@@ -1,3 +1,7 @@
 export default function Home() {
-  return <></>;
+  return (
+    <div className="flex h-screen items-center justify-center text-gray-500 text-sm">
+      Đang chuyển hướng...
+    </div>
+  );
 }
