@@ -10,9 +10,40 @@ import {
   faLock,
   faSignInAlt,
 } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiPost } from "@/lib/api";
 
 export default function LoginPage() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const res = await apiPost("/auth/login", { username, password });
+
+    const days = 365;
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+
+    if (rememberMe) {
+      document.cookie = `authorization=Bearer ${res.accessToken}; path=/; expires=${expires}`;
+      document.cookie = `roleId=${res.roleId}; path=/; expires=${expires}`;
+    } else {
+      document.cookie = `authorization=Bearer ${res.accessToken}; path=/`;
+      document.cookie = `roleId=${res.roleId}; path=/`;
+    }
+
+    // Chuyển hướng theo role
+    if ([1, 2].includes(res.roleId)) router.push("/central/dashboard");
+    else if ([11, 12, 21].includes(res.roleId))
+      router.push("/agency/dashboard");
+    else if (res.roleId === 31) router.push("/device/dashboard");
+    else router.push("/login");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 font-inter">
       <div className="fixed inset-0 z-20 flex items-center justify-center px-2">
@@ -57,8 +88,8 @@ export default function LoginPage() {
           <div className="flex-1 flex items-center justify-center bg-white md:bg-transparent px-4 sm:px-10 py-12">
             <form
               className="w-full max-w-md mx-auto space-y-8"
+              onSubmit={handleSubmit}
               autoComplete="off"
-              onSubmit={(e) => e.preventDefault()}
             >
               <div className="text-center mb-3">
                 <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
@@ -86,12 +117,14 @@ export default function LoginPage() {
                     </span>
                     <input
                       type="text"
-                      id="username"
                       name="username"
                       placeholder="Nhập tên đăng nhập"
+                      autoComplete="username"
                       required
                       autoFocus
                       className="w-full py-3 pl-11 pr-4 rounded-xl bg-blue-50 border border-blue-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-base text-slate-800 outline-none transition shadow"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                     />
                   </div>
                 </div>
@@ -109,11 +142,13 @@ export default function LoginPage() {
                     </span>
                     <input
                       type="password"
-                      id="password"
                       name="password"
                       placeholder="Nhập mật khẩu"
+                      autoComplete="current-password"
                       required
                       className="w-full py-3 pl-11 pr-4 rounded-xl bg-blue-50 border border-blue-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-base text-slate-800 outline-none transition shadow"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
                 </div>
@@ -122,20 +157,21 @@ export default function LoginPage() {
                   <label className="flex items-center gap-2 text-slate-500 text-sm select-none cursor-pointer">
                     <input
                       type="checkbox"
-                      id="remember"
                       name="remember"
                       className="accent-blue-600 w-4 h-4 cursor-pointer"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     Ghi nhớ đăng nhập
                   </label>
                 </div>
 
-                <Link
-                  href="/layout"
+                <button
+                  type="submit"
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold text-base shadow-lg transition hover:-translate-y-1 active:scale-95"
                 >
                   <FontAwesomeIcon icon={faSignInAlt} /> Đăng Nhập
-                </Link>
+                </button>
               </div>
             </form>
           </div>
