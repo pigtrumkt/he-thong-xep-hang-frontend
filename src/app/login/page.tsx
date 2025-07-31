@@ -1,0 +1,146 @@
+"use client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPeopleGroup,
+  faCheck,
+  faChartPie,
+  faPlug,
+  faUserShield,
+  faUser,
+  faLock,
+  faSignInAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 font-inter">
+      <div className="fixed inset-0 z-20 flex items-center justify-center px-2">
+        <div className="flex flex-col md:flex-row w-[60rem] bg-white/95 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
+          {/* Intro trái */}
+          <div className="hidden md:flex flex-col justify-center items-center flex-1 bg-gradient-to-br from-blue-600 to-blue-400 text-white px-8 py-12">
+            <div className="w-24 h-24 flex items-center justify-center bg-white/20 rounded-3xl shadow-2xl mb-4">
+              <FontAwesomeIcon
+                icon={faPeopleGroup}
+                className="text-5xl text-white"
+              />
+            </div>
+            <h1 className="text-4xl font-extrabold leading-tight text-center drop-shadow-lg mb-7">
+              Hệ Thống Xếp Hàng
+            </h1>
+            <ul className="space-y-4 text-lg">
+              <li className="flex items-center gap-3">
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className="bg-white/30 rounded-full p-2 text-xl"
+                />
+                Xếp hàng thông minh, tiết kiệm thời gian
+              </li>
+              <li className="flex items-center gap-3">
+                <FontAwesomeIcon
+                  icon={faChartPie}
+                  className="bg-white/30 rounded-full p-2 text-xl"
+                />
+                Báo cáo, thống kê linh hoạt
+              </li>
+              <li className="flex items-center gap-3">
+                <FontAwesomeIcon
+                  icon={faPlug}
+                  className="bg-white/30 rounded-full p-2 text-xl"
+                />
+                Giao diện thân thiện, dễ sử dụng
+              </li>
+            </ul>
+          </div>
+
+          {/* Form phải */}
+          <div className="flex-1 flex items-center justify-center bg-white md:bg-transparent px-4 sm:px-10 py-12">
+            <form
+              className="w-full max-w-md mx-auto space-y-8"
+              autoComplete="off"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <div className="text-center mb-3">
+                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <FontAwesomeIcon
+                    icon={faUserShield}
+                    className="text-3xl text-blue-700"
+                  />
+                </div>
+                <h1 className="text-2xl font-bold text-slate-800 mb-8">
+                  Đăng Nhập Hệ Thống
+                </h1>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="username"
+                    className="block mb-2 text-base font-semibold text-slate-700"
+                  >
+                    Tên đăng nhập
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-lg">
+                      <FontAwesomeIcon icon={faUser} />
+                    </span>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      placeholder="Nhập tên đăng nhập"
+                      required
+                      autoFocus
+                      className="w-full py-3 pl-11 pr-4 rounded-xl bg-blue-50 border border-blue-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-base text-slate-800 outline-none transition shadow"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block mb-2 text-base font-semibold text-slate-700"
+                  >
+                    Mật khẩu
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-lg">
+                      <FontAwesomeIcon icon={faLock} />
+                    </span>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      placeholder="Nhập mật khẩu"
+                      required
+                      className="w-full py-3 pl-11 pr-4 rounded-xl bg-blue-50 border border-blue-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-base text-slate-800 outline-none transition shadow"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-slate-500 text-sm select-none cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      name="remember"
+                      className="accent-blue-600 w-4 h-4 cursor-pointer"
+                    />
+                    Ghi nhớ đăng nhập
+                  </label>
+                </div>
+
+                <Link
+                  href="/layout"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold text-base shadow-lg transition hover:-translate-y-1 active:scale-95"
+                >
+                  <FontAwesomeIcon icon={faSignInAlt} /> Đăng Nhập
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
