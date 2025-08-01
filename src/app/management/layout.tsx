@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import "../globals.css";
 import SidebarCentralMenu from "@/components/menus/SidebarCentralMenu";
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { apiPost } from "@/lib/api";
+import PopupChangePassword from "@/components/popup/PopupChangePassword";
 
 function applyDropdownToggle() {
   const avatar = document.getElementById("avatarBtn");
@@ -26,6 +27,8 @@ function applyEventBtnLogout() {
   const logoutBtn = document.getElementById("logoutBtn");
   const handleLogout = (e: MouseEvent) => {
     e.preventDefault();
+
+    document.getElementById("profileMenu")?.classList.add("hidden");
 
     // // Xoá cookie client (nếu không phải httpOnly)
     document.cookie =
@@ -51,6 +54,8 @@ export default function ManagementLayout({
   children: ReactNode;
 }) {
   const { roleId } = useGlobalParams();
+
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
     const cleanup1 = applyDropdownToggle();
@@ -111,6 +116,9 @@ export default function ManagementLayout({
             <a
               href="#"
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
+              onClick={() => {
+                document.getElementById("profileMenu")?.classList.add("hidden");
+              }}
             >
               <svg
                 className="w-6 h-6 text-blue-500"
@@ -126,6 +134,10 @@ export default function ManagementLayout({
             </a>
             <a
               href="#"
+              onClick={() => {
+                document.getElementById("profileMenu")?.classList.add("hidden");
+                setShowChangePassword(true);
+              }}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
             >
               <svg
@@ -171,6 +183,11 @@ export default function ManagementLayout({
           {children}
         </main>
       </div>
+
+      {/* popup đổi pass */}
+      {showChangePassword && (
+        <PopupChangePassword onClose={() => setShowChangePassword(false)} />
+      )}
     </>
   );
 }
