@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiPost } from "@/lib/api";
 import { usePopup } from "./PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
@@ -18,6 +18,13 @@ export default function PopupChangePassword({
   const [errorMessage, setErrorMessage] = useState("");
   const { alertMessageGreen, popupMessage } = usePopup();
   const [disableSubmit, setDisableSubmit] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 10);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleConfirm = async () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
       setErrorMessage("Vui lòng điền đầy đủ thông tin");
@@ -42,19 +49,34 @@ export default function PopupChangePassword({
 
     if (res.status === 201) {
       alertMessageGreen("Đổi mật khẩu thành công");
-      onClose();
-      router.push("/login");
+      handleClose();
+      setTimeout(() => {
+        router.push("/login");
+      }, 500);
     } else {
       setErrorMessage(String(Object.values(res.data)[0]) || "Có lỗi xảy ra");
     }
   };
 
+  const handleClose = () => {
+    setVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 200); // thời gian khớp animation
+  };
+
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl relative animate-zoom-in">
+    <div
+      className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-all duration-200 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      <div
+        className={`bg-white rounded-xl p-6 w-full max-w-md shadow-xl relative `}
+      >
         <button
           onClick={() => {
-            onClose();
+            handleClose();
           }}
           className="absolute top-2 right-3 text-gray-400 hover:text-red-500 text-xl cursor-pointer"
         >
@@ -107,7 +129,7 @@ export default function PopupChangePassword({
 
         <div className="flex justify-end gap-3 mt-6">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer"
           >
             Hủy
