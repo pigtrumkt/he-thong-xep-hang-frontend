@@ -16,15 +16,6 @@ import { apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { usePopup } from "@/components/popup/PopupContext";
 
-function setLoginCookies(token: string, roleId: number, remember: boolean) {
-  const days = 365;
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-
-  const options = remember ? `; expires=${expires}` : "";
-  document.cookie = `authorization=Bearer ${token}; path=/${options}`;
-  document.cookie = `roleId=${roleId}; path=/${options}`;
-}
-
 export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [username, setUsername] = useState("");
@@ -53,15 +44,6 @@ export default function LoginPage() {
       return;
     }
 
-    if (!res.data?.accessToken || !res.data?.roleId) {
-      popupMessage("Lỗi hệ thống");
-      setSubmitting(false);
-      return;
-    }
-
-    setLoginCookies(res.data.accessToken, res.data.roleId, rememberMe);
-
-    // Chuyển hướng về / để middleware tự định hướng
     window.location.href = "/";
   };
 
