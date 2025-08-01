@@ -36,9 +36,9 @@ export default async function RootLayout({
   const roleId = Number((await cookieStore).get("roleId")?.value ?? 0);
 
   return (
-    <html lang="vi">
+    <html lang="vi" data-scroll-behavior="smooth">
       <body
-        className={`${inter.className} bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200`}
+        className={`${inter.className} text-[18px] min-h-[100vh] min-w-[800px]`}
       >
         <ClientWrapper globalParams={{ roleId }}>{children}</ClientWrapper>
       </body>

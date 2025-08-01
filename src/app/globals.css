@@ -1,9 +1,4 @@
 @import "tailwindcss";
-/* Smooth scroll cho toàn bộ app */
-html {
-  scroll-behavior: smooth;
-}
-
 a,
 a:visited,
 a:active,
