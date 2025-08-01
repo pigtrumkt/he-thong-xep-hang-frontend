@@ -26,6 +26,7 @@ function setLoginCookies(token: string, roleId: number, remember: boolean) {
 }
 
 export default function LoginPage() {
+  const [submitting, setSubmitting] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -35,19 +36,26 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // chặn click nhiều lần
+    if (submitting) return;
+    setSubmitting(true);
+
     const res = await apiPost("/auth/login", { username, password });
     if (![200, 400, 401].includes(res.status)) {
       handleApiError(res, popupMessage, router);
+      setSubmitting(false);
       return;
     }
 
     if (res.status === 401 || res.status === 400) {
       alertMessageRed("Tên đăng nhập hoặc mật khẩu không đúng");
+      setSubmitting(false);
       return;
     }
 
     if (!res.data?.accessToken || !res.data?.roleId) {
       popupMessage("Lỗi hệ thống");
+      setSubmitting(false);
       return;
     }
 
@@ -180,7 +188,8 @@ export default function LoginPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold text-base shadow-lg transition hover:-translate-y-1 active:scale-95"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-base shadow-lg transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={submitting}
                 >
                   <FontAwesomeIcon icon={faSignInAlt} /> Đăng Nhập
                 </button>
