@@ -51,9 +51,7 @@ export default function PopupHoSoCaNhan({
           ×
         </button>
 
-        <h2 className="text-xl font-bold text-blue-700 mb-4">
-          Hồ sơ cá nhân
-        </h2>
+        <h2 className="text-xl font-bold text-blue-700 mb-4">Hồ sơ cá nhân</h2>
 
         <div className="flex flex-col items-center gap-4">
           <div className="relative">

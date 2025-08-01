@@ -2,17 +2,22 @@
 
 import { useState } from "react";
 import { apiPost } from "@/lib/api";
+import { usePopup } from "./PopupContext";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 
 export default function PopupChangePassword({
   onClose,
 }: {
   onClose: () => void;
 }) {
+  const router = useRouter();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+  const { alertMessageGreen, popupMessage } = usePopup();
+  const [disableSubmit, setDisableSubmit] = useState(false);
   const handleConfirm = async () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
       setErrorMessage("Vui lòng điền đầy đủ thông tin");
@@ -23,15 +28,23 @@ export default function PopupChangePassword({
       return;
     }
 
-    const res = await apiPost("/auth/change-password", {
+    setDisableSubmit(true);
+    const res = await apiPost("/accounts/change-password", {
       oldPassword,
       newPassword,
     });
+    setDisableSubmit(false);
 
-    if (res.status === 200) {
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      alertMessageGreen("Đổi mật khẩu thành công");
       onClose();
     } else {
-      setErrorMessage("Đổi mật khẩu thất bại");
+      setErrorMessage(String(Object.values(res.data)[0]) || "Có lỗi xảy ra");
     }
   };
 
@@ -100,7 +113,8 @@ export default function PopupChangePassword({
           </button>
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer disabled:opacity-50"
+            disabled={disableSubmit}
           >
             Xác nhận
           </button>
