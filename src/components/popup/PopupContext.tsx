@@ -14,9 +14,18 @@ type AlertType = "green" | "red";
 type PopupContextType = {
   alertMessageGreen: (msg: string, duration?: number) => void;
   alertMessageRed: (msg: string, duration?: number) => void;
-  popupMessage: (msg: string) => Promise<void>;
-  popupConfirm: (msg: string) => Promise<boolean>;
-  popupConfirmRed: (msg: string) => Promise<boolean>;
+  popupMessage: (options: {
+    title?: string;
+    description?: string;
+  }) => Promise<void>;
+  popupConfirm: (options: {
+    title?: string;
+    description?: string;
+  }) => Promise<boolean>;
+  popupConfirmRed: (options: {
+    title?: string;
+    description?: string;
+  }) => Promise<boolean>;
 };
 
 const PopupContext = createContext<PopupContextType | undefined>(undefined);
@@ -28,12 +37,14 @@ export function PopupProvider({ children }: { children: ReactNode }) {
   } | null>(null);
 
   const [messagePopup, setMessagePopup] = useState<{
-    message: string;
+    title?: string;
+    description?: string;
     resolve: () => void;
   } | null>(null);
 
   const [confirmPopup, setConfirmPopup] = useState<{
-    message: string;
+    title?: string;
+    description?: string;
     type: ConfirmType;
     resolve: (result: boolean) => void;
   } | null>(null);
@@ -48,23 +59,32 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     setTimeout(() => setAlert(null), duration);
   }, []);
 
-  const popupMessage = useCallback((msg: string) => {
-    return new Promise<void>((resolve) => {
-      setMessagePopup({ message: msg, resolve });
-    });
-  }, []);
+  const popupMessage = useCallback(
+    (options: { title?: string; description?: string }) => {
+      return new Promise<void>((resolve) => {
+        setMessagePopup({ ...options, resolve });
+      });
+    },
+    []
+  );
 
-  const popupConfirm = useCallback((msg: string) => {
-    return new Promise<boolean>((resolve) => {
-      setConfirmPopup({ message: msg, type: "default", resolve });
-    });
-  }, []);
+  const popupConfirm = useCallback(
+    (options: { title?: string; description?: string }) => {
+      return new Promise<boolean>((resolve) => {
+        setConfirmPopup({ ...options, type: "default", resolve });
+      });
+    },
+    []
+  );
 
-  const popupConfirmRed = useCallback((msg: string) => {
-    return new Promise<boolean>((resolve) => {
-      setConfirmPopup({ message: msg, type: "red", resolve });
-    });
-  }, []);
+  const popupConfirmRed = useCallback(
+    (options: { title?: string; description?: string }) => {
+      return new Promise<boolean>((resolve) => {
+        setConfirmPopup({ ...options, type: "red", resolve });
+      });
+    },
+    []
+  );
 
   const closePopupMessage = () => {
     messagePopup?.resolve();
@@ -88,7 +108,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     >
       {children}
 
-      {/* 🔹 Alert Message */}
+      {/* Alert Message */}
       {alert && (
         <div
           className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in-out-popup text-sm font-semibold
@@ -98,16 +118,24 @@ export function PopupProvider({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      {/* 🔹 Popup Message (OK button) */}
+      {/* Popup Message (OK button) */}
       {messagePopup && (
         <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-6">
-            <p className="text-base font-medium text-slate-800">
-              {messagePopup.message}
-            </p>
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-2">
+            {messagePopup.title && (
+              <h2 className="text-lg font-bold text-slate-800">
+                {messagePopup.title}
+              </h2>
+            )}
+            {messagePopup.description && (
+              <p className="text-base text-slate-600">
+                {messagePopup.description}
+              </p>
+            )}
+
             <button
               onClick={closePopupMessage}
-              className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-400"
+              className="mt-4 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
             >
               OK
             </button>
@@ -115,23 +143,30 @@ export function PopupProvider({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      {/* 🔹 Popup Confirm */}
+      {/* Popup Confirm */}
       {confirmPopup && (
         <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-6">
-            <p className="text-base font-medium text-slate-800">
-              {confirmPopup.message}
-            </p>
-            <div className="flex justify-center gap-4">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-2">
+            {confirmPopup.title && (
+              <h2 className="text-lg font-bold text-slate-800">
+                {confirmPopup.title}
+              </h2>
+            )}
+            {confirmPopup.description && (
+              <p className="text-base text-slate-600">
+                {confirmPopup.description}
+              </p>
+            )}
+            <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={() => handleConfirm(false)}
-                className="px-4 py-2 bg-gray-200 text-slate-700 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 text-slate-700 rounded-lg hover:bg-gray-300 cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={() => handleConfirm(true)}
-                className={`px-4 py-2 text-white rounded-lg ${
+                className={`cursor-pointer px-4 py-2 text-white rounded-lg ${
                   confirmPopup.type === "red"
                     ? "bg-red-400 hover:bg-red-500"
                     : "bg-blue-400 hover:bg-blue-500"

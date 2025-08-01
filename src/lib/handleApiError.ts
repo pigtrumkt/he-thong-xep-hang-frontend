@@ -1,10 +1,15 @@
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 export function handleApiError(
   res: { status: number },
-  showMessage: (msg: string) => void,
-  router: any // hoặc bỏ luôn type
+  showMessage: (options: { title?: string; description?: string }) => void,
+  router: AppRouterInstance
 ) {
   if (res.status === 0) {
-    showMessage("Mất kết nối mạng hoặc máy chủ không phản hồi.");
+    showMessage({
+      title: "Mất kết nối",
+      description: "Mạng không ổn định hoặc máy chủ không phản hồi.",
+    });
     return;
   }
 
@@ -14,7 +19,10 @@ export function handleApiError(
   }
 
   if (res.status >= 500) {
-    showMessage("Lỗi hệ thống. Vui lòng thử lại sau.");
+    showMessage({
+      title: "Lỗi hệ thống",
+      description: "Có lỗi xảy ra. Vui lòng thử lại sau.",
+    });
     return;
   }
 }

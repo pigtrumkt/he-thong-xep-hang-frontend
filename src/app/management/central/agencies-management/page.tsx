@@ -2,27 +2,29 @@
 
 import { usePopup } from "@/components/popup/PopupContext";
 import { useRouter } from "next/navigation";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useEffect, useState } from "react";
 
 export default function AgenciesManagementPage() {
   const router = useRouter();
+  const { popupMessage, popupConfirmRed } = usePopup();
   const [agencies, setAgencies] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState(""); // "", "1", "0"
   const [search, setSearch] = useState("");
-  const { popupMessage } = usePopup();
+  const [selectedAgency, setSelectedAgency] = useState<any>(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await apiGet("/agencies/findAll");
+      const res = await apiGet("/agencies/findAllActive");
 
       if (![200, 400].includes(res.status)) {
         handleApiError(res, popupMessage, router);
         return;
       }
 
-      const data = await res.data();
+      const data = res.data;
       setAgencies(data);
     };
 
@@ -88,6 +90,10 @@ export default function AgenciesManagementPage() {
                   <button
                     title="Xem chi tiết"
                     className="p-2 rounded-lg hover:bg-blue-100"
+                    onClick={() => {
+                      setSelectedAgency(a);
+                      setShowDetail(true);
+                    }}
                   >
                     <svg
                       className="w-6 h-6 text-blue-600"
@@ -105,10 +111,34 @@ export default function AgenciesManagementPage() {
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      className="sr-only peer"
-                      defaultChecked={a.status === 1}
+                      className="sr-only peer disabled:opacity-50"
+                      checked={a.status === 1}
+                      onChange={async (e) => {
+                        e.target.disabled = true;
+                        const newStatus = e.target.checked ? 1 : 0;
+                        const res = await apiPost(`/agencies/${a.id}/status`, {
+                          status: newStatus,
+                        });
+
+                        e.target.disabled = false;
+                        if (res.status === 201) {
+                          setAgencies((prev) =>
+                            prev.map((item) =>
+                              item.id === a.id
+                                ? { ...item, status: newStatus }
+                                : item
+                            )
+                          );
+                        } else {
+                          popupMessage({
+                            title: "Cập nhật trạng thái thất bại",
+                            description:
+                              "Mạng không ổn định hoặc máy chủ không phản hồi.",
+                          });
+                        }
+                      }}
                     />
-                    <div className="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600 transition duration-300"></div>
+                    <div className="w-11 h-6 bg-gray-200 rounded-full transition duration-300 peer-checked:bg-blue-600 peer-disabled:opacity-50"></div>
                     <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"></div>
                   </label>
 
@@ -132,6 +162,29 @@ export default function AgenciesManagementPage() {
                   <button
                     className="p-2 rounded-lg hover:bg-red-100"
                     title="Xóa"
+                    onClick={() => {
+                      popupConfirmRed({
+                        title: "Xác nhận xoá cơ quan?",
+                        description: `${a.name}`,
+                      }).then(async (confirmed) => {
+                        if (!confirmed) return;
+
+                        const res = await apiPost(
+                          `/agencies/${a.id}/delete`,
+                          {}
+                        );
+                        if (res.status === 201) {
+                          setAgencies((prev) =>
+                            prev.filter((item) => item.id !== a.id)
+                          );
+                        } else {
+                          popupMessage({
+                            title: `Xoá thất bại`,
+                            description: `${a.name}`,
+                          });
+                        }
+                      });
+                    }}
                   >
                     <svg
                       className="w-6 h-6 text-red-400"
@@ -149,6 +202,118 @@ export default function AgenciesManagementPage() {
           ))}
         </tbody>
       </table>
+
+      {/* detail */}
+      {showDetail && selectedAgency && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xl w-full relative border border-blue-300">
+            <button
+              onClick={() => setShowDetail(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl"
+            >
+              ×
+            </button>
+
+            <h2 className="text-xl font-bold text-blue-700 mb-4">
+              Thông tin chi tiết cơ quan
+            </h2>
+
+            <div className="grid grid-cols-1 gap-4 text-sm text-gray-800">
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Tên cơ quan:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {selectedAgency.name}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Thông báo ở màn hình quầy:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {selectedAgency.screen_notice || "(Không có)"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Ngày làm việc:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {(selectedAgency.allowed_days_of_week || "")
+                    .split(",")
+                    .map((d: string) => {
+                      const days = [
+                        "Chủ nhật",
+                        "Thứ 2",
+                        "Thứ 3",
+                        "Thứ 4",
+                        "Thứ 5",
+                        "Thứ 6",
+                        "Thứ 7",
+                      ];
+                      return days[Number(d)] ?? d;
+                    })
+                    .join(", ")}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Thời gian lấy số:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {selectedAgency.ticket_time_range}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Cho phép lấy số online:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {selectedAgency.allow_online_ticket === 1 ? "Có" : "Không"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Thời gian chờ giữa 2 lần lấy số (phút):
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {selectedAgency.min_time_between_ticket_online}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Giới hạn số lần lấy số trong ngày:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  {selectedAgency.max_ticket_per_day_online}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 font-medium mb-1">
+                  Link lấy số online:
+                </label>
+                <div className="bg-gray-100 px-3 py-2 rounded">
+                  <a
+                    href={`/take-number/${selectedAgency.id}`}
+                    target="_blank"
+                    className="text-blue-600 underline"
+                  >
+                    {origin}/take-number/{selectedAgency.id}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
