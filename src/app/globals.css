@@ -1,1 +1,92 @@
 @import "tailwindcss";
+/* Smooth scroll cho toàn bộ app */
+html {
+  scroll-behavior: smooth;
+}
+
+a,
+a:visited,
+a:active,
+a:focus {
+  color: inherit !important;
+  outline: none !important;
+  box-shadow: none !important;
+  text-decoration: none;
+}
+
+/* Ẩn scrollbar mặc định (hiệu quả nhất trên Chrome, Edge) */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+/* Khi hover vào vùng scroll thì mới hiện thanh cuộn nhỏ màu xám */
+aside:hover::-webkit-scrollbar {
+  width: 6px;
+  height: 8px;
+  background: transparent;
+}
+
+aside:hover::-webkit-scrollbar-thumb {
+  background: #a3a3a34f;
+  border-radius: 10px;
+}
+
+main::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
+  background: transparent;
+}
+
+main::-webkit-scrollbar-thumb {
+  background: #7c7c7c73;
+  border-radius: 10px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #1337ad, #2c52cf, rgb(49, 86, 207));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+aside .active {
+  background: linear-gradient(90deg, #3b82f6 20%, #1e40af 80%) !important;
+  color: #fff !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 24px 0 rgba(59, 130, 246, 0.15) !important;
+}
+
+aside .active svg {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
+.apply-full-screen-css {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes fade-in-out-popup {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.animate-fade-in-out-popup {
+  animation: fade-in-out-popup 4s ease forwards;
+}

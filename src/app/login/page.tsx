@@ -13,35 +13,48 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { usePopup } from "@/components/popup/PopupContext";
+
+function setLoginCookies(token: string, roleId: number, remember: boolean) {
+  const days = 365;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+
+  const options = remember ? `; expires=${expires}` : "";
+  document.cookie = `authorization=Bearer ${token}; path=/${options}`;
+  document.cookie = `roleId=${roleId}; path=/${options}`;
+}
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+  const { alertMessageRed, popupMessage } = usePopup();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const res = await apiPost("/auth/login", { username, password });
-
-    const days = 365;
-    const expires = new Date(Date.now() + days * 864e5).toUTCString();
-
-    if (rememberMe) {
-      document.cookie = `authorization=Bearer ${res.accessToken}; path=/; expires=${expires}`;
-      document.cookie = `roleId=${res.roleId}; path=/; expires=${expires}`;
-    } else {
-      document.cookie = `authorization=Bearer ${res.accessToken}; path=/`;
-      document.cookie = `roleId=${res.roleId}; path=/`;
+    if (![200, 400, 401].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
     }
 
-    // Chuyển hướng theo role
-    if ([1, 2].includes(res.roleId)) router.push("/central/dashboard");
-    else if ([11, 12, 21].includes(res.roleId))
-      router.push("/agency/dashboard");
-    else if (res.roleId === 31) router.push("/device/dashboard");
-    else router.push("/login");
+    if (res.status === 401 || res.status === 400) {
+      alertMessageRed("Tên đăng nhập hoặc mật khẩu không đúng");
+      return;
+    }
+
+    if (!res.data?.accessToken || !res.data?.roleId) {
+      popupMessage("Lỗi hệ thống");
+      return;
+    }
+
+    setLoginCookies(res.data.accessToken, res.data.roleId, rememberMe);
+
+    // Chuyển hướng về / để middleware tự định hướng
+    window.location.href = "/";
   };
 
   return (
@@ -165,7 +178,6 @@ export default function LoginPage() {
                     Ghi nhớ đăng nhập
                   </label>
                 </div>
-
                 <button
                   type="submit"
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold text-base shadow-lg transition hover:-translate-y-1 active:scale-95"

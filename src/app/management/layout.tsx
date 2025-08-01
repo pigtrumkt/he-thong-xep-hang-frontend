@@ -1,0 +1,123 @@
+"use client";
+
+import type { ReactNode } from "react";
+import "../globals.css";
+import SidebarCentralMenu from "@/components/menus/SidebarCentralMenu";
+import { useGlobalParams } from "@/components/ClientWrapper";
+
+export default function CentralLayout({ children }: { children: ReactNode }) {
+  const { roleId } = useGlobalParams();
+
+  return (
+    <html lang="vi">
+      <body className="text-[18px] font-sans min-h-[100vh] min-w-[800px]">
+        {/* Header */}
+        <header className="w-full bg-white/90 backdrop-blur border-b border-blue-200 shadow-md flex items-center justify-between px-10 h-16">
+          <div className="flex items-center gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-2 rounded-xl shadow-lg">
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                <path d="M16 3.13a4 4 0 010 7.75" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
+              Quản lý xếp hàng
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 relative">
+            <span className="font-medium inline text-blue-700">
+              Xin chào, <b>Nguyễn Văn A</b>
+            </span>
+            <button
+              id="avatarBtn"
+              className="w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center shadow focus:ring-2 focus:ring-blue-400"
+            >
+              <svg
+                className="w-7 h-7 text-blue-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+            </button>
+            <div
+              id="profileMenu"
+              className="hidden absolute right-0 top-14 z-50 w-56 bg-white rounded-2xl shadow-xl border border-blue-100 py-3 px-2 animate-fade-in"
+            >
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
+              >
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M6 21v-2a4 4 0 014-4h0a4 4 0 014 4v2" />
+                </svg>
+                Hồ sơ cá nhân
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
+              >
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 17v-7m0 0a2 2 0 10-4 0 2 2 0 004 0zm0 0a2 2 0 104 0 2 2 0 00-4 0z" />
+                  <path d="M5 21h14" />
+                </svg>
+                Đổi mật khẩu
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-100 text-red-600 font-semibold"
+              >
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                  <rect x="3" y="5" width="4" height="14" rx="2" />
+                </svg>
+                Đăng xuất
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <div className="min-w-full flex h-[calc(100vh-4rem)]">
+          <aside className="min-w-[18rem] bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 border-r border-blue-700 shadow-lg px-3 py-6 overflow-y-auto">
+            <nav className="flex flex-col gap-8">
+              <SidebarCentralMenu roleId={roleId} />
+            </nav>
+          </aside>
+          <main className="w-full h-[calc(100vh-4rem)] overflow-y-auto transition-all bg-blue-100">
+            {children}
+          </main>
+        </div>
+      </body>
+    </html>
+  );
+}

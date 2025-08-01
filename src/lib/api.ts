@@ -6,34 +6,40 @@ const API_BASE = (() => {
   return "http://localhost:3001"; // fallback khi SSR (nếu cần)
 })();
 
-// Gọi GET
-export async function apiGet(path: string) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "GET",
-    credentials: "include",
-  });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error?.message || "Lỗi hệ thống");
-  }
-
-  return res.json();
+export function apiGet(path: string) {
+  return apiRequest("GET", path);
 }
 
-// Gọi POST
-export async function apiPost(path: string, body: any) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    credentials: "include",
-  });
+export function apiPost(path: string, body: any) {
+  return apiRequest("POST", path, body);
+}
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error?.message || "Lỗi hệ thống");
+async function apiRequest(method: "GET" | "POST", path: string, body?: any) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000); // 10 giây
+
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: "include",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    const contentType = res.headers.get("content-type");
+    const json = contentType?.includes("application/json")
+      ? await res.json().catch(() => ({}))
+      : {};
+
+    return {
+      status: res.status,
+      data: json || null,
+    };
+  } catch (error) {
+    clearTimeout(timeout);
+    return { status: 0, data: null };
   }
-
-  return res.json();
 }
