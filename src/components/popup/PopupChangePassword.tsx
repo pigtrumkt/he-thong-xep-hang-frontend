@@ -43,6 +43,7 @@ export default function PopupChangePassword({
     if (res.status === 201) {
       alertMessageGreen("Đổi mật khẩu thành công");
       onClose();
+      router.push("/login");
     } else {
       setErrorMessage(String(Object.values(res.data)[0]) || "Có lỗi xảy ra");
     }

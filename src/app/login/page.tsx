@@ -31,7 +31,11 @@ export default function LoginPage() {
     if (submitting) return;
     setSubmitting(true);
 
-    const res = await apiPost("/auth/login", { username, password });
+    const res = await apiPost("/auth/login", {
+      username,
+      password,
+      rememberMe,
+    });
     if (![200, 400, 401].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       setSubmitting(false);
