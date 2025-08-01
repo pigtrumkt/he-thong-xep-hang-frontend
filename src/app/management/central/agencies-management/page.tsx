@@ -1,55 +1,61 @@
 "use client";
 
-import { useState } from "react";
-
-type Agency = {
-  id: number;
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
-  status: number; // 1 = bật, 0 = tắt
-};
+import { usePopup } from "@/components/popup/PopupContext";
+import { useRouter } from "next/navigation";
+import { apiGet } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useEffect, useState } from "react";
 
 export default function AgenciesManagementPage() {
+  const router = useRouter();
+  const [agencies, setAgencies] = useState<any[]>([]);
+  const [statusFilter, setStatusFilter] = useState(""); // "", "1", "0"
   const [search, setSearch] = useState("");
+  const { popupMessage } = usePopup();
 
-  const agencies: Agency[] = [
-    {
-      id: 1,
-      name: "UBND Tỉnh Hà Giang",
-      address: "Số 1 Nguyễn Trãi, TP. Hà Giang, Hà Giang",
-      phone: "0219-3862666",
-      email: "ubnd@hagiang.gov.vn",
-      status: 1,
-    },
-    {
-      id: 2,
-      name: "Công an Tỉnh Hà Giang",
-      address: "Tổ 7, P. Minh Khai, TP. Hà Giang, Hà Giang",
-      phone: "0219-3862222",
-      email: "congan@hagiang.gov.vn",
-      status: 0,
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await apiGet("/agencies/findAll");
 
-  const filtered = agencies.filter((agency) =>
-    agency.name.toLowerCase().includes(search.toLowerCase())
-  );
+      if (![200, 400].includes(res.status)) {
+        handleApiError(res, popupMessage, router);
+        return;
+      }
+
+      const data = await res.data();
+      setAgencies(data);
+    };
+
+    fetchData();
+  }, [popupMessage, router]);
+
+  const filtered = agencies.filter((a) => {
+    const matchName = a.name.toLowerCase().includes(search.toLowerCase());
+    const matchStatus =
+      statusFilter === "" || String(a.status) === statusFilter;
+    return matchName && matchStatus;
+  });
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
-      <div className="flex items-center justify-between mb-6">
-        <button className="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-xl font-semibold flex items-center gap-2 shadow transition">
-          <span className="font-bold">+</span> Thêm
-        </button>
+      <div className="flex gap-2 items-center mb-6">
         <input
           type="text"
-          placeholder="Tìm tên cơ quan..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="px-4 py-2 bg-white border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none"
+          placeholder="Tìm tên cơ quan..."
         />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="1">Đang hoạt động</option>
+          <option value="0">Tắt</option>
+        </select>
       </div>
 
       <table className="min-w-full rounded-xl overflow-hidden">
