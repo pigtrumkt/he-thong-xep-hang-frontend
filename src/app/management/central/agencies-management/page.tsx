@@ -40,24 +40,30 @@ export default function AgenciesManagementPage() {
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
-      <div className="flex gap-2 items-center mb-6">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 bg-white border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none"
-          placeholder="Tìm tên cơ quan..."
-        />
+      <div className="flex items-center justify-between mb-6">
+        <button className="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-xl font-semibold flex items-center gap-2 shadow transition">
+          <span className="font-bold">+</span>
+          Thêm
+        </button>
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-4 py-2 bg-white border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none"
+            placeholder="Tìm tên cơ quan..."
+          />
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none"
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="1">Đang hoạt động</option>
-          <option value="0">Tắt</option>
-        </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="1">Đang hoạt động</option>
+            <option value="0">Tắt</option>
+          </select>
+        </div>
       </div>
 
       <table className="min-w-full rounded-xl overflow-hidden">
