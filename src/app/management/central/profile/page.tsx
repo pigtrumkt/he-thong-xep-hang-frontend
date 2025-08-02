@@ -128,7 +128,7 @@ export default function ProfilePage() {
   return (
     <section className="max-w-5xl mx-auto my-6">
       <div className="p-8 mx-4 bg-white border border-blue-200 shadow-xl rounded-3xl">
-        <div className="relative flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-8">
           <img
             src={`${host}/accounts/avatar/${
               user.avatar_url
