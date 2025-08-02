@@ -37,6 +37,7 @@ export default function ProfilePage() {
         handleApiError(res, popupMessage, router);
         return;
       }
+
       if (res.status === 200 && res.data) {
         const u = res.data;
         setUser(u);
@@ -92,6 +93,11 @@ export default function ProfilePage() {
       credentials: "include",
     });
 
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
     setCropImageUrl(null);
 
     if (res.ok) {
@@ -110,6 +116,11 @@ export default function ProfilePage() {
     const res = await apiPost("/accounts/update-avatar", {
       removeAvatar: true,
     });
+
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
 
     if (res.status === 201) {
       const refreshed = await apiGet("/accounts/me");
