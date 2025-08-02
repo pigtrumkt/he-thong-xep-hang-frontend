@@ -1,4 +1,4 @@
-const API_BASE = (() => {
+export const API_BASE = (() => {
   if (typeof window !== "undefined") {
     const { protocol, hostname } = window.location;
     return `${protocol}//${hostname}:3001`;

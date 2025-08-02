@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiGet, apiPost } from "@/lib/api";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
+import AvatarCropper from "@/components/avatar/AvatarCropper";
+import { useGlobalParams } from "@/components/ClientWrapper";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { popupMessage } = usePopup();
+  const { popupMessage, popupConfirmRed } = usePopup();
 
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+
+  const { globalParams, setGlobalParams } = useGlobalParams();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,6 +23,7 @@ export default function ProfilePage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmiting, setSubmiting] = useState(false);
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
 
   const host =
     typeof window !== "undefined"
@@ -29,12 +33,10 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await apiGet("/accounts/me");
-
       if (![200, 400].includes(res.status)) {
         handleApiError(res, popupMessage, router);
         return;
       }
-
       if (res.status === 200 && res.data) {
         const u = res.data;
         setUser(u);
@@ -43,26 +45,20 @@ export default function ProfilePage() {
         setPhone(u.phone || "");
         setGender(u.gender ?? null);
       }
-
-      setLoading(false);
     };
-
     fetchData();
   }, [popupMessage, router]);
 
   const handleSubmit = async () => {
     if (!user) return;
-
     setErrors({});
     setSubmiting(true);
-
     const res = await apiPost("/accounts/update-profile", {
       full_name: fullName,
       email,
       phone,
       gender,
     });
-
     setSubmiting(false);
 
     if (![201, 400].includes(res.status)) {
@@ -72,6 +68,10 @@ export default function ProfilePage() {
 
     if (res.status === 201) {
       popupMessage({ description: "Đã cập nhật hồ sơ" });
+
+      const globalParamsTemp = { ...globalParams };
+      globalParamsTemp.user.full_name = fullName;
+      setGlobalParams(globalParamsTemp);
     } else if (res.status === 400) {
       setErrors(res.data);
     } else {
@@ -79,26 +79,125 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="p-10 text-gray-500">Đang tải...</div>;
-  if (!user)
-    return <div className="p-10 text-red-600">Không tìm thấy người dùng</div>;
+  const handleCropDone = async (blob: Blob) => {
+    const ext = blob.type.split("/")[1] || "png";
+    const filename = `avatar.${ext}`;
+
+    const form = new FormData();
+    form.append("avatar", blob, filename);
+
+    const res = await fetch(API_BASE + "/accounts/update-avatar", {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+
+    setCropImageUrl(null);
+
+    if (res.ok) {
+      const refreshed = await apiGet("/accounts/me");
+      setUser(refreshed.data);
+
+      const globalParamsTemp = { ...globalParams };
+      globalParamsTemp.user.avatar_url = refreshed.data.avatar_urlavatar_url;
+      setGlobalParams(globalParamsTemp);
+    } else {
+      popupMessage({ description: "Upload ảnh thất bại" });
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    const res = await apiPost("/accounts/update-avatar", {
+      removeAvatar: true,
+    });
+
+    if (res.status === 201) {
+      const refreshed = await apiGet("/accounts/me");
+      setUser(refreshed.data);
+
+      const globalParamsTemp = { ...globalParams };
+      globalParamsTemp.user.avatar_url = "";
+      setGlobalParams(globalParamsTemp);
+    } else {
+      popupMessage({ description: "Xoá ảnh thất bại" });
+    }
+  };
+
+  if (!user) return <></>;
 
   return (
-    <section className="my-6 max-w-5xl mx-auto">
-      <div className="bg-white border border-blue-200 shadow-xl rounded-3xl p-8 mx-4">
-        <div className="flex flex-col items-center mb-8">
+    <section className="max-w-5xl mx-auto my-6">
+      <div className="p-8 mx-4 bg-white border border-blue-200 shadow-xl rounded-3xl">
+        <div className="relative flex flex-col items-center mb-8">
           <img
             src={`${host}/accounts/avatar/${
               user.avatar_url
-                ? user.avatar_url
+                ? `${user.avatar_url}?v=${Date.now()}`
                 : gender === 0
                 ? "avatar_default_female.png"
                 : "avatar_default_male.png"
             }`}
             alt="Avatar"
-            className="w-32 h-32 rounded-full object-cover border-4 border-blue-300 shadow-md mb-3"
+            className="object-cover w-32 h-32 mb-3 border-4 border-blue-300 rounded-full shadow-md"
           />
-          <h2 className="text-xl font-bold text-blue-700">{user.full_name}</h2>
+          <div className="flex gap-2">
+            <label className="text-sm text-blue-600 underline cursor-pointer">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  if (!file.type.startsWith("image/")) {
+                    popupMessage({
+                      description: "Vui lòng chọn tệp hình ảnh.",
+                    });
+                    return;
+                  }
+
+                  if (file.size > 2 * 1024 * 1024) {
+                    popupMessage({
+                      description: "Ảnh quá lớn, chọn ảnh dưới 2MB.",
+                    });
+                    return;
+                  }
+
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setCropImageUrl(reader.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              Đổi ảnh
+            </label>
+
+            {user.avatar_url && (
+              <button
+                onClick={async () => {
+                  const confirmed = await popupConfirmRed({
+                    description: "Xác nhận xóa ảnh đại diện?",
+                  });
+
+                  if (!confirmed) return;
+                  handleRemoveAvatar();
+                }}
+                className="text-sm text-red-600 underline cursor-pointer"
+              >
+                Xoá ảnh
+              </button>
+            )}
+          </div>
+
+          {cropImageUrl && (
+            <AvatarCropper
+              imageUrl={cropImageUrl}
+              onCancel={() => setCropImageUrl(null)}
+              onCropDone={handleCropDone}
+            />
+          )}
         </div>
 
         <form
@@ -106,11 +205,11 @@ export default function ProfilePage() {
             e.preventDefault();
             handleSubmit();
           }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800"
+          className="grid grid-cols-1 gap-6 text-sm text-gray-800 md:grid-cols-2"
         >
           {/* Tên đăng nhập */}
           <div>
-            <label className="block mb-1 text-gray-600 font-medium">
+            <label className="block mb-1 font-medium text-gray-600">
               Tên đăng nhập
             </label>
             <input
@@ -122,7 +221,7 @@ export default function ProfilePage() {
 
           {/* Vai trò */}
           <div>
-            <label className="block mb-1 text-gray-600 font-medium">
+            <label className="block mb-1 font-medium text-gray-600">
               Vai trò
             </label>
             <input
@@ -134,11 +233,11 @@ export default function ProfilePage() {
 
           {/* Họ và tên */}
           <div>
-            <label className="block mb-1 text-gray-600 font-medium">
+            <label className="block mb-1 font-medium text-gray-600">
               Họ và tên
             </label>
             <input
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+              className="w-full px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
@@ -149,11 +248,11 @@ export default function ProfilePage() {
 
           {/* Giới tính */}
           <div>
-            <label className="block mb-1 text-gray-600 font-medium">
+            <label className="block mb-1 font-medium text-gray-600">
               Giới tính
             </label>
             <select
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+              className="w-full px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               value={gender ?? ""}
               onChange={(e) => setGender(Number(e.target.value))}
             >
@@ -167,12 +266,12 @@ export default function ProfilePage() {
 
           {/* Email */}
           <div>
-            <label className="block mb-1 text-gray-600 font-medium">
+            <label className="block mb-1 font-medium text-gray-600">
               Email
             </label>
             <input
               type="email"
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+              className="w-full px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -183,11 +282,11 @@ export default function ProfilePage() {
 
           {/* Số điện thoại */}
           <div>
-            <label className="block mb-1 text-gray-600 font-medium">
+            <label className="block mb-1 font-medium text-gray-600">
               Số điện thoại
             </label>
             <input
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+              className="w-full px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
@@ -197,11 +296,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Nút cập nhật */}
-          <div className="md:col-span-2 text-right pt-4">
+          <div className="pt-4 text-right md:col-span-2">
             <button
               type="submit"
               disabled={isSubmiting}
-              className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold transition disabled:opacity-50"
+              className="px-6 py-2 font-semibold text-white transition bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50"
             >
               Cập nhật
             </button>

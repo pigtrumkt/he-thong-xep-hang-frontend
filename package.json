@@ -16,8 +16,10 @@
     "@fortawesome/react-fontawesome": "^0.2.3",
     "jose": "^6.0.12",
     "next": "^15.4.5",
+    "rc-slider": "^11.1.8",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-easy-crop": "^5.5.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

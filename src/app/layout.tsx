@@ -58,7 +58,7 @@ export default async function RootLayout({
       <body
         className={`${inter.className} text-[18px] min-h-[100vh] min-w-[800px]`}
       >
-        <ClientWrapper globalParams={{ user }}>{children}</ClientWrapper>
+        <ClientWrapper value={{ user }}>{children}</ClientWrapper>
       </body>
     </html>
   );

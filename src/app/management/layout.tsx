@@ -93,24 +93,14 @@ export default function ManagementLayout({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { user } = useGlobalParams();
+  const { globalParams } = useGlobalParams();
   const [host, setHost] = useState("");
-  const [avatarSrc, setAvatarSrc] = useState("");
 
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
     const hostTemp = `${window.location.protocol}//${window.location.hostname}:3001`;
     setHost(hostTemp);
-    setAvatarSrc(
-      user?.avatar_url
-        ? `${hostTemp}/accounts/avatar/${user.avatar_url}`
-        : `${hostTemp}/accounts/avatar/${
-            user?.gender === 0
-              ? "avatar_default_female.png"
-              : "avatar_default_male.png"
-          }`
-    );
 
     const cleanup1 = applyDropdownToggle();
     const cleanup2 = applyEventBtnLogout();
@@ -124,9 +114,9 @@ export default function ManagementLayout({
   return (
     <>
       {/* Header */}
-      <header className="w-full bg-white/90 backdrop-blur border-b border-blue-200 shadow-md flex items-center justify-between px-10 h-16">
+      <header className="flex items-center justify-between w-full h-16 px-10 border-b border-blue-200 shadow-md bg-white/90 backdrop-blur">
         <div className="flex items-center gap-4">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-2 rounded-xl shadow-lg">
+          <div className="p-2 shadow-lg bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl">
             <svg
               className="w-6 h-6 text-white"
               fill="none"
@@ -144,19 +134,25 @@ export default function ManagementLayout({
             Quản lý xếp hàng
           </h1>
         </div>
-        <div className="flex items-center gap-3 relative">
-          <span className="font-medium inline text-blue-700">
-            Xin chào, <b>{user.full_name}</b>
+        <div className="relative flex items-center gap-3">
+          <span className="inline font-medium text-blue-700">
+            Xin chào, <b>{globalParams.user.full_name}</b>
           </span>
           <button
             id="avatarBtn"
-            className="w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center shadow focus:ring-2 focus:ring-blue-400 cursor-pointer overflow-hidden"
+            className="flex items-center justify-center w-10 h-10 overflow-hidden bg-blue-100 border-2 border-blue-200 rounded-full shadow cursor-pointer focus:ring-2 focus:ring-blue-400"
           >
             {host && (
               <img
-                src={avatarSrc}
+                src={`${host}/accounts/avatar/${
+                  globalParams.user.avatar_url
+                    ? `${globalParams.user.avatar_url}?v=${Date.now()}`
+                    : globalParams.user.gender === 0
+                    ? "avatar_default_female.png"
+                    : "avatar_default_male.png"
+                }`}
                 alt="Avatar"
-                className="w-full h-full object-cover rounded-full"
+                className="object-cover w-full h-full rounded-full"
               />
             )}
           </button>
@@ -171,15 +167,15 @@ export default function ManagementLayout({
                 e.preventDefault();
                 hideProfileMenu();
 
-                if ([1, 2].includes(user.role_id)) {
+                if ([1, 2].includes(globalParams.user.role_id)) {
                   router.push("/management/central/profile");
-                } else if ([11, 12, 21].includes(user.role_id)) {
+                } else if ([11, 12, 21].includes(globalParams.user.role_id)) {
                   router.push("/management/agency/profile");
-                } else if (user.role_id === 31) {
+                } else if (globalParams.user.role_id === 31) {
                   router.push("/management/device/profile");
                 }
               }}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
+              className="flex items-center gap-3 px-3 py-2 font-semibold text-blue-700 rounded-lg hover:bg-blue-100"
             >
               <svg
                 className="w-6 h-6 text-blue-500"
@@ -199,7 +195,7 @@ export default function ManagementLayout({
                 hideProfileMenu();
                 setShowChangePassword(true);
               }}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
+              className="flex items-center gap-3 px-3 py-2 font-semibold text-blue-700 rounded-lg hover:bg-blue-100"
             >
               <svg
                 className="w-6 h-6 text-blue-500"
@@ -216,7 +212,7 @@ export default function ManagementLayout({
             <a
               href="#"
               id="logoutBtn"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-100 text-red-600 font-semibold"
+              className="flex items-center gap-3 px-3 py-2 font-semibold text-red-600 rounded-lg hover:bg-red-100"
             >
               <svg
                 className="w-6 h-6 text-red-500"
@@ -237,7 +233,7 @@ export default function ManagementLayout({
       <div className="min-w-full flex h-[calc(100vh-4rem)]">
         <aside className="min-w-[18rem] bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 border-r border-blue-700 shadow-lg px-3 py-6 overflow-y-auto">
           <nav className="flex flex-col gap-8">
-            <SidebarCentralMenu roleId={user["role_id"]} />
+            <SidebarCentralMenu roleId={globalParams.user["role_id"]} />
           </nav>
         </aside>
         <main className="w-full h-[calc(100vh-4rem)] overflow-y-auto transition-all bg-blue-100">

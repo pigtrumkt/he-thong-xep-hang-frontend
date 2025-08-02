@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { PopupProvider } from "./popup/PopupContext";
 
@@ -16,21 +22,21 @@ export const useGlobalParams = () => {
 };
 
 export default function ClientWrapper({
-  globalParams,
+  value,
   children,
 }: {
-  globalParams: any;
+  value: any;
   children: ReactNode;
 }) {
   const router = useRouter();
-  const user = globalParams?.user;
+  const [globalParams, setGlobalParams] = useState(value ?? null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!user) return;
+    if (!globalParams.user) return;
 
     const path = window.location.pathname;
-    const roleId = user["role_id"];
+    const roleId = globalParams.user["role_id"];
     if (path === "/") {
       if ([1, 2].includes(roleId)) {
         router.replace("/management/central");
@@ -63,10 +69,10 @@ export default function ClientWrapper({
       router.replace("/management/device");
       return;
     }
-  }, [router, user]);
+  }, [globalParams, router]);
 
   return (
-    <UserContext.Provider value={globalParams}>
+    <UserContext.Provider value={{ globalParams, setGlobalParams }}>
       <PopupProvider>{children}</PopupProvider>
     </UserContext.Provider>
   );
