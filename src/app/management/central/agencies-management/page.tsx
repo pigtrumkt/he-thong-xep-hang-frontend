@@ -13,7 +13,11 @@ export default function AgenciesManagementPage() {
   const [statusFilter, setStatusFilter] = useState(""); // "", "1", "0"
   const [search, setSearch] = useState("");
   const [selectedAgency, setSelectedAgency] = useState<any>(null);
+
+  const [showAddPopup, setShowAddPopup] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+
+  const handleAddAgency = () => {};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +45,10 @@ export default function AgenciesManagementPage() {
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
       <div className="flex items-center justify-between mb-6">
-        <button className="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-xl font-semibold flex items-center gap-2 shadow transition">
+        <button
+          className="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-xl font-semibold flex items-center gap-2 shadow transition cursor-pointer"
+          onClick={() => setShowAddPopup(true)}
+        >
           <span className="font-bold">+</span>
           Thêm
         </button>
@@ -220,6 +227,147 @@ export default function AgenciesManagementPage() {
           ))}
         </tbody>
       </table>
+
+      {/* popup add */}
+      {/* popup add */}
+      {showAddPopup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xl w-full relative border border-blue-300">
+            <button
+              onClick={() => setShowAddPopup(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl"
+            >
+              ×
+            </button>
+
+            <h2 className="text-xl font-bold text-blue-700 mb-4">
+              Thêm cơ quan mới
+            </h2>
+
+            <form
+              className="grid grid-cols-1 gap-4 text-sm text-gray-800"
+              onSubmit={handleAddAgency}
+            >
+              <div>
+                <label className="block mb-1 font-medium">Tên cơ quan</label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Địa chỉ</label>
+                <input
+                  type="text"
+                  name="address"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Số điện thoại</label>
+                <input
+                  type="text"
+                  name="phone"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Thông báo ở màn hình
+                </label>
+                <textarea
+                  name="screen_notice"
+                  rows={2}
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Cho phép lấy số online?
+                </label>
+                <select
+                  name="allow_online_ticket"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                >
+                  <option value="1">Có</option>
+                  <option value="0">Không</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Chờ giữa 2 lượt (phút)
+                  </label>
+                  <input
+                    type="number"
+                    name="min_time_between_ticket_online"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Giới hạn lượt/ngày
+                  </label>
+                  <input
+                    type="number"
+                    name="max_ticket_per_day_online"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Ngày làm việc (1,2,3,...)
+                </label>
+                <input
+                  type="text"
+                  name="allowed_days_of_week"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  placeholder="VD: 1,2,3,4,5"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Khoảng giờ lấy số (VD: 0800~1700)
+                </label>
+                <input
+                  type="text"
+                  name="ticket_time_range"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+
+              <div className="pt-4 text-right">
+                <button
+                  type="submit"
+                  className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold transition"
+                >
+                  Lưu
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* detail */}
       {showDetail && selectedAgency && (
