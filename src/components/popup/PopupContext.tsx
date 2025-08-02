@@ -160,7 +160,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
       {/* Alert Message */}
       {alert && (
         <div
-          className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] text-white px-6 py-3 rounded-xl shadow-lg text-sm font-semibold
+          className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] text-white px-6 py-3 rounded-xl shadow-2xl drop-shadow-2xl text-sm font-semibold
           transition-opacity duration-200 ${
             alertVisible ? "opacity-100" : "opacity-0"
           }

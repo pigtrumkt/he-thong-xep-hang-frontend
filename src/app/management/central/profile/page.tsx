@@ -71,9 +71,10 @@ export default function ProfilePage() {
     }
 
     if (res.status === 201) {
-      alertMessageGreen("Đã cập nhật hồ sơ");
+      popupMessage({
+        description: "Đã cập nhật hồ sơ",
+      });
     } else if (res.status === 400) {
-      alertMessageRed("Thông tin chưa hợp lệ, vui lòng kiểm tra lại");
       setErrors(res.data.message);
     } else {
       popupMessage({
