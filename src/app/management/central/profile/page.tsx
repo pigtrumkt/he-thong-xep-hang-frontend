@@ -99,7 +99,7 @@ export default function ProfilePage() {
       setUser(refreshed.data);
 
       const globalParamsTemp = { ...globalParams };
-      globalParamsTemp.user.avatar_url = refreshed.data.avatar_urlavatar_url;
+      globalParamsTemp.user.avatar_url = refreshed.data.avatar_url;
       setGlobalParams(globalParamsTemp);
     } else {
       popupMessage({ description: "Upload ảnh thất bại" });
