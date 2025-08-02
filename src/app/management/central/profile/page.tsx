@@ -110,28 +110,31 @@ export default function ProfilePage() {
 
         {/* Inputs thông tin bên phải */}
         <div className="flex-1 w-full grid grid-cols-1 gap-4">
+          {/* Tên đăng nhập (readOnly) */}
           <div>
             <label className="text-sm text-gray-500">Tên đăng nhập</label>
             <input
-              className="w-full mt-1 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none text-slate-700"
               value={user.username}
               readOnly
             />
           </div>
 
+          {/* Vai trò (readOnly) */}
           <div>
             <label className="text-sm text-gray-500">Vai trò</label>
             <input
-              className="w-full mt-1 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none text-slate-700"
               value={user.role_name || ""}
               readOnly
             />
           </div>
 
+          {/* Họ và tên */}
           <div>
             <label className="text-sm text-gray-500">Họ và tên</label>
             <input
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
@@ -140,10 +143,11 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Giới tính */}
           <div>
             <label className="text-sm text-gray-500">Giới tính</label>
             <select
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
               value={gender ?? ""}
               onChange={(e) => setGender(Number(e.target.value))}
             >
@@ -155,11 +159,12 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Email */}
           <div>
             <label className="text-sm text-gray-500">Email</label>
             <input
               type="email"
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -168,10 +173,11 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Số điện thoại */}
           <div>
             <label className="text-sm text-gray-500">Số điện thoại</label>
             <input
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
@@ -180,6 +186,7 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Nút cập nhật */}
           <div className="pt-4 text-right">
             <button
               onClick={handleSubmit}
