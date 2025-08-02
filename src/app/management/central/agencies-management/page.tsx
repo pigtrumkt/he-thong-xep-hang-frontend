@@ -127,6 +127,12 @@ export default function AgenciesManagementPage() {
                         });
 
                         e.target.disabled = false;
+
+                        if (![201, 400].includes(res.status)) {
+                          handleApiError(res, popupMessage, router);
+                          return;
+                        }
+
                         if (res.status === 201) {
                           setAgencies((prev) =>
                             prev.map((item) =>
@@ -179,6 +185,12 @@ export default function AgenciesManagementPage() {
                           `/agencies/${a.id}/delete`,
                           {}
                         );
+
+                        if (![201, 400].includes(res.status)) {
+                          handleApiError(res, popupMessage, router);
+                          return;
+                        }
+
                         if (res.status === 201) {
                           setAgencies((prev) =>
                             prev.filter((item) => item.id !== a.id)

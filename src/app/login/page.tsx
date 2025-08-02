@@ -36,6 +36,7 @@ export default function LoginPage() {
       password,
       rememberMe,
     });
+
     if (![200, 400, 401].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       setSubmitting(false);
