@@ -35,17 +35,21 @@ export default async function RootLayout({
   const cookieStore = cookies();
 
   const token = (await cookieStore).get("authorization")?.value;
-  let user = null;
+  let user = {};
   if (token) {
-    const res = await fetch(`http://localhost:3001/accounts/me`, {
-      headers: {
-        Cookie: `authorization=${token}`,
-      },
-      cache: "no-store",
-    });
+    try {
+      const res = await fetch(`http://localhost:3001/accounts/me`, {
+        headers: {
+          Cookie: `authorization=${token}`,
+        },
+        cache: "no-store",
+      });
 
-    if (res.ok) {
-      user = await res.json();
+      if (res.ok) {
+        user = await res.json();
+      }
+    } catch (err) {
+      console.error("Lỗi gọi API /accounts/me:", err);
     }
   }
 
