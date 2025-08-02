@@ -33,14 +33,28 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = cookies();
-  const roleId = Number((await cookieStore).get("roleId")?.value ?? 0);
+
+  const token = (await cookieStore).get("authorization")?.value;
+  let user = null;
+  if (token) {
+    const res = await fetch(`http://localhost:3001/accounts/me`, {
+      headers: {
+        Cookie: `authorization=${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      user = await res.json();
+    }
+  }
 
   return (
     <html lang="vi" data-scroll-behavior="smooth">
       <body
         className={`${inter.className} text-[18px] min-h-[100vh] min-w-[800px]`}
       >
-        <ClientWrapper globalParams={{ roleId }}>{children}</ClientWrapper>
+        <ClientWrapper globalParams={{ user }}>{children}</ClientWrapper>
       </body>
     </html>
   );

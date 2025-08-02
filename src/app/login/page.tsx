@@ -48,7 +48,7 @@ export default function LoginPage() {
       return;
     }
 
-    window.location.href = "/";
+    window.location.replace("/");
   };
 
   return (

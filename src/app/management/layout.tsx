@@ -6,6 +6,7 @@ import SidebarCentralMenu from "@/components/menus/SidebarCentralMenu";
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { apiPost } from "@/lib/api";
 import PopupChangePassword from "@/components/popup/PopupChangePassword";
+import { useRouter } from "next/navigation";
 
 function applyDropdownToggle() {
   const avatar = document.getElementById("avatarBtn");
@@ -72,7 +73,6 @@ function applyEventBtnLogout() {
     // // Xoá cookie client (nếu không phải httpOnly)
     document.cookie =
       "authorization=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = "roleId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
     apiPost("/auth/logout", null);
 
@@ -92,7 +92,8 @@ export default function ManagementLayout({
 }: {
   children: ReactNode;
 }) {
-  const { roleId } = useGlobalParams();
+  const router = useRouter();
+  const { user } = useGlobalParams();
 
   const [showChangePassword, setShowChangePassword] = useState(false);
 
@@ -154,10 +155,12 @@ export default function ManagementLayout({
           >
             <a
               href="#"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 hideProfileMenu();
+                router.push("/management/profile");
               }}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
             >
               <svg
                 className="w-6 h-6 text-blue-500"
@@ -215,7 +218,7 @@ export default function ManagementLayout({
       <div className="min-w-full flex h-[calc(100vh-4rem)]">
         <aside className="min-w-[18rem] bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 border-r border-blue-700 shadow-lg px-3 py-6 overflow-y-auto">
           <nav className="flex flex-col gap-8">
-            <SidebarCentralMenu roleId={roleId} />
+            <SidebarCentralMenu roleId={user["role_id"]} />
           </nav>
         </aside>
         <main className="w-full h-[calc(100vh-4rem)] overflow-y-auto transition-all bg-blue-100">
