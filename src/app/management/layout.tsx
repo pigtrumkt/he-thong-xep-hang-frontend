@@ -12,10 +12,16 @@ function applyDropdownToggle() {
   const menu = document.getElementById("profileMenu");
 
   const toggleMenu = (e: MouseEvent) => {
-    if (avatar?.contains(e.target as Node)) {
-      menu?.classList.toggle("hidden");
-    } else if (!menu?.contains(e.target as Node)) {
-      menu?.classList.add("hidden");
+    if (!menu || !avatar) return;
+
+    if (avatar.contains(e.target as Node)) {
+      if (menu.classList.contains("visible")) {
+        hideProfileMenu();
+      } else {
+        showProfileMenu();
+      }
+    } else if (!menu.contains(e.target as Node)) {
+      hideProfileMenu();
     }
   };
 
@@ -23,12 +29,45 @@ function applyDropdownToggle() {
   return () => document.removeEventListener("click", toggleMenu);
 }
 
+function showProfileMenu() {
+  const menu = document.getElementById("profileMenu");
+
+  menu?.classList.remove(
+    "opacity-0",
+    "scale-95",
+    "invisible",
+    "pointer-events-none"
+  );
+  menu?.classList.add(
+    "opacity-100",
+    "scale-100",
+    "visible",
+    "pointer-events-auto"
+  );
+}
+
+function hideProfileMenu() {
+  const menu = document.getElementById("profileMenu");
+  menu?.classList.remove(
+    "opacity-100",
+    "scale-100",
+    "visible",
+    "pointer-events-auto"
+  );
+  menu?.classList.add(
+    "opacity-0",
+    "scale-95",
+    "invisible",
+    "pointer-events-none"
+  );
+}
+
 function applyEventBtnLogout() {
   const logoutBtn = document.getElementById("logoutBtn");
   const handleLogout = (e: MouseEvent) => {
     e.preventDefault();
 
-    document.getElementById("profileMenu")?.classList.add("hidden");
+    hideProfileMenu();
 
     // // Xoá cookie client (nếu không phải httpOnly)
     document.cookie =
@@ -111,13 +150,13 @@ export default function ManagementLayout({
           </button>
           <div
             id="profileMenu"
-            className="hidden absolute right-0 top-14 z-50 w-56 bg-white rounded-2xl shadow-xl border border-blue-100 py-3 px-2 animate-fade-in"
+            className={`absolute right-0 top-14 z-50 w-56 bg-white rounded-2xl shadow-xl border border-blue-100 py-3 px-2 transition-all duration-100 origin-top-right scale-95 opacity-0 pointer-events-none invisible`}
           >
             <a
               href="#"
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
               onClick={() => {
-                document.getElementById("profileMenu")?.classList.add("hidden");
+                hideProfileMenu();
               }}
             >
               <svg
@@ -135,7 +174,7 @@ export default function ManagementLayout({
             <a
               href="#"
               onClick={() => {
-                document.getElementById("profileMenu")?.classList.add("hidden");
+                hideProfileMenu();
                 setShowChangePassword(true);
               }}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
