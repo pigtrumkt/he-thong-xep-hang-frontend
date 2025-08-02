@@ -46,24 +46,22 @@ export default function ClientWrapper({
       }
     }
 
-    if (path !== "/management/profile") {
-      if ([1, 2].includes(roleId) && !path.startsWith("/management/central")) {
-        router.replace("/management/central");
-        return;
-      }
+    if ([1, 2].includes(roleId) && !path.startsWith("/management/central")) {
+      router.replace("/management/central");
+      return;
+    }
 
-      if (
-        [11, 12, 21].includes(roleId) &&
-        !path.startsWith("/management/agency")
-      ) {
-        router.replace("/management/agency");
-        return;
-      }
+    if (
+      [11, 12, 21].includes(roleId) &&
+      !path.startsWith("/management/agency")
+    ) {
+      router.replace("/management/agency");
+      return;
+    }
 
-      if (roleId === 31 && !path.startsWith("/management/device")) {
-        router.replace("/management/device");
-        return;
-      }
+    if (roleId === 31 && !path.startsWith("/management/device")) {
+      router.replace("/management/device");
+      return;
     }
   }, [router, user]);
 

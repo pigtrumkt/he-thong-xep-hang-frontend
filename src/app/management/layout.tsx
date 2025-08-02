@@ -94,10 +94,24 @@ export default function ManagementLayout({
 }) {
   const router = useRouter();
   const { user } = useGlobalParams();
+  const [host, setHost] = useState("");
+  const [avatarSrc, setAvatarSrc] = useState("");
 
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
+    const hostTemp = `${window.location.protocol}//${window.location.hostname}:3001`;
+    setHost(hostTemp);
+    setAvatarSrc(
+      user?.avatar_url
+        ? `${hostTemp}/accounts/avatar/${user.avatar_url}`
+        : `${hostTemp}/accounts/avatar/${
+            user?.gender === 0
+              ? "avatar_default_female.png"
+              : "avatar_default_male.png"
+          }`
+    );
+
     const cleanup1 = applyDropdownToggle();
     const cleanup2 = applyEventBtnLogout();
 
@@ -132,23 +146,21 @@ export default function ManagementLayout({
         </div>
         <div className="flex items-center gap-3 relative">
           <span className="font-medium inline text-blue-700">
-            Xin chào, <b>Nguyễn Văn A</b>
+            Xin chào, <b>{user.full_name}</b>
           </span>
           <button
             id="avatarBtn"
-            className="w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center shadow focus:ring-2 focus:ring-blue-400 cursor-pointer"
+            className="w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center shadow focus:ring-2 focus:ring-blue-400 cursor-pointer overflow-hidden"
           >
-            <svg
-              className="w-7 h-7 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-            </svg>
+            {host && (
+              <img
+                src={avatarSrc}
+                alt="Avatar"
+                className="w-full h-full object-cover rounded-full"
+              />
+            )}
           </button>
+
           <div
             id="profileMenu"
             className={`absolute right-0 top-14 z-50 w-56 bg-white rounded-2xl shadow-xl border border-blue-100 py-3 px-2 transition-all duration-100 origin-top-right scale-95 opacity-0 pointer-events-none invisible`}
@@ -158,7 +170,14 @@ export default function ManagementLayout({
               onClick={(e) => {
                 e.preventDefault();
                 hideProfileMenu();
-                router.push("/management/profile");
+
+                if ([1, 2].includes(user.role_id)) {
+                  router.push("/management/central/profile");
+                } else if ([11, 12, 21].includes(user.role_id)) {
+                  router.push("/management/agency/profile");
+                } else if (user.role_id === 31) {
+                  router.push("/management/device/profile");
+                }
               }}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 text-blue-700 font-semibold"
             >
