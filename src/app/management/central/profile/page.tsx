@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
   const [isSubmiting, setSubmiting] = useState(false);
 
-  const { popupMessage, alertMessageRed, alertMessageGreen } = usePopup();
+  const { popupMessage } = usePopup();
 
   const host =
     typeof window !== "undefined"
@@ -49,7 +49,7 @@ export default function ProfilePage() {
     };
 
     fetchData();
-  }, []);
+  }, [popupMessage, router]);
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -75,7 +75,7 @@ export default function ProfilePage() {
         description: "Đã cập nhật hồ sơ",
       });
     } else if (res.status === 400) {
-      setErrors(res.data.message);
+      setErrors(res.data);
     } else {
       popupMessage({
         description: "Cập nhật thất bại",
