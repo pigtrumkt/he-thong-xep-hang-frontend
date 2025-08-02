@@ -4,11 +4,11 @@ import {
   useContext,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from "react";
 
 type ConfirmType = "default" | "red";
-
 type AlertType = "green" | "red";
 
 type PopupContextType = {
@@ -31,17 +31,20 @@ type PopupContextType = {
 const PopupContext = createContext<PopupContextType | undefined>(undefined);
 
 export function PopupProvider({ children }: { children: ReactNode }) {
+  const [alertVisible, setAlertVisible] = useState(false);
   const [alert, setAlert] = useState<{
     message: string;
     type: AlertType;
   } | null>(null);
 
+  const [messageVisible, setMessageVisible] = useState(false);
   const [messagePopup, setMessagePopup] = useState<{
     title?: string;
     description?: string;
     resolve: () => void;
   } | null>(null);
 
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState<{
     title?: string;
     description?: string;
@@ -49,20 +52,58 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     resolve: (result: boolean) => void;
   } | null>(null);
 
-  const alertMessageGreen = useCallback((msg: string, duration = 3000) => {
-    setAlert({ message: msg, type: "green" });
-    setTimeout(() => setAlert(null), duration);
-  }, []);
+  // Refs để quản lý timeout
+  const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const alertFadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const alertMessageRed = useCallback((msg: string, duration = 3000) => {
-    setAlert({ message: msg, type: "red" });
-    setTimeout(() => setAlert(null), duration);
-  }, []);
+  const showAlert = useCallback(
+    (type: AlertType, msg: string, duration = 3000) => {
+      // Clear các timeout trước
+      if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
+      if (alertFadeTimeoutRef.current)
+        clearTimeout(alertFadeTimeoutRef.current);
+
+      const show = () => {
+        setAlert({ message: msg, type });
+        setAlertVisible(true);
+        alertTimeoutRef.current = setTimeout(() => {
+          setAlertVisible(false);
+          setTimeout(() => {
+            setAlert(null);
+            alertTimeoutRef.current = null;
+          }, 200);
+        }, duration - 200);
+      };
+
+      if (alertVisible) {
+        setAlertVisible(false);
+        alertFadeTimeoutRef.current = setTimeout(show, 200);
+      } else {
+        show();
+      }
+    },
+    [alertVisible]
+  );
+
+  const alertMessageRed = useCallback(
+    (msg: string, duration?: number) => {
+      showAlert("red", msg, duration);
+    },
+    [showAlert]
+  );
+
+  const alertMessageGreen = useCallback(
+    (msg: string, duration?: number) => {
+      showAlert("green", msg, duration);
+    },
+    [showAlert]
+  );
 
   const popupMessage = useCallback(
     (options: { title?: string; description?: string }) => {
       return new Promise<void>((resolve) => {
         setMessagePopup({ ...options, resolve });
+        setTimeout(() => setMessageVisible(true), 10);
       });
     },
     []
@@ -72,6 +113,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     (options: { title?: string; description?: string }) => {
       return new Promise<boolean>((resolve) => {
         setConfirmPopup({ ...options, type: "default", resolve });
+        setTimeout(() => setConfirmVisible(true), 10);
       });
     },
     []
@@ -81,19 +123,26 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     (options: { title?: string; description?: string }) => {
       return new Promise<boolean>((resolve) => {
         setConfirmPopup({ ...options, type: "red", resolve });
+        setTimeout(() => setConfirmVisible(true), 10);
       });
     },
     []
   );
 
   const closePopupMessage = () => {
-    messagePopup?.resolve();
-    setMessagePopup(null);
+    setMessageVisible(false);
+    setTimeout(() => {
+      messagePopup?.resolve();
+      setMessagePopup(null);
+    }, 200);
   };
 
   const handleConfirm = (result: boolean) => {
-    confirmPopup?.resolve(result);
-    setConfirmPopup(null);
+    setConfirmVisible(false);
+    setTimeout(() => {
+      confirmPopup?.resolve(result);
+      setConfirmPopup(null);
+    }, 200);
   };
 
   return (
@@ -111,7 +160,10 @@ export function PopupProvider({ children }: { children: ReactNode }) {
       {/* Alert Message */}
       {alert && (
         <div
-          className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in-out-popup text-sm font-semibold
+          className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] text-white px-6 py-3 rounded-xl shadow-lg text-sm font-semibold
+          transition-opacity duration-200 ${
+            alertVisible ? "opacity-100" : "opacity-0"
+          }
           ${alert.type === "green" ? "bg-green-400" : "bg-red-400"}`}
         >
           {alert.message}
@@ -120,7 +172,11 @@ export function PopupProvider({ children }: { children: ReactNode }) {
 
       {/* Popup Message (OK button) */}
       {messagePopup && (
-        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+        <div
+          className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
+            messageVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-2">
             {messagePopup.title && (
               <h2 className="text-lg font-bold text-slate-800">
@@ -132,7 +188,6 @@ export function PopupProvider({ children }: { children: ReactNode }) {
                 {messagePopup.description}
               </p>
             )}
-
             <button
               onClick={closePopupMessage}
               className="mt-4 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
@@ -145,7 +200,11 @@ export function PopupProvider({ children }: { children: ReactNode }) {
 
       {/* Popup Confirm */}
       {confirmPopup && (
-        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+        <div
+          className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
+            confirmVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-2">
             {confirmPopup.title && (
               <h2 className="text-lg font-bold text-slate-800">
