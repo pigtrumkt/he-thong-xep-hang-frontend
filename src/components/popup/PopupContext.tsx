@@ -177,7 +177,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             messageVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-2">
+          <div className="bg-white p-6 rounded-xl shadow-xl min-w-[25rem] max-w-[45rem] text-center space-y-2">
             {messagePopup.title && (
               <h2 className="text-lg font-bold text-slate-800">
                 {messagePopup.title}
@@ -205,7 +205,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             confirmVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center space-y-2">
+          <div className="bg-white p-6 rounded-xl shadow-xl min-w-[25rem] max-w-[45rem] text-center space-y-2">
             {confirmPopup.title && (
               <h2 className="text-lg font-bold text-slate-800">
                 {confirmPopup.title}
