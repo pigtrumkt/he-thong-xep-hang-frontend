@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
+import { usePopup } from "@/components/popup/PopupContext";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -11,8 +15,12 @@ export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState<number | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [isSubmiting, setSubmiting] = useState(false);
+
+  const { popupMessage, alertMessageRed, alertMessageGreen } = usePopup();
 
   const host =
     typeof window !== "undefined"
@@ -22,6 +30,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await apiGet("/accounts/me");
+
+      if (![200, 400].includes(res.status)) {
+        handleApiError(res, popupMessage, router);
+        return;
+      }
+
       if (res.status === 200 && res.data) {
         const u = res.data;
         setUser(u);
@@ -29,41 +43,42 @@ export default function ProfilePage() {
         setEmail(u.email || "");
         setPhone(u.phone || "");
         setGender(u.gender ?? null);
-        setAvatarPreview(u.avatar || "");
       }
+
       setLoading(false);
     };
+
     fetchData();
   }, []);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-    }
-  };
 
   const handleSubmit = async () => {
     if (!user) return;
 
-    const form = new FormData();
-    form.append("full_name", fullName);
-    form.append("email", email);
-    form.append("phone", phone);
-    form.append("gender", String(gender ?? ""));
-    if (avatarFile) form.append("avatar", avatarFile);
-
-    const res = await fetch("/accounts/update-profile", {
-      method: "POST",
-      credentials: "include",
-      body: form,
+    setErrors({});
+    setSubmiting(true);
+    const res = await apiPost("/accounts/update-profile", {
+      full_name: fullName,
+      email,
+      phone,
+      gender,
     });
 
-    if (res.ok) {
-      alert("Đã cập nhật hồ sơ!");
+    setSubmiting(false);
+
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      alertMessageGreen("Đã cập nhật hồ sơ");
+    } else if (res.status === 400) {
+      alertMessageRed("Thông tin chưa hợp lệ, vui lòng kiểm tra lại");
+      setErrors(res.data.message);
     } else {
-      alert("Cập nhật thất bại");
+      popupMessage({
+        description: "Cập nhật thất bại",
+      });
     }
   };
 
@@ -76,45 +91,23 @@ export default function ProfilePage() {
       <h1 className="text-xl font-bold text-blue-700 mb-6">Hồ sơ cá nhân</h1>
 
       <div className="flex flex-col md:flex-row items-start gap-10">
-        {/* Avatar bên trái */}
+        {/* Avatar hiển thị bên trái */}
         <div className="flex flex-col items-center gap-3">
-          <div className="relative">
-            <img
-              src={
-                avatarPreview ||
-                `${host}/accounts/avatar/${
-                  user.avatar
-                    ? user.avatar
-                    : gender === 0
-                    ? "avatar_default_female.png"
-                    : "avatar_default_male.png"
-                }`
-              }
-              alt="Avatar"
-              className="w-36 h-36 rounded-full object-cover border-4 border-blue-300 shadow"
-            />
-            <label className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 shadow">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 4v16m8-8H4" />
-              </svg>
-            </label>
-          </div>
+          <img
+            src={`${host}/accounts/avatar/${
+              user.avatar_url
+                ? user.avatar_url
+                : gender === 0
+                ? "avatar_default_female.png"
+                : "avatar_default_male.png"
+            }`}
+            alt="Avatar"
+            className="w-36 h-36 rounded-full object-cover border-4 border-blue-300 shadow"
+          />
           <p className="text-sm text-gray-500">Ảnh đại diện</p>
         </div>
 
-        {/* Inputs bên phải */}
+        {/* Inputs thông tin bên phải */}
         <div className="flex-1 w-full grid grid-cols-1 gap-4">
           <div>
             <label className="text-sm text-gray-500">Tên đăng nhập</label>
@@ -141,6 +134,9 @@ export default function ProfilePage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
+            {errors.full_name && (
+              <p className="mt-1 text-sm text-red-400">{errors.full_name}</p>
+            )}
           </div>
 
           <div>
@@ -150,10 +146,12 @@ export default function ProfilePage() {
               value={gender ?? ""}
               onChange={(e) => setGender(Number(e.target.value))}
             >
-              <option value="">-- Chọn giới tính --</option>
               <option value="1">Nam</option>
               <option value="0">Nữ</option>
             </select>
+            {errors.gender && (
+              <p className="mt-1 text-sm text-red-400">{errors.gender}</p>
+            )}
           </div>
 
           <div>
@@ -164,6 +162,9 @@ export default function ProfilePage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+            )}
           </div>
 
           <div>
@@ -173,14 +174,18 @@ export default function ProfilePage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
+            {errors.phone && (
+              <p className="mt-1 text-sm text-red-400">{errors.phone}</p>
+            )}
           </div>
 
           <div className="pt-4 text-right">
             <button
               onClick={handleSubmit}
-              className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold transition"
+              className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold transition disabled:opacity-50 cursor-pointer"
+              disabled={isSubmiting}
             >
-              Lưu thông tin
+              Cập nhật
             </button>
           </div>
         </div>

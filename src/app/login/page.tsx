@@ -175,7 +175,7 @@ export default function LoginPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-base shadow-lg transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-base shadow-lg transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   disabled={submitting}
                 >
                   <FontAwesomeIcon icon={faSignInAlt} /> Đăng Nhập
