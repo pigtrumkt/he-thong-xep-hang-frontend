@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { RoleEnum, PermissionEnum } from "@/constants/Enum";
 import AddOrUpdateAccountModal from "./components/AddOrUpdateAccountModal";
+import ViewAccountModal from "./components/ViewAccountModal";
 
 export default function AccountsManagementPage() {
   const router = useRouter();
@@ -21,6 +22,9 @@ export default function AccountsManagementPage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
+
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
   const fetchData = async () => {
     const res = await apiGet("/accounts/findAllNotDeletedCentral");
@@ -205,6 +209,10 @@ export default function AccountsManagementPage() {
                   <button
                     title="Xem chi tiết"
                     className="p-2 rounded-lg hover:bg-blue-100"
+                    onClick={() => {
+                      setSelectedAccount(acc);
+                      setShowViewModal(true);
+                    }}
                   >
                     <svg
                       className="w-6 h-6 text-blue-600"
@@ -318,6 +326,16 @@ export default function AccountsManagementPage() {
           ))}
         </tbody>
       </table>
+
+      {showViewModal && selectedAccount && (
+        <ViewAccountModal
+          accountData={selectedAccount}
+          onClose={() => {
+            setShowViewModal(false);
+            setSelectedAccount(null);
+          }}
+        />
+      )}
 
       {showAddModal && (
         <AddOrUpdateAccountModal
