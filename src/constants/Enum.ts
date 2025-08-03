@@ -1,0 +1,55 @@
+export enum RoleEnum {
+  SUPER_ADMIN_ROOT = 1, // Super admin cao nhất
+  SUPER_ADMIN = 2, // Super admin
+  AGENCY_ADMIN_ROOT = 11, // Admin cơ quan cao nhất
+  AGENCY_ADMIN = 12, // Admin cơ quan
+  AGENCY_STAFF = 21, // Nhân viên
+  DEVICE = 31, // Thiết bị
+}
+
+export enum PermissionEnum {
+  // Dịch vụ (Super Admin)
+  SERVICE_VIEW_SUPER = 100,
+  SERVICE_ADD_SUPER = 101,
+  SERVICE_UPDATE_SUPER = 102,
+  SERVICE_DELETE_SUPER = 103,
+
+  SERVICE_GROUP_ADD = 104,
+  SERVICE_GROUP_UPDATE = 105,
+  SERVICE_GROUP_DELETE = 106,
+
+  // Cơ quan (Super Admin)
+  AGENCY_VIEW_SUPER = 110,
+  AGENCY_ADD_SUPER = 111,
+  AGENCY_UPDATE_SUPER = 112,
+  AGENCY_DELETE_SUPER = 113,
+
+  // Tài khoản (Super Admin)
+  ACCOUNT_VIEW_SUPER = 120,
+  ACCOUNT_ADD_SUPER = 121,
+  ACCOUNT_UPDATE_SUPER = 122,
+  ACCOUNT_DELETE_SUPER = 123,
+
+  // Gọi số (Cơ quan)
+  CALL = 130,
+
+  // Quầy (Cơ quan)
+  COUNTER_VIEW = 140,
+  COUNTER_ADD = 141,
+  COUNTER_UPDATE = 142,
+  COUNTER_DELETE = 143,
+
+  // Dịch vụ (Cơ quan)
+  SERVICE_VIEW = 150,
+  SERVICE_UPDATE = 151,
+
+  // Tài khoản (Cơ quan)
+  ACCOUNT_VIEW = 160,
+  ACCOUNT_ADD = 161,
+  ACCOUNT_UPDATE = 162,
+  ACCOUNT_DELETE = 163,
+
+  // Cài đặt (Cơ quan)
+  SETTINGS_VIEW = 170,
+  SETTINGS_UPDATE = 171,
+}
