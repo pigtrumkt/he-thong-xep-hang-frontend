@@ -126,7 +126,7 @@ export default function GroupServicesManagementPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            placeholder="Tìm tên nhóm dịch vụ..."
+            placeholder="Tìm kiếm..."
           />
           <select
             value={statusFilter}

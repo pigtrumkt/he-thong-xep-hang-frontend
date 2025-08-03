@@ -58,7 +58,12 @@ export default function AgenciesManagementPage() {
   };
 
   const filtered = agencies.filter((a) => {
-    const matchName = a.name.toLowerCase().includes(search.toLowerCase());
+    const matchName =
+      (a.name?.toLowerCase() ?? "").includes(search.toLowerCase()) ||
+      (a.address?.toLowerCase() ?? "").includes(search.toLowerCase()) ||
+      (a.phone?.toLowerCase() ?? "").includes(search.toLowerCase()) ||
+      (a.email?.toLowerCase() ?? "").includes(search.toLowerCase());
+
     const matchStatus =
       statusFilter === "" || String(a.status) === statusFilter;
     return matchName && matchStatus;
@@ -87,7 +92,7 @@ export default function AgenciesManagementPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            placeholder="Tìm tên cơ quan..."
+            placeholder="Tìm kiếm..."
           />
           <select
             value={statusFilter}

@@ -132,7 +132,10 @@ export default function ServicesManagementPage() {
 
   const filteredGroups = services
     .filter((s) => {
-      const matchName = s.name.toLowerCase().includes(search.toLowerCase());
+      const matchName =
+        s.name.toLowerCase().includes(search.toLowerCase()) ||
+        s.range_start === Number(search) ||
+        s.range_end === Number(search);
       const matchStatus =
         statusFilter === "" || String(s.status) === statusFilter;
       const matchGroup = groupFilter === "" || s.groupName === groupFilter;
@@ -170,7 +173,7 @@ export default function ServicesManagementPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            placeholder="Tìm tên dịch vụ..."
+            placeholder="Tìm kiếm..."
           />
           <select
             value={groupFilter}
