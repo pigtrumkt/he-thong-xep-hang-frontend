@@ -2,7 +2,7 @@
 
 import { usePopup } from "@/components/popup/PopupContext";
 import { useRouter } from "next/navigation";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useEffect, useState } from "react";
 import { useGlobalParams } from "@/components/ClientWrapper";
@@ -16,6 +16,7 @@ export default function AccountsManagementPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [agencyFilter, setAgencyFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const fetchData = async () => {
     const res = await apiGet("/accounts/findAllNotDeleted");
@@ -30,9 +31,32 @@ export default function AccountsManagementPage() {
     fetchData();
   }, []);
 
+  const handleToggleStatus = async (accountId: number, newStatus: number) => {
+    const res = await apiPost(`/accounts/${accountId}/status`, {
+      status: newStatus,
+    });
+
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      setAccounts((prev) =>
+        prev.map((item) =>
+          item.id === accountId ? { ...item, status: newStatus } : item
+        )
+      );
+    } else {
+      popupMessage({
+        title: "Cập nhật trạng thái thất bại",
+        description: "Mạng không ổn định hoặc máy chủ không phản hồi.",
+      });
+    }
+  };
+
   const filteredAccounts = accounts.filter((acc) => {
     const username = acc.username || "";
-
     const matchText = username.toLowerCase().includes(search.toLowerCase());
 
     const matchAgency =
@@ -40,7 +64,12 @@ export default function AccountsManagementPage() {
       (agencyFilter === "Super Admin" && [1, 2].includes(acc.role_id)) ||
       acc.agency_name === agencyFilter;
 
-    return matchText && matchAgency;
+    const matchStatus =
+      statusFilter === "" ||
+      (statusFilter === "active" && acc.status === 1) ||
+      (statusFilter === "inactive" && acc.status === 0);
+
+    return matchText && matchAgency && matchStatus;
   });
 
   const groupedAccounts: Record<string, any[]> = {};
@@ -126,6 +155,15 @@ export default function AccountsManagementPage() {
               </option>
             ))}
           </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 transition-colors bg-white border rounded-lg outline-none w-60 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Không hoạt động</option>
+          </select>
         </div>
       </div>
 
@@ -193,7 +231,10 @@ export default function AccountsManagementPage() {
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          defaultChecked={acc.status === 1}
+                          checked={acc.status === 1}
+                          onChange={(e) =>
+                            handleToggleStatus(acc.id, e.target.checked ? 1 : 0)
+                          }
                         />
                         <div className="h-6 bg-gray-200 rounded-full w-11 peer-checked:bg-blue-600"></div>
                         <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"></div>
