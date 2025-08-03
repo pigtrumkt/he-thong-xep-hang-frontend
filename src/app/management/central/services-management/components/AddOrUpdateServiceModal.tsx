@@ -19,8 +19,8 @@ export default function AddOrUpdateServiceModal({
   const [form, setForm] = useState({
     name: "",
     group_id: 0,
-    range_start: 0,
-    range_end: 999999,
+    range_start: 1,
+    range_end: 100,
     status: true,
   });
 
