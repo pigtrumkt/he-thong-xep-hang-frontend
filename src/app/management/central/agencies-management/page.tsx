@@ -203,13 +203,18 @@ export default function AgenciesManagementPage() {
                         }}
                       >
                         <svg
+                          xmlns="http://www.w3.org/2000/svg"
                           className="w-6 h-6 text-blue-700"
                           fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
                           viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
                         >
-                          <path d="M16.862 4.487l2.65 2.65a2 2 0 010 2.828l-9.393 9.393a2 2 0 01-.708.464l-4 1.333a1 1 0 01-1.262-1.262l1.333-4a2 2 0 01.464-.708l9.393-9.393a2 2 0 012.828 0z" />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M16.862 4.487l2.65 2.65a2 2 0 010 2.828l-9.393 9.393a2 2 0 01-.708.464l-4 1.333a1 1 0 01-1.262-1.262l1.333-4a2 2 0 01.464-.708l9.393-9.393a2 2 0 012.828 0z"
+                          />
                         </svg>
                       </button>
                     </>
@@ -252,13 +257,18 @@ export default function AgenciesManagementPage() {
                       }}
                     >
                       <svg
+                        xmlns="http://www.w3.org/2000/svg"
                         className="w-6 h-6 text-red-400"
                         fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
                         viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
                       >
-                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a2 2 0 012 2v2H7V5a2 2 0 012-2zm7 4H4" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 7h12M10 11v6M14 11v6M5 7l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"
+                        />
                       </svg>
                     </button>
                   )}
