@@ -124,7 +124,7 @@ export default function AgenciesManagementPage() {
               <td className="px-4 py-3">{a.name}</td>
               <td className="px-4 py-3">{a.address}</td>
               <td className="px-4 py-3">{a.phone}</td>
-              <td className="px-4 py-3">{a.email}</td>
+              <td className="px-4 py-3">{a.email || "-"}</td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   <button
