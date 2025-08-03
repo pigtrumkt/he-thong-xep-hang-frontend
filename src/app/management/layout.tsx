@@ -233,7 +233,10 @@ export default function ManagementLayout({
       <div className="min-w-full flex h-[calc(100vh-4rem)]">
         <aside className="min-w-[18rem] bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 border-r border-blue-700 shadow-lg px-3 py-6 overflow-y-auto">
           <nav className="flex flex-col gap-8">
-            <SidebarCentralMenu roleId={globalParams.user["role_id"]} />
+            <SidebarCentralMenu
+              roleId={globalParams.user["role_id"]}
+              permissions={globalParams.user["permissions"]}
+            />
           </nav>
         </aside>
         <main className="w-full h-[calc(100vh-4rem)] overflow-y-auto transition-all bg-blue-100">
