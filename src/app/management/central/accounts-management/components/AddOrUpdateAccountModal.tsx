@@ -14,6 +14,45 @@ const roleOptions = [
   { id: 11, label: "Admin cơ quan" },
 ];
 
+const permissionGroups = [
+  {
+    label: "Dịch vụ",
+    children: [
+      { id: 100, label: "Xem dịch vụ" },
+      { id: 101, label: "Thêm dịch vụ" },
+      { id: 102, label: "Sửa dịch vụ" },
+      { id: 103, label: "Xoá dịch vụ" },
+    ],
+  },
+  {
+    label: "Nhóm dịch vụ",
+    children: [
+      { id: 105, label: "Xem nhóm dịch vụ" },
+      { id: 106, label: "Thêm nhóm dịch vụ" },
+      { id: 107, label: "Sửa nhóm dịch vụ" },
+      { id: 108, label: "Xoá nhóm dịch vụ" },
+    ],
+  },
+  {
+    label: "Cơ quan",
+    children: [
+      { id: 110, label: "Xem cơ quan" },
+      { id: 111, label: "Thêm cơ quan" },
+      { id: 112, label: "Sửa cơ quan" },
+      { id: 113, label: "Xoá cơ quan" },
+    ],
+  },
+  {
+    label: "Tài khoản",
+    children: [
+      { id: 120, label: "Xem tài khoản" },
+      { id: 121, label: "Thêm tài khoản" },
+      { id: 122, label: "Sửa tài khoản" },
+      { id: 123, label: "Xoá tài khoản" },
+    ],
+  },
+];
+
 export default function AddOrUpdateAccountModal({
   onClose,
   onSubmit,
@@ -23,7 +62,7 @@ export default function AddOrUpdateAccountModal({
     username: "",
     password: "",
     full_name: "",
-    gender: "0",
+    gender: "1",
     email: "",
     phone: "",
     position: "",
@@ -45,7 +84,7 @@ export default function AddOrUpdateAccountModal({
         username: initialData.username || "",
         password: "",
         full_name: initialData.full_name || "",
-        gender: initialData.gender?.toString() || "0",
+        gender: initialData.gender?.toString() || "1",
         email: initialData.email || "",
         phone: initialData.phone || "",
         position: initialData.position || "",
@@ -55,6 +94,16 @@ export default function AddOrUpdateAccountModal({
           ? initialData.permission_ids.split(",")
           : [],
       });
+    } else {
+      // mặc định tích hết quyền nếu tạo mới
+      const allPermissionIds = permissionGroups
+        .flatMap((g) => g.children)
+        .map((p) => p.id.toString());
+
+      setForm((prev) => ({
+        ...prev,
+        permission_ids: allPermissionIds,
+      }));
     }
   }, [initialData]);
 
@@ -66,18 +115,6 @@ export default function AddOrUpdateAccountModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const newErrors: Record<string, string> = {};
-    if (!form.username.trim()) newErrors.username = "Bắt buộc";
-    if (!initialData && !form.password.trim()) newErrors.password = "Bắt buộc";
-    if (!form.full_name.trim()) newErrors.full_name = "Bắt buộc";
-    if (!form.gender) newErrors.gender = "Bắt buộc";
-    if (!form.role_id) newErrors.role_id = "Bắt buộc";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
 
     const payload = {
       username: form.username.trim(),
@@ -103,45 +140,6 @@ export default function AddOrUpdateAccountModal({
 
   const inputClass =
     "w-full px-4 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500";
-
-  const permissionGroups = [
-    {
-      label: "Dịch vụ",
-      children: [
-        { id: 100, label: "Xem dịch vụ" },
-        { id: 101, label: "Thêm dịch vụ" },
-        { id: 102, label: "Sửa dịch vụ" },
-        { id: 103, label: "Xoá dịch vụ" },
-      ],
-    },
-    {
-      label: "Nhóm dịch vụ",
-      children: [
-        { id: 105, label: "Xem nhóm dịch vụ" },
-        { id: 106, label: "Thêm nhóm dịch vụ" },
-        { id: 107, label: "Sửa nhóm dịch vụ" },
-        { id: 108, label: "Xoá nhóm dịch vụ" },
-      ],
-    },
-    {
-      label: "Cơ quan",
-      children: [
-        { id: 110, label: "Xem cơ quan" },
-        { id: 111, label: "Thêm cơ quan" },
-        { id: 112, label: "Sửa cơ quan" },
-        { id: 113, label: "Xoá cơ quan" },
-      ],
-    },
-    {
-      label: "Tài khoản",
-      children: [
-        { id: 120, label: "Xem tài khoản" },
-        { id: 121, label: "Thêm tài khoản" },
-        { id: 122, label: "Sửa tài khoản" },
-        { id: 123, label: "Xoá tài khoản" },
-      ],
-    },
-  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -313,11 +311,10 @@ export default function AddOrUpdateAccountModal({
             )}
           </div>
 
-          {/* Phân quyền nếu là Super Admin */}
           {form.role_id === "2" && (
             <div>
               <label className="block mb-1 font-medium">Phân quyền</label>
-              <div className="grid grid-cols-2 gap-2 max-h-[12rem] overflow-y-auto border p-3 rounded-lg">
+              <div className="grid grid-cols-2 gap-2 p-3 overflow-y-auto border rounded-lg">
                 {permissionGroups.map((group, gi) => (
                   <div key={gi}>
                     <div className="mb-1 font-semibold text-blue-700">
