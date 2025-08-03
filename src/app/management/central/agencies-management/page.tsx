@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useEffect, useState } from "react";
-import AddAgencyModal from "./component/AddOrUpdateAgencyModal";
-import AgencyDetailModal from "./component/AgencyDetailModal";
+import AddAgencyModal from "./components/AddOrUpdateAgencyModal";
+import AgencyDetailModal from "./components/AgencyDetailModal";
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { PermissionEnum, RoleEnum } from "@/constants/Enum";
 
