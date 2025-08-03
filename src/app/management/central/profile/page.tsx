@@ -245,7 +245,7 @@ export default function ProfilePage() {
           {/* Họ và tên */}
           <div>
             <label className="block mb-1 font-medium text-gray-600">
-              Họ và tên
+              Họ và tên <span className="text-red-400">*</span>
             </label>
             <input
               className="w-full px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -260,7 +260,7 @@ export default function ProfilePage() {
           {/* Giới tính */}
           <div>
             <label className="block mb-1 font-medium text-gray-600">
-              Giới tính
+              Giới tính <span className="text-red-400">*</span>
             </label>
             <select
               className="w-full px-4 py-2 transition-colors bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"

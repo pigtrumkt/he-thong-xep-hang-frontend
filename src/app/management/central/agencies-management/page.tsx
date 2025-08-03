@@ -34,7 +34,7 @@ export default function AgenciesManagementPage() {
     fetchData();
   }, []);
 
-  const handleSaveAgency = async (formData: any) => {
+  const handleSaveOrUpdateAgency = async (formData: any) => {
     const isUpdate = !!editingAgency;
     const endpoint = isUpdate
       ? `/agencies/${editingAgency.id}/update`
@@ -43,7 +43,6 @@ export default function AgenciesManagementPage() {
     const res = await apiPost(endpoint, formData);
     if (![201, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
-      return;
     }
 
     if (res.status === 201) {
@@ -51,6 +50,8 @@ export default function AgenciesManagementPage() {
       setEditingAgency(null);
       fetchData();
     }
+
+    return res;
   };
 
   const filtered = agencies.filter((a) => {
@@ -254,7 +255,7 @@ export default function AgenciesManagementPage() {
             setShowAddPopup(false);
             setEditingAgency(null);
           }}
-          onSubmit={handleSaveAgency}
+          onSubmit={handleSaveOrUpdateAgency}
           initialData={editingAgency}
         />
       )}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 interface AddAgencyModalProps {
   onClose: () => void;
-  onSubmit: (formData: any) => void;
+  onSubmit: (formData: any) => Promise<{ status: number; data?: any } | void>;
   initialData?: any;
 }
 
@@ -13,6 +13,8 @@ export default function AddAgencyModal({
   onSubmit,
   initialData,
 }: AddAgencyModalProps) {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [form, setForm] = useState({
     name: "",
     address: "",
@@ -27,6 +29,14 @@ export default function AddAgencyModal({
     ticket_time_end: "",
   });
 
+  const errorText = (field: string) => {
+    if (errors[field]) {
+      return <p className="mt-1 text-sm text-red-400">{errors[field]}</p>;
+    }
+
+    return "";
+  };
+
   useEffect(() => {
     if (initialData) {
       const [start, end] = initialData.ticket_time_range?.split("~") || [
@@ -39,7 +49,7 @@ export default function AddAgencyModal({
         phone: initialData.phone || "",
         email: initialData.email || "",
         screen_notice: initialData.screen_notice || "",
-        allow_online_ticket: initialData.allow_online_ticket === "1",
+        allow_online_ticket: initialData.allow_online_ticket === 1,
         min_time_between_ticket_online:
           initialData.min_time_between_ticket_online?.toString() || "",
         max_ticket_per_day_online:
@@ -68,28 +78,20 @@ export default function AddAgencyModal({
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name.trim() || !form.address.trim() || !form.phone.trim()) {
-      alert("Vui lòng nhập đầy đủ tên, địa chỉ và số điện thoại.");
-      return;
+    let ticket_time_range = `${form.ticket_time_start}~${form.ticket_time_end}`;
+    if (ticket_time_range.length < 11) {
+      ticket_time_range = ""; // ✅ Clear if invalid
     }
-
-    if (!form.ticket_time_start || !form.ticket_time_end) {
-      alert("Vui lòng chọn khoảng giờ lấy số.");
-      return;
-    }
-
-    const ticket_time_range = `${form.ticket_time_start}~${form.ticket_time_end}`;
-
     const payload = {
       name: form.name.trim(),
       address: form.address.trim(),
       phone: form.phone.trim(),
       email: form.email?.trim() || "",
       screen_notice: form.screen_notice?.trim() || "",
-      allow_online_ticket: form.allow_online_ticket ? "1" : "0",
+      allow_online_ticket: form.allow_online_ticket ? 1 : 0,
       min_time_between_ticket_online: form.allow_online_ticket
         ? Number(form.min_time_between_ticket_online || 0)
         : undefined,
@@ -100,7 +102,12 @@ export default function AddAgencyModal({
       ticket_time_range,
     };
 
-    onSubmit(payload);
+    const result = await onSubmit(payload);
+    if (result && result.status === 400 && typeof result.data === "object") {
+      setErrors(result.data); // ✅ Set lỗi từ API
+    } else {
+      setErrors({}); // ✅ Clear lỗi nếu submit thành công
+    }
   };
 
   const inputClass =
@@ -138,7 +145,7 @@ export default function AddAgencyModal({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="block mb-1 font-medium text-gray-700">
-                Tên cơ quan *
+                Tên cơ quan <span className="text-red-400">*</span>
               </label>
               <input
                 name="name"
@@ -146,10 +153,11 @@ export default function AddAgencyModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("name")}
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700">
-                Địa chỉ *
+                Địa chỉ <span className="text-red-400">*</span>
               </label>
               <input
                 name="address"
@@ -157,6 +165,7 @@ export default function AddAgencyModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("address")}
             </div>
           </div>
 
@@ -164,7 +173,7 @@ export default function AddAgencyModal({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="block mb-1 font-medium text-gray-700">
-                Số điện thoại *
+                Số điện thoại <span className="text-red-400">*</span>
               </label>
               <input
                 name="phone"
@@ -172,6 +181,7 @@ export default function AddAgencyModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("phone")}
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700">
@@ -183,13 +193,14 @@ export default function AddAgencyModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("email")}
             </div>
           </div>
 
           {/* Thông báo màn hình */}
           <div>
             <label className="block mb-1 font-medium text-gray-700">
-              Thông báo ở màn hình
+              Thông báo chạy ở màn hình mỗi quầy
             </label>
             <textarea
               name="screen_notice"
@@ -198,12 +209,13 @@ export default function AddAgencyModal({
               className={`${inputClass} resize-none`}
               rows={2}
             />
+            {errorText("screen_notice")}
           </div>
 
           {/* Ngày làm việc */}
           <div>
             <label className="block mb-1 font-medium text-gray-700">
-              Ngày làm việc
+              Ngày có thể lấy số <span className="text-red-400">*</span>
             </label>
             <div className="flex flex-wrap gap-4">
               {weekdays.map((day) => (
@@ -221,12 +233,13 @@ export default function AddAgencyModal({
                 </label>
               ))}
             </div>
+            {errorText("allowed_days_of_week")}
           </div>
 
           {/* Khoảng giờ lấy số */}
           <div>
             <label className="block mb-1 font-medium text-gray-700">
-              Khoảng giờ lấy số *
+              Thời gian có thể lấy số <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <input
@@ -246,6 +259,7 @@ export default function AddAgencyModal({
                 className={inputClass}
               />
             </div>
+            {errorText("ticket_time_range")}
           </div>
 
           {/* Cho phép lấy số online */}
@@ -280,7 +294,9 @@ export default function AddAgencyModal({
                   value={form.min_time_between_ticket_online}
                   onChange={handleChange}
                   className={inputClass}
+                  placeholder="Để trống hoặc 0 nếu không giới hạn"
                 />
+                {errorText("min_time_between_ticket_online")}
               </div>
               <div>
                 <label className="block mb-1 font-medium text-gray-700">
@@ -292,7 +308,9 @@ export default function AddAgencyModal({
                   value={form.max_ticket_per_day_online}
                   onChange={handleChange}
                   className={inputClass}
+                  placeholder="Để trống hoặc 0 nếu không giới hạn"
                 />
+                {errorText("max_ticket_per_day_online")}
               </div>
             </div>
           )}
@@ -303,7 +321,7 @@ export default function AddAgencyModal({
               type="submit"
               className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition shadow rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
             >
-              {initialData ? "💾 Cập nhật" : "💾 Lưu lại"}
+              {initialData ? "Cập nhật" : "Lưu lại"}
             </button>
           </div>
         </form>
