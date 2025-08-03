@@ -78,7 +78,6 @@ export default function AddOrUpdateAccountModal({
     if (errors[field]) {
       return <p className="mt-1 text-sm text-red-400">{errors[field]}</p>;
     }
-
     return "";
   };
 
@@ -103,7 +102,6 @@ export default function AddOrUpdateAccountModal({
           : [],
       });
     } else {
-      // mặc định tích hết quyền nếu tạo mới
       const allPermissionIds = permissionGroups
         .flatMap((g) => g.children)
         .map((p) => p.id.toString());
@@ -139,9 +137,9 @@ export default function AddOrUpdateAccountModal({
 
     const result = await onSubmit(payload);
     if (result && result.status === 400 && typeof result.data === "object") {
-      setErrors(result.data); // ✅ Set lỗi từ API
+      setErrors(result.data);
     } else {
-      setErrors({}); // ✅ Clear lỗi nếu submit thành công
+      setErrors({});
     }
   };
 
@@ -166,6 +164,7 @@ export default function AddOrUpdateAccountModal({
           onSubmit={handleSubmit}
           className="space-y-5 text-sm text-gray-800"
         >
+          {/* Username + Password or Full Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 font-medium">
@@ -182,7 +181,8 @@ export default function AddOrUpdateAccountModal({
               />
               {errorText("username")}
             </div>
-            {!initialData && (
+
+            {!initialData ? (
               <div>
                 <label className="block mb-1 font-medium">
                   Mật khẩu <span className="text-red-400">*</span>
@@ -191,7 +191,11 @@ export default function AddOrUpdateAccountModal({
                   name="password"
                   type="text"
                   autoComplete="new-password"
-                  style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
+                  style={
+                    {
+                      WebkitTextSecurity: "disc",
+                    } as React.CSSProperties
+                  }
                   value={form.password}
                   onChange={handleChange}
                   className={inputClass}
@@ -199,22 +203,38 @@ export default function AddOrUpdateAccountModal({
                 />
                 {errorText("password")}
               </div>
+            ) : (
+              <div>
+                <label className="block mb-1 font-medium">
+                  Họ và tên <span className="text-red-400">*</span>
+                </label>
+                <input
+                  name="full_name"
+                  value={form.full_name}
+                  onChange={handleChange}
+                  className={inputClass}
+                  required
+                />
+                {errorText("full_name")}
+              </div>
             )}
           </div>
 
-          <div>
-            <label className="block mb-1 font-medium">
-              Họ và tên <span className="text-red-400">*</span>
-            </label>
-            <input
-              name="full_name"
-              value={form.full_name}
-              onChange={handleChange}
-              className={inputClass}
-              required
-            />
-            {errorText("full_name")}
-          </div>
+          {!initialData && (
+            <div>
+              <label className="block mb-1 font-medium">
+                Họ và tên <span className="text-red-400">*</span>
+              </label>
+              <input
+                name="full_name"
+                value={form.full_name}
+                onChange={handleChange}
+                className={inputClass}
+                required
+              />
+              {errorText("full_name")}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
