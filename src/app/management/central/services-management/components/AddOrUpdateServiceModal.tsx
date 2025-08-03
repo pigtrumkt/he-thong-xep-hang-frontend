@@ -128,7 +128,7 @@ export default function AddOrUpdateServiceModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 font-medium text-gray-700">
-                Số bắt đầu
+                Số bắt đầu <span className="text-red-400">*</span>
               </label>
               <input
                 name="range_start"
@@ -136,6 +136,7 @@ export default function AddOrUpdateServiceModal({
                 value={form.range_start}
                 onChange={handleChange}
                 className={inputClass}
+                required
               />
               {errors.range_start && (
                 <p className="mt-1 text-sm text-red-400">
@@ -145,7 +146,7 @@ export default function AddOrUpdateServiceModal({
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700">
-                Số kết thúc
+                Số kết thúc <span className="text-red-400">*</span>
               </label>
               <input
                 name="range_end"
@@ -153,6 +154,7 @@ export default function AddOrUpdateServiceModal({
                 value={form.range_end}
                 onChange={handleChange}
                 className={inputClass}
+                required
               />
               {errors.range_end && (
                 <p className="mt-1 text-sm text-red-400">{errors.range_end}</p>
@@ -161,6 +163,9 @@ export default function AddOrUpdateServiceModal({
           </div>
           {errors._validateRange && (
             <p className="mt-1 text-sm text-red-400">{errors._validateRange}</p>
+          )}
+          {errors.message && (
+            <p className="mt-1 text-sm text-red-400">{errors.message}</p>
           )}
           {/* Submit */}
           <div className="pt-4 text-right">
