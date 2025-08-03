@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useEffect, useState } from "react";
-import AddAgencyModal from "./component/AddAgencyModal";
+import AddAgencyModal from "./component/AddOrUpdateAgencyModal";
 import AgencyDetailModal from "./component/AgencyDetailModal";
 
 export default function AgenciesManagementPage() {
