@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 
-interface AddAgencyModalProps {
+interface AddOrUpdateAgencyModalProps {
   onClose: () => void;
   onSubmit: (formData: any) => Promise<{ status: number; data?: any } | void>;
   initialData?: any;
 }
 
-export default function AddAgencyModal({
+export default function AddOrUpdateAgencyModal({
   onClose,
   onSubmit,
   initialData,
-}: AddAgencyModalProps) {
+}: AddOrUpdateAgencyModalProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
