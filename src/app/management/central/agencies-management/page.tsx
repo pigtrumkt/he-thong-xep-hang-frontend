@@ -25,7 +25,7 @@ export default function AgenciesManagementPage() {
   const { hasAccess } = useGlobalParams();
 
   const fetchData = async () => {
-    const res = await apiGet("/agencies/findAllActive");
+    const res = await apiGet("/agencies/findAllNotDeleted");
     if (![200, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       return;
