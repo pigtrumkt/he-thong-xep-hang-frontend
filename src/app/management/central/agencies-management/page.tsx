@@ -7,6 +7,8 @@ import { handleApiError } from "@/lib/handleApiError";
 import { useEffect, useState } from "react";
 import AddAgencyModal from "./component/AddOrUpdateAgencyModal";
 import AgencyDetailModal from "./component/AgencyDetailModal";
+import { useGlobalParams } from "@/components/ClientWrapper";
+import { PermissionEnum, RoleEnum } from "@/constants/Enum";
 
 export default function AgenciesManagementPage() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function AgenciesManagementPage() {
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [editingAgency, setEditingAgency] = useState<any>(null);
+  const { hasAccess } = useGlobalParams();
 
   const fetchData = async () => {
     const res = await apiGet("/agencies/findAllActive");
@@ -64,16 +67,20 @@ export default function AgenciesManagementPage() {
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
       <div className="flex items-center justify-between mb-6">
-        <button
-          className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow cursor-pointer hover:bg-blue-900 rounded-xl"
-          onClick={() => {
-            setEditingAgency(null);
-            setShowAddPopup(true);
-          }}
-        >
-          <span className="font-bold">+</span> Thêm
-        </button>
-
+        {hasAccess({
+          allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+          allowedPermissions: [PermissionEnum.AGENCY_ADD_SUPER],
+        }) && (
+          <button
+            className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow cursor-pointer hover:bg-blue-900 rounded-xl"
+            onClick={() => {
+              setEditingAgency(null);
+              setShowAddPopup(true);
+            }}
+          >
+            <span className="font-bold">+</span> Thêm
+          </button>
+        )}
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -140,108 +147,121 @@ export default function AgenciesManagementPage() {
                     </svg>
                   </button>
 
-                  {/* Toggle trạng thái */}
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer disabled:opacity-50"
-                      checked={a.status === 1}
-                      onChange={async (e) => {
-                        e.target.disabled = true;
-                        const newStatus = e.target.checked ? 1 : 0;
-                        const res = await apiPost(`/agencies/${a.id}/status`, {
-                          status: newStatus,
+                  {hasAccess({
+                    allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+                    allowedPermissions: [PermissionEnum.AGENCY_UPDATE_SUPER],
+                  }) && (
+                    <>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer disabled:opacity-50"
+                          checked={a.status === 1}
+                          onChange={async (e) => {
+                            e.target.disabled = true;
+                            const newStatus = e.target.checked ? 1 : 0;
+                            const res = await apiPost(
+                              `/agencies/${a.id}/status`,
+                              {
+                                status: newStatus,
+                              }
+                            );
+
+                            e.target.disabled = false;
+
+                            if (![201, 400].includes(res.status)) {
+                              handleApiError(res, popupMessage, router);
+                              return;
+                            }
+
+                            if (res.status === 201) {
+                              setAgencies((prev) =>
+                                prev.map((item) =>
+                                  item.id === a.id
+                                    ? { ...item, status: newStatus }
+                                    : item
+                                )
+                              );
+                            } else {
+                              popupMessage({
+                                title: "Cập nhật trạng thái thất bại",
+                                description:
+                                  "Mạng không ổn định hoặc máy chủ không phản hồi.",
+                              });
+                            }
+                          }}
+                        />
+                        <div className="h-6 transition duration-300 bg-gray-200 rounded-full w-11 peer-checked:bg-blue-600 peer-disabled:opacity-50"></div>
+                        <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"></div>
+                      </label>
+                      <button
+                        title="Chỉnh sửa"
+                        className="p-2 rounded-lg hover:bg-blue-100"
+                        onClick={() => {
+                          setEditingAgency(a);
+                          setShowAddPopup(true);
+                        }}
+                      >
+                        <svg
+                          className="w-6 h-6 text-blue-700"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M16.862 4.487l2.65 2.65a2 2 0 010 2.828l-9.393 9.393a2 2 0 01-.708.464l-4 1.333a1 1 0 01-1.262-1.262l1.333-4a2 2 0 01.464-.708l9.393-9.393a2 2 0 012.828 0z" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                  {hasAccess({
+                    allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+                    allowedPermissions: [PermissionEnum.AGENCY_DELETE_SUPER],
+                  }) && (
+                    <button
+                      title="Xóa"
+                      className="p-2 rounded-lg hover:bg-red-100"
+                      onClick={() => {
+                        popupConfirmRed({
+                          title: "Xác nhận xoá cơ quan?",
+                          description: a.name,
+                        }).then(async (confirmed) => {
+                          if (!confirmed) return;
+
+                          const res = await apiPost(
+                            `/agencies/${a.id}/delete`,
+                            {}
+                          );
+
+                          if (![201, 400].includes(res.status)) {
+                            handleApiError(res, popupMessage, router);
+                            return;
+                          }
+
+                          if (res.status === 201) {
+                            setAgencies((prev) =>
+                              prev.filter((item) => item.id !== a.id)
+                            );
+                          } else {
+                            popupMessage({
+                              title: `Xoá thất bại`,
+                              description: a.name,
+                            });
+                          }
                         });
-
-                        e.target.disabled = false;
-
-                        if (![201, 400].includes(res.status)) {
-                          handleApiError(res, popupMessage, router);
-                          return;
-                        }
-
-                        if (res.status === 201) {
-                          setAgencies((prev) =>
-                            prev.map((item) =>
-                              item.id === a.id
-                                ? { ...item, status: newStatus }
-                                : item
-                            )
-                          );
-                        } else {
-                          popupMessage({
-                            title: "Cập nhật trạng thái thất bại",
-                            description:
-                              "Mạng không ổn định hoặc máy chủ không phản hồi.",
-                          });
-                        }
                       }}
-                    />
-                    <div className="h-6 transition duration-300 bg-gray-200 rounded-full w-11 peer-checked:bg-blue-600 peer-disabled:opacity-50"></div>
-                    <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"></div>
-                  </label>
-                  <button
-                    title="Chỉnh sửa"
-                    className="p-2 rounded-lg hover:bg-blue-100"
-                    onClick={() => {
-                      setEditingAgency(a);
-                      setShowAddPopup(true);
-                    }}
-                  >
-                    <svg
-                      className="w-6 h-6 text-blue-700"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
                     >
-                      <path d="M16.862 4.487l2.65 2.65a2 2 0 010 2.828l-9.393 9.393a2 2 0 01-.708.464l-4 1.333a1 1 0 01-1.262-1.262l1.333-4a2 2 0 01.464-.708l9.393-9.393a2 2 0 012.828 0z" />
-                    </svg>
-                  </button>
-
-                  <button
-                    title="Xóa"
-                    className="p-2 rounded-lg hover:bg-red-100"
-                    onClick={() => {
-                      popupConfirmRed({
-                        title: "Xác nhận xoá cơ quan?",
-                        description: a.name,
-                      }).then(async (confirmed) => {
-                        if (!confirmed) return;
-
-                        const res = await apiPost(
-                          `/agencies/${a.id}/delete`,
-                          {}
-                        );
-
-                        if (![201, 400].includes(res.status)) {
-                          handleApiError(res, popupMessage, router);
-                          return;
-                        }
-
-                        if (res.status === 201) {
-                          setAgencies((prev) =>
-                            prev.filter((item) => item.id !== a.id)
-                          );
-                        } else {
-                          popupMessage({
-                            title: `Xoá thất bại`,
-                            description: a.name,
-                          });
-                        }
-                      });
-                    }}
-                  >
-                    <svg
-                      className="w-6 h-6 text-red-400"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a2 2 0 012 2v2H7V5a2 2 0 012-2zm7 4H4" />
-                    </svg>
-                  </button>
+                      <svg
+                        className="w-6 h-6 text-red-400"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a2 2 0 012 2v2H7V5a2 2 0 012-2zm7 4H4" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
