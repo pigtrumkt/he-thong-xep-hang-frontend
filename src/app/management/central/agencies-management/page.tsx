@@ -59,10 +59,10 @@ export default function AgenciesManagementPage() {
 
   const filtered = agencies.filter((a) => {
     const matchName =
-      (a.name?.toLowerCase() ?? "").includes(search.toLowerCase()) ||
-      (a.address?.toLowerCase() ?? "").includes(search.toLowerCase()) ||
-      (a.phone?.toLowerCase() ?? "").includes(search.toLowerCase()) ||
-      (a.email?.toLowerCase() ?? "").includes(search.toLowerCase());
+      a.name?.toLowerCase().includes(search.toLowerCase()) ||
+      a.address?.toLowerCase().includes(search.toLowerCase()) ||
+      a.phone?.toLowerCase().includes(search.toLowerCase()) ||
+      a.email?.toLowerCase().includes(search.toLowerCase());
 
     const matchStatus =
       statusFilter === "" || String(a.status) === statusFilter;
