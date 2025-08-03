@@ -159,7 +159,9 @@ export default function AddOrUpdateServiceModal({
               )}
             </div>
           </div>
-
+          {errors._validateRange && (
+            <p className="mt-1 text-sm text-red-400">{errors._validateRange}</p>
+          )}
           {/* Submit */}
           <div className="pt-4 text-right">
             <button
