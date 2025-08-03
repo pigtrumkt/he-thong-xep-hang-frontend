@@ -221,7 +221,7 @@ export default function ServicesManagementPage() {
                 {servicesInGroup.map((s, idx) => (
                   <tr
                     key={s.id}
-                    className="transition border-b hover:bg-blue-50 group"
+                    className="transition border-b border-slate-300 hover:bg-blue-50 group"
                   >
                     <td className="px-4 py-3 font-semibold text-blue-800">
                       {idx + 1}
