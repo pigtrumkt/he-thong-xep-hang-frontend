@@ -7,6 +7,7 @@ import { handleApiError } from "@/lib/handleApiError";
 import { useEffect, useState } from "react";
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { RoleEnum, PermissionEnum } from "@/constants/Enum";
+import AddOrUpdateAccountModal from "./components/AddOrUpdateAccountModal";
 
 export default function AccountsManagementPage() {
   const router = useRouter();
@@ -17,6 +18,9 @@ export default function AccountsManagementPage() {
   const [search, setSearch] = useState("");
   const [agencyFilter, setAgencyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
 
   const fetchData = async () => {
     const res = await apiGet("/accounts/findAllNotDeleted");
@@ -53,6 +57,26 @@ export default function AccountsManagementPage() {
         description: "Mạng không ổn định hoặc máy chủ không phản hồi.",
       });
     }
+  };
+
+  const handleSaveOrUpdateAccount = async (formData: any) => {
+    const isUpdate = !!editingAccount;
+    const endpoint = isUpdate
+      ? `/accounts/${editingAccount.id}/update`
+      : "/accounts/create";
+
+    const res = await apiPost(endpoint, formData);
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+    }
+
+    if (res.status === 201) {
+      setShowAddModal(false);
+      setEditingAccount(null);
+      fetchData();
+    }
+
+    return res;
   };
 
   const filteredAccounts = accounts.filter((acc) => {
@@ -122,7 +146,8 @@ export default function AccountsManagementPage() {
           <button
             className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow cursor-pointer hover:bg-blue-900 rounded-xl"
             onClick={() => {
-              // TODO: mở modal thêm mới tài khoản
+              setEditingAccount(null);
+              setShowAddModal(true);
             }}
           >
             <span className="font-bold">+</span> Thêm
@@ -333,6 +358,17 @@ export default function AccountsManagementPage() {
           ))}
         </tbody>
       </table>
+
+      {showAddModal && (
+        <AddOrUpdateAccountModal
+          onClose={() => {
+            setShowAddModal(false);
+            setEditingAccount(null);
+          }}
+          onSubmit={handleSaveOrUpdateAccount}
+          initialData={editingAccount}
+        />
+      )}
     </section>
   );
 }
