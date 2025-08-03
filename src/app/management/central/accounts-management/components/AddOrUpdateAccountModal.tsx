@@ -74,6 +74,14 @@ export default function AddOrUpdateAccountModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [agencies, setAgencies] = useState<any[]>([]);
 
+  const errorText = (field: string) => {
+    if (errors[field]) {
+      return <p className="mt-1 text-sm text-red-400">{errors[field]}</p>;
+    }
+
+    return "";
+  };
+
   useEffect(() => {
     apiGet("/agencies/findAllNotDeleted").then((res) => {
       if (res.status === 200) setAgencies(res.data);
@@ -130,11 +138,10 @@ export default function AddOrUpdateAccountModal({
     };
 
     const result = await onSubmit(payload);
-
     if (result && result.status === 400 && typeof result.data === "object") {
-      setErrors(result.data);
+      setErrors(result.data); // ✅ Set lỗi từ API
     } else {
-      setErrors({});
+      setErrors({}); // ✅ Clear lỗi nếu submit thành công
     }
   };
 
@@ -173,9 +180,7 @@ export default function AddOrUpdateAccountModal({
                 required
                 disabled={!!initialData}
               />
-              {errors.username && (
-                <p className="text-red-400">{errors.username}</p>
-              )}
+              {errorText("username")}
             </div>
             {!initialData && (
               <div>
@@ -192,9 +197,7 @@ export default function AddOrUpdateAccountModal({
                   className={inputClass}
                   required
                 />
-                {errors.password && (
-                  <p className="text-red-400">{errors.password}</p>
-                )}
+                {errorText("password")}
               </div>
             )}
           </div>
@@ -210,9 +213,7 @@ export default function AddOrUpdateAccountModal({
               className={inputClass}
               required
             />
-            {errors.full_name && (
-              <p className="text-red-400">{errors.full_name}</p>
-            )}
+            {errorText("full_name")}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -227,9 +228,10 @@ export default function AddOrUpdateAccountModal({
                 className={inputClass}
                 required
               >
-                <option value="0">Nam</option>
-                <option value="1">Nữ</option>
+                <option value="1">Nam</option>
+                <option value="0">Nữ</option>
               </select>
+              {errorText("gender")}
             </div>
             <div>
               <label className="block mb-1 font-medium">Chức danh</label>
@@ -239,6 +241,7 @@ export default function AddOrUpdateAccountModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("position")}
             </div>
           </div>
 
@@ -251,6 +254,7 @@ export default function AddOrUpdateAccountModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("phone")}
             </div>
             <div>
               <label className="block mb-1 font-medium">Email</label>
@@ -260,6 +264,7 @@ export default function AddOrUpdateAccountModal({
                 onChange={handleChange}
                 className={inputClass}
               />
+              {errorText("email")}
             </div>
           </div>
 
@@ -284,9 +289,7 @@ export default function AddOrUpdateAccountModal({
                   </option>
                 ))}
               </select>
-              {errors.role_id && (
-                <p className="text-red-400">{errors.role_id}</p>
-              )}
+              {errorText("role_id")}
             </div>
             {form.role_id === "11" && (
               <div>
@@ -304,9 +307,7 @@ export default function AddOrUpdateAccountModal({
                     </option>
                   ))}
                 </select>
-                {errors.agency_id && (
-                  <p className="text-red-400">{errors.agency_id}</p>
-                )}
+                {errorText("agency_id")}
               </div>
             )}
           </div>
@@ -350,6 +351,7 @@ export default function AddOrUpdateAccountModal({
                     ))}
                   </div>
                 ))}
+                {errorText("permission_ids")}
               </div>
             </div>
           )}
