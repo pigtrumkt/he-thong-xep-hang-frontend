@@ -31,14 +31,9 @@ export default function AccountsManagementPage() {
   }, []);
 
   const filteredAccounts = accounts.filter((acc) => {
-    const name = acc.full_name || "";
     const username = acc.username || "";
-    const phone = acc.phone || "";
 
-    const matchText =
-      name.toLowerCase().includes(search.toLowerCase()) ||
-      username.toLowerCase().includes(search.toLowerCase()) ||
-      phone.toLowerCase().includes(search.toLowerCase());
+    const matchText = username.toLowerCase().includes(search.toLowerCase());
 
     const matchAgency =
       agencyFilter === "" ||
@@ -90,7 +85,7 @@ export default function AccountsManagementPage() {
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex items-center justify-between mb-6">
         {hasAccess({
           allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
           allowedPermissions: [PermissionEnum.ACCOUNT_ADD_SUPER],
@@ -104,32 +99,34 @@ export default function AccountsManagementPage() {
             <span className="font-bold">+</span> Thêm
           </button>
         )}
-        <select
-          value={agencyFilter}
-          onChange={(e) => setAgencyFilter(e.target.value)}
-          className="px-3 py-2 transition-colors bg-white border rounded-lg outline-none w-72 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-        >
-          <option value="">Tất cả cơ quan</option>
-          <option value="Super Admin">Super Admin</option>
-          {Array.from(
-            new Set(
-              accounts
-                .filter((acc) => acc.agency_name)
-                .map((acc) => acc.agency_name)
-            )
-          ).map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 transition-colors bg-white border rounded-lg outline-none w-96 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          placeholder="Tìm tên đăng nhập, họ và tên, số điện thoại..."
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-4 py-2 transition-colors bg-white border rounded-lg outline-none w-96 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            placeholder="Tìm tên đăng nhập..."
+          />
+          <select
+            value={agencyFilter}
+            onChange={(e) => setAgencyFilter(e.target.value)}
+            className="px-3 py-2 transition-colors bg-white border rounded-lg outline-none w-72 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="">Tất cả cơ quan</option>
+            <option value="Super Admin">Super Admin</option>
+            {Array.from(
+              new Set(
+                accounts
+                  .filter((acc) => acc.agency_name)
+                  .map((acc) => acc.agency_name)
+              )
+            ).map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <table className="min-w-full overflow-hidden rounded-xl">
