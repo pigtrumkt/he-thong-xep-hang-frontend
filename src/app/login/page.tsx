@@ -44,9 +44,15 @@ export default function LoginPage() {
     }
 
     if (res.status === 401 || res.status === 400) {
-      alertMessageRed("Tên đăng nhập hoặc mật khẩu không đúng");
-      setSubmitting(false);
-      return;
+      if (res.data.message && res.data.message === "Unauthorized") {
+        alertMessageRed("Tên đăng nhập hoặc mật khẩu không đúng");
+        setSubmitting(false);
+        return;
+      } else {
+        alertMessageRed(res.data.message);
+        setSubmitting(false);
+        return;
+      }
     }
 
     window.location.replace("/");
@@ -57,8 +63,8 @@ export default function LoginPage() {
       <div className="fixed inset-0 z-20 flex items-center justify-center px-2">
         <div className="flex flex-col md:flex-row w-[60rem] bg-white/95 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
           {/* Intro trái */}
-          <div className="hidden md:flex flex-col justify-center items-center flex-1 bg-gradient-to-br from-blue-600 to-blue-400 text-white px-8 py-12">
-            <div className="w-24 h-24 flex items-center justify-center bg-white/20 rounded-3xl shadow-2xl mb-4">
+          <div className="flex-col items-center justify-center flex-1 hidden px-8 py-12 text-white md:flex bg-gradient-to-br from-blue-600 to-blue-400">
+            <div className="flex items-center justify-center w-24 h-24 mb-4 shadow-2xl bg-white/20 rounded-3xl">
               <FontAwesomeIcon
                 icon={faPeopleGroup}
                 className="text-5xl text-white"
@@ -71,21 +77,21 @@ export default function LoginPage() {
               <li className="flex items-center gap-3">
                 <FontAwesomeIcon
                   icon={faCheck}
-                  className="bg-white/30 rounded-full p-2 text-xl"
+                  className="p-2 text-xl rounded-full bg-white/30"
                 />
                 Xếp hàng thông minh, tiết kiệm thời gian
               </li>
               <li className="flex items-center gap-3">
                 <FontAwesomeIcon
                   icon={faChartPie}
-                  className="bg-white/30 rounded-full p-2 text-xl"
+                  className="p-2 text-xl rounded-full bg-white/30"
                 />
                 Báo cáo, thống kê linh hoạt
               </li>
               <li className="flex items-center gap-3">
                 <FontAwesomeIcon
                   icon={faPlug}
-                  className="bg-white/30 rounded-full p-2 text-xl"
+                  className="p-2 text-xl rounded-full bg-white/30"
                 />
                 Giao diện thân thiện, dễ sử dụng
               </li>
@@ -93,20 +99,20 @@ export default function LoginPage() {
           </div>
 
           {/* Form phải */}
-          <div className="flex-1 flex items-center justify-center bg-white md:bg-transparent px-4 sm:px-10 py-12">
+          <div className="flex items-center justify-center flex-1 px-4 py-12 bg-white md:bg-transparent sm:px-10">
             <form
               className="w-full max-w-md mx-auto space-y-8"
               onSubmit={handleSubmit}
               autoComplete="off"
             >
-              <div className="text-center mb-3">
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+              <div className="mb-3 text-center">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 bg-blue-100 shadow-lg rounded-xl">
                   <FontAwesomeIcon
                     icon={faUserShield}
                     className="text-3xl text-blue-700"
                   />
                 </div>
-                <h1 className="text-2xl font-bold text-slate-800 mb-8">
+                <h1 className="mb-8 text-2xl font-bold text-slate-800">
                   Đăng Nhập Hệ Thống
                 </h1>
               </div>
@@ -120,7 +126,7 @@ export default function LoginPage() {
                     Tên đăng nhập
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-lg">
+                    <span className="absolute text-lg text-blue-400 -translate-y-1/2 left-3 top-1/2">
                       <FontAwesomeIcon icon={faUser} />
                     </span>
                     <input
@@ -130,7 +136,7 @@ export default function LoginPage() {
                       autoComplete="username"
                       required
                       autoFocus
-                      className="w-full py-3 pl-11 pr-4 rounded-xl bg-blue-50 border border-blue-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-base text-slate-800 outline-none transition shadow"
+                      className="w-full py-3 pr-4 text-base transition border border-blue-200 shadow outline-none pl-11 rounded-xl bg-blue-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-slate-800"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                     />
@@ -145,7 +151,7 @@ export default function LoginPage() {
                     Mật khẩu
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-lg">
+                    <span className="absolute text-lg text-blue-400 -translate-y-1/2 left-3 top-1/2">
                       <FontAwesomeIcon icon={faLock} />
                     </span>
                     <input
@@ -154,7 +160,7 @@ export default function LoginPage() {
                       placeholder="Nhập mật khẩu"
                       autoComplete="current-password"
                       required
-                      className="w-full py-3 pl-11 pr-4 rounded-xl bg-blue-50 border border-blue-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-base text-slate-800 outline-none transition shadow"
+                      className="w-full py-3 pr-4 text-base transition border border-blue-200 shadow outline-none pl-11 rounded-xl bg-blue-50 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 text-slate-800"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -162,11 +168,11 @@ export default function LoginPage() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-slate-500 text-sm select-none cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer select-none text-slate-500">
                     <input
                       type="checkbox"
                       name="remember"
-                      className="accent-blue-600 w-4 h-4 cursor-pointer"
+                      className="w-4 h-4 cursor-pointer accent-blue-600"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
                     />
