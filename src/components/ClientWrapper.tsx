@@ -21,6 +21,11 @@ export const useGlobalParams = () => {
   return ctx;
 };
 
+export interface AccessConfig {
+  allowedRoles?: number[];
+  allowedPermissions?: number[];
+}
+
 export default function ClientWrapper({
   value,
   children,
@@ -30,6 +35,24 @@ export default function ClientWrapper({
 }) {
   const router = useRouter();
   const [globalParams, setGlobalParams] = useState(value ?? null);
+
+  const hasAccess = (config: AccessConfig): boolean => {
+    if (!globalParams.user) return false;
+
+    const { allowedRoles = [], allowedPermissions = [] } = config;
+
+    if (allowedRoles.includes(globalParams.user.role_id)) {
+      return true;
+    }
+
+    if (
+      allowedPermissions.some((p) => globalParams.user.permissions.includes(p))
+    ) {
+      return true;
+    }
+
+    return false;
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -72,7 +95,7 @@ export default function ClientWrapper({
   }, [globalParams, router]);
 
   return (
-    <UserContext.Provider value={{ globalParams, setGlobalParams }}>
+    <UserContext.Provider value={{ globalParams, setGlobalParams, hasAccess }}>
       <PopupProvider>{children}</PopupProvider>
     </UserContext.Provider>
   );

@@ -3,21 +3,19 @@
 import { PermissionEnum, RoleEnum } from "@/constants/Enum";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-export default function SidebarCentralMenu({
-  roleId,
-  permissions,
-}: {
-  roleId: number;
-  permissions: number[];
-}) {
+import { useGlobalParams } from "../ClientWrapper";
+export default function SidebarCentralMenu() {
   const pathname = usePathname();
+  const { hasAccess } = useGlobalParams();
 
-  if (![RoleEnum.SUPER_ADMIN_ROOT, RoleEnum.SUPER_ADMIN].includes(roleId))
+  if (
+    !hasAccess({
+      allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT, RoleEnum.SUPER_ADMIN],
+      allowedPermissions: [],
+    })
+  ) {
     return null;
-
-  const hasPermission = (id: number) => {
-    return roleId === RoleEnum.SUPER_ADMIN_ROOT || permissions.includes(id);
-  };
+  }
 
   return (
     <div>
@@ -28,7 +26,10 @@ export default function SidebarCentralMenu({
         </span>
       </div>
       <ul className="flex flex-col gap-1 font-semibold text-white">
-        {hasPermission(PermissionEnum.SERVICE_VIEW_SUPER) && (
+        {hasAccess({
+          allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+          allowedPermissions: [PermissionEnum.SERVICE_VIEW_SUPER],
+        }) && (
           <li>
             <Link
               href="/management/central/services-management"
@@ -63,7 +64,10 @@ export default function SidebarCentralMenu({
             </Link>
           </li>
         )}
-        {hasPermission(PermissionEnum.AGENCY_VIEW_SUPER) && (
+        {hasAccess({
+          allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+          allowedPermissions: [PermissionEnum.AGENCY_VIEW_SUPER],
+        }) && (
           <li>
             <Link
               href="/management/central/agencies-management"
@@ -92,7 +96,10 @@ export default function SidebarCentralMenu({
             </Link>
           </li>
         )}
-        {hasPermission(PermissionEnum.ACCOUNT_VIEW_SUPER) && (
+        {hasAccess({
+          allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+          allowedPermissions: [PermissionEnum.ACCOUNT_VIEW_SUPER],
+        }) && (
           <li>
             <Link
               href="/management/central/accounts-management"
