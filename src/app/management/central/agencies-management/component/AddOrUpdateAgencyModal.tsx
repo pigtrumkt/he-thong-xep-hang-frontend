@@ -20,13 +20,14 @@ export default function AddAgencyModal({
     address: "",
     phone: "",
     email: "",
-    screen_notice: "",
+    screen_notice:
+      "Vui lòng chuẩn bị giấy tờ khi đến lượt. Xin cảm ơn quý công dân đã hợp tác!",
     allow_online_ticket: true,
-    min_time_between_ticket_online: "",
-    max_ticket_per_day_online: "",
-    allowed_days_of_week: [] as string[],
-    ticket_time_start: "",
-    ticket_time_end: "",
+    min_time_between_ticket_online: 15,
+    max_ticket_per_day_online: 20,
+    allowed_days_of_week: ["1", "2", "3", "4", "5"] as string[],
+    ticket_time_start: "08:00",
+    ticket_time_end: "17:00",
   });
 
   const errorText = (field: string) => {
