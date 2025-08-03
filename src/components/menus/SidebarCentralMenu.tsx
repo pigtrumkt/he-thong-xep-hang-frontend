@@ -28,6 +28,39 @@ export default function SidebarCentralMenu() {
       <ul className="flex flex-col gap-1 font-semibold text-white">
         {hasAccess({
           allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+          allowedPermissions: [PermissionEnum.SERVICE_GROUP_VIEW_SUPER],
+        }) && (
+          <li>
+            <Link
+              href="/management/central/group-services-management"
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                pathname === "/management/central/group-services-management"
+                  ? "active"
+                  : ""
+              }`}
+            >
+              <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 7a2 2 0 012-2h5l2 2h9a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+                  />
+                </svg>
+              </span>
+              Nhóm dịch vụ
+            </Link>
+          </li>
+        )}
+        {hasAccess({
+          allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
           allowedPermissions: [PermissionEnum.SERVICE_VIEW_SUPER],
         }) && (
           <li>
