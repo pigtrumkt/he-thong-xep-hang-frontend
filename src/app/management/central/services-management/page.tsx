@@ -59,19 +59,21 @@ export default function ServicesManagementPage() {
     );
 
     setServices(flattened);
+  };
 
-    // Lưu danh sách nhóm để chọn trong modal
-    const allGroups = (res.data || [])
-      .filter((g: any) => g.id !== 0)
-      .map((g: any) => ({
-        id: g.id,
-        name: g.name,
-      }));
-    setGroupOptions(allGroups);
+  const fetchGroupData = async () => {
+    const res = await apiGet("/group-services/findAllNotDeleted");
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    setGroupOptions(res.data);
   };
 
   useEffect(() => {
     fetchData();
+    fetchGroupData();
   }, []);
 
   const handleToggleStatus = async (id: number, newStatus: number) => {
