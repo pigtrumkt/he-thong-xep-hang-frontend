@@ -177,7 +177,7 @@ export default function AccountsManagementPage() {
               <td className="px-4 py-2">{acc.username}</td>
               <td className="px-4 py-2">{acc.full_name}</td>
               <td className="px-4 py-2">{acc.phone || "-"}</td>
-              <td className="px-4 py-2">
+              <td className="px-4 py-2 whitespace-nowrap">
                 <span className={getRoleClass(acc.role_id)}>
                   {getRoleLabel(acc.role_id)}
                 </span>
