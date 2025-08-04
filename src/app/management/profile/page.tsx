@@ -168,7 +168,7 @@ export default function ProfilePage() {
                 : "avatar_default_male.png"
             }`}
             alt="Avatar"
-            className="object-cover w-32 h-32 mb-3 border-2 rounded-full shadow-md border-slate-400"
+            className="object-cover w-32 h-32 mb-3 border-2 shadow-md border-slate-400"
           />
           <div className="flex gap-2">
             <label className="text-sm text-blue-600 underline cursor-pointer">
