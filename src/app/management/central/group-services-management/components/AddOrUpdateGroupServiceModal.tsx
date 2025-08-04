@@ -1,18 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiPost } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { usePopup } from "@/components/popup/PopupContext";
+import { handleApiError } from "@/lib/handleApiError";
 
 interface AddOrUpdateGroupServiceModalProps {
   onClose: () => void;
-  onSubmit: (formData: any) => Promise<{ status: number; data?: any } | void>;
+  onSuccess?: () => void;
   initialData?: any;
 }
 
 export default function AddOrUpdateGroupServiceModal({
   onClose,
-  onSubmit,
+  onSuccess,
   initialData,
 }: AddOrUpdateGroupServiceModalProps) {
+  const router = useRouter();
+  const { popupMessage } = usePopup();
   const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
@@ -22,7 +28,7 @@ export default function AddOrUpdateGroupServiceModal({
 
   const closeWithFade = () => {
     setVisible(false);
-    setTimeout(() => onClose(), 100); // onClose vẫn dùng được
+    setTimeout(() => onClose(), 100);
   };
 
   useEffect(() => {
@@ -32,8 +38,6 @@ export default function AddOrUpdateGroupServiceModal({
         status: initialData.status === 1,
       });
     }
-
-    // Kích hoạt hiệu ứng hiện
     setTimeout(() => setVisible(true), 10);
   }, [initialData]);
 
@@ -49,9 +53,23 @@ export default function AddOrUpdateGroupServiceModal({
       status: form.status ? 1 : 0,
     };
 
-    const result = await onSubmit(payload);
+    const endpoint = initialData
+      ? `/group-services/${initialData.id}/update`
+      : "/group-services/create";
 
-    if (result && result.status === 400 && typeof result.data === "object") {
+    const result = await apiPost(endpoint, payload);
+    if (![201, 400].includes(result.status)) {
+      handleApiError(result, popupMessage, router);
+      return;
+    }
+
+    if (result?.status === 201) {
+      setVisible(false);
+      setTimeout(() => {
+        onClose();
+        onSuccess?.();
+      }, 100);
+    } else if (result?.status === 400 && typeof result.data === "object") {
       setErrors(result.data);
     } else {
       setErrors({});

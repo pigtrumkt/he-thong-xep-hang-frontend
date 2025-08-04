@@ -58,20 +58,32 @@ export default function ViewAccountModal({
 }: ViewAccountModalProps) {
   const [permissions, setPermissions] = useState<string[]>([]);
 
+  const [visible, setVisible] = useState(false);
+
+  const closeWithFade = () => {
+    setVisible(false);
+    setTimeout(() => onClose(), 100);
+  };
   useEffect(() => {
     if (accountData?.permission_ids) {
       setPermissions(accountData.permission_ids.split(","));
     }
+
+    setTimeout(() => setVisible(true), 10);
   }, [accountData]);
 
   const labelClass = "text-sm text-gray-600 mb-1";
   const valueClass = "text-base font-medium text-gray-800 mb-4";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm duration-100 transition-opacity ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="relative w-full max-w-2xl p-8 bg-white border border-blue-200 shadow-2xl rounded-3xl">
         <button
-          onClick={onClose}
+          onClick={closeWithFade}
           className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
         >
           ×

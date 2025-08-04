@@ -21,26 +21,6 @@ export default function GroupServicesManagementPage() {
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [editingGroup, setEditingGroup] = useState<any>(null);
 
-  const handleSaveOrUpdateGroup = async (formData: any) => {
-    const isUpdate = !!editingGroup;
-    const endpoint = isUpdate
-      ? `/group-services/${editingGroup.id}/update`
-      : "/group-services/create";
-
-    const res = await apiPost(endpoint, formData);
-    if (![201, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
-    }
-
-    if (res.status === 201) {
-      setShowAddPopup(false);
-      setEditingGroup(null);
-      fetchData();
-    }
-
-    return res;
-  };
-
   const fetchData = async () => {
     const res = await apiGet("/group-services/findAllNotDeleted");
     if (![200, 400].includes(res.status)) {
@@ -252,7 +232,7 @@ export default function GroupServicesManagementPage() {
             setShowAddPopup(false);
             setEditingGroup(null);
           }}
-          onSubmit={handleSaveOrUpdateGroup}
+          onSuccess={fetchData}
           initialData={editingGroup}
         />
       )}

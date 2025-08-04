@@ -37,26 +37,6 @@ export default function AgenciesManagementPage() {
     fetchData();
   }, []);
 
-  const handleSaveOrUpdateAgency = async (formData: any) => {
-    const isUpdate = !!editingAgency;
-    const endpoint = isUpdate
-      ? `/agencies/${editingAgency.id}/update`
-      : "/agencies/create";
-
-    const res = await apiPost(endpoint, formData);
-    if (![201, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
-    }
-
-    if (res.status === 201) {
-      setShowAddPopup(false);
-      setEditingAgency(null);
-      fetchData();
-    }
-
-    return res;
-  };
-
   const filtered = agencies.filter((a) => {
     const matchName =
       a.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -290,7 +270,7 @@ export default function AgenciesManagementPage() {
             setShowAddPopup(false);
             setEditingAgency(null);
           }}
-          onSubmit={handleSaveOrUpdateAgency}
+          onSuccess={fetchData}
           initialData={editingAgency}
         />
       )}

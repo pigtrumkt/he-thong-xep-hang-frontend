@@ -1,20 +1,26 @@
 "use client";
 
+import { usePopup } from "@/components/popup/PopupContext";
+import { apiPost } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface AddOrUpdateServiceModalProps {
   onClose: () => void;
-  onSubmit: (formData: any) => Promise<{ status: number; data?: any } | void>;
+  onSuccess?: () => void;
   initialData?: any;
   groupOptions: { id: number; name: string }[];
 }
 
 export default function AddOrUpdateServiceModal({
   onClose,
-  onSubmit,
+  onSuccess,
   initialData,
   groupOptions,
 }: AddOrUpdateServiceModalProps) {
+  const router = useRouter();
+  const { popupMessage } = usePopup();
   const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
@@ -63,9 +69,28 @@ export default function AddOrUpdateServiceModal({
       status: form.status ? 1 : 0,
     };
 
-    const result = await onSubmit(payload);
+    const endpoint = initialData
+      ? `/services/${initialData.id}/update`
+      : "/services/create";
 
-    if (result && result.status === 400 && typeof result.data === "object") {
+    const result = await apiPost(endpoint, payload);
+
+    if (![201, 400].includes(result.status)) {
+      handleApiError(result, popupMessage, router);
+      return;
+    }
+
+    if (result?.status === 201) {
+      setVisible(false);
+      setTimeout(() => {
+        onClose();
+        onSuccess?.();
+      }, 100);
+    } else if (
+      result &&
+      result.status === 400 &&
+      typeof result.data === "object"
+    ) {
       setErrors(result.data);
     } else {
       setErrors({});

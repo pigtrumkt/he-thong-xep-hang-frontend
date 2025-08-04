@@ -72,26 +72,6 @@ export default function ServicesManagementPage() {
     fetchData();
   }, []);
 
-  const handleSaveOrUpdateService = async (formData: any) => {
-    const isUpdate = !!editingService;
-    const endpoint = isUpdate
-      ? `/services/${editingService.id}/update`
-      : "/services/create";
-
-    const res = await apiPost(endpoint, formData);
-    if (![201, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
-    }
-
-    if (res.status === 201) {
-      setShowAddPopup(false);
-      setEditingService(null);
-      fetchData();
-    }
-
-    return res;
-  };
-
   const handleToggleStatus = async (id: number, newStatus: number) => {
     const res = await apiPost(`/services/${id}/status`, { status: newStatus });
     if (![201, 400].includes(res.status)) {
@@ -333,7 +313,7 @@ export default function ServicesManagementPage() {
             setShowAddPopup(false);
             setEditingService(null);
           }}
-          onSubmit={handleSaveOrUpdateService}
+          onSuccess={fetchData}
           initialData={editingService}
           groupOptions={groupOptions}
         />

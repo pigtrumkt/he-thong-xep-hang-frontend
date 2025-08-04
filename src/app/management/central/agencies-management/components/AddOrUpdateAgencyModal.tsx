@@ -1,18 +1,24 @@
 "use client";
 
+import { usePopup } from "@/components/popup/PopupContext";
+import { apiPost } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface AddOrUpdateAgencyModalProps {
   onClose: () => void;
-  onSubmit: (formData: any) => Promise<{ status: number; data?: any } | void>;
+  onSuccess?: () => void;
   initialData?: any;
 }
 
 export default function AddOrUpdateAgencyModal({
   onClose,
-  onSubmit,
+  onSuccess,
   initialData,
 }: AddOrUpdateAgencyModalProps) {
+  const router = useRouter();
+  const { popupMessage } = usePopup();
   const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -112,8 +118,27 @@ export default function AddOrUpdateAgencyModal({
       ticket_time_range,
     };
 
-    const result = await onSubmit(payload);
-    if (result && result.status === 400 && typeof result.data === "object") {
+    const endpoint = initialData
+      ? `/agencies/${initialData.id}/update`
+      : "/agencies/create";
+
+    const result = await apiPost(endpoint, payload);
+    if (![201, 400].includes(result.status)) {
+      handleApiError(result, popupMessage, router);
+      return;
+    }
+
+    if (result?.status === 201) {
+      setVisible(false);
+      setTimeout(() => {
+        onClose();
+        onSuccess?.();
+      }, 100);
+    } else if (
+      result &&
+      result.status === 400 &&
+      typeof result.data === "object"
+    ) {
       setErrors(result.data); // ✅ Set lỗi từ API
     } else {
       setErrors({}); // ✅ Clear lỗi nếu submit thành công

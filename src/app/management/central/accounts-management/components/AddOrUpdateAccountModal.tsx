@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { usePopup } from "@/components/popup/PopupContext";
 
 interface AddOrUpdateAccountModalProps {
   onClose: () => void;
@@ -58,6 +60,9 @@ export default function AddOrUpdateAccountModal({
   onSubmit,
   initialData,
 }: AddOrUpdateAccountModalProps) {
+  const router = useRouter();
+  const { popupMessage } = usePopup();
+  const [visible, setVisible] = useState(false);
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -79,6 +84,11 @@ export default function AddOrUpdateAccountModal({
       return <p className="mt-1 text-sm text-red-400">{errors[field]}</p>;
     }
     return "";
+  };
+
+  const closeWithFade = () => {
+    setVisible(false);
+    setTimeout(() => onClose(), 100);
   };
 
   useEffect(() => {
@@ -111,6 +121,8 @@ export default function AddOrUpdateAccountModal({
         permission_ids: allPermissionIds,
       }));
     }
+
+    setTimeout(() => setVisible(true), 10);
   }, [initialData]);
 
   const handleChange = (
@@ -147,10 +159,14 @@ export default function AddOrUpdateAccountModal({
     "w-full px-4 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-100 bg-black/40 backdrop-blur-sm ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="relative w-full max-w-2xl p-8 bg-white border border-blue-200 shadow-2xl rounded-3xl">
         <button
-          onClick={onClose}
+          onClick={closeWithFade}
           className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
         >
           ×
