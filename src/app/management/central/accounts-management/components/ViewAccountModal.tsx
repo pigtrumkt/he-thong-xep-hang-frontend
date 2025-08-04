@@ -10,7 +10,7 @@ interface ViewAccountModalProps {
 const roleLabels: Record<number, string> = {
   1: "Super Admin (root)",
   2: "Super Admin",
-  11: "Admin cơ quan (root)",
+  11: "Admin cơ quan",
   12: "Admin cơ quan",
   21: "Nhân viên",
   31: "Thiết bị",
