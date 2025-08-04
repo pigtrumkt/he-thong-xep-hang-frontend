@@ -46,7 +46,7 @@ export default function ServicesManagementPage() {
     const flattened: ServiceWithGroupName[] = (res.data || []).flatMap(
       (group: any) => {
         const groupName =
-          group.id === 0 ? "Chưa phân nhóm" : group.name || "Chưa phân nhóm";
+          group.id === 0 ? "Không phân nhóm" : group.name || "Không phân nhóm";
         return (group.services || []).map((s: any) => ({
           ...s,
           groupName,
@@ -105,7 +105,7 @@ export default function ServicesManagementPage() {
       return matchName && matchStatus && matchGroup;
     })
     .reduce((groups: Record<string, ServiceWithGroupName[]>, service) => {
-      const key = service.groupName || "Chưa phân nhóm";
+      const key = service.groupName || "Không phân nhóm";
       if (!groups[key]) groups[key] = [];
       groups[key].push(service);
       return groups;

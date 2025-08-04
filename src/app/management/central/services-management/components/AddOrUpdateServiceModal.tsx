@@ -150,7 +150,7 @@ export default function AddOrUpdateServiceModal({
               onChange={handleChange}
               className={inputClass}
             >
-              <option value={0}>Chưa phân nhóm</option>
+              <option value={0}>Không phân nhóm</option>
               {groupOptions.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
