@@ -113,7 +113,7 @@ export default function AccountsManagementPage() {
           allowedPermissions: [PermissionEnum.ACCOUNT_ADD_SUPER],
         }) && (
           <button
-            className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow cursor-pointer hover:bg-blue-900 rounded-xl"
+            className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow hover:bg-blue-900 rounded-xl"
             onClick={() => {
               setEditingAccount(null);
               setShowAddModal(true);

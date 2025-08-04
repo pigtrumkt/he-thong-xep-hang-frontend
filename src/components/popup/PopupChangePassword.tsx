@@ -78,7 +78,7 @@ export default function PopupChangePassword({
           onClick={() => {
             handleClose();
           }}
-          className="absolute text-xl text-gray-400 cursor-pointer top-2 right-3 hover:text-red-500"
+          className="absolute text-xl text-gray-400 top-2 right-3 hover:text-red-500"
         >
           ×
         </button>
@@ -130,13 +130,13 @@ export default function PopupChangePassword({
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
+            className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
           >
             Hủy
           </button>
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600 disabled:opacity-50"
+            className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50"
             disabled={disableSubmit}
           >
             Xác nhận

@@ -214,7 +214,7 @@ export default function ProfilePage() {
                   if (!confirmed) return;
                   handleRemoveAvatar();
                 }}
-                className="text-sm text-red-600 underline cursor-pointer"
+                className="text-sm text-red-600 underline"
               >
                 Xoá ảnh
               </button>

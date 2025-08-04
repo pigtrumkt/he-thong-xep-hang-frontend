@@ -219,13 +219,13 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={() => handleConfirm(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg cursor-pointer text-slate-700 hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 rounded-lg text-slate-700 hover:bg-gray-300"
               >
                 Hủy
               </button>
               <button
                 onClick={() => handleConfirm(true)}
-                className={`cursor-pointer px-4 py-2 text-white rounded-lg ${
+                className={`px-4 py-2 text-white rounded-lg ${
                   confirmPopup.type === "red"
                     ? "bg-red-400 hover:bg-red-500"
                     : "bg-blue-400 hover:bg-blue-500"

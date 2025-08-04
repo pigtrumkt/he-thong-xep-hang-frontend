@@ -73,9 +73,9 @@ export default function ProfilePage() {
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
-      <h1 className="text-xl font-bold text-blue-700 mb-6">Hồ sơ cá nhân</h1>
+      <h1 className="mb-6 text-xl font-bold text-blue-700">Hồ sơ cá nhân</h1>
 
-      <div className="flex flex-col md:flex-row items-start gap-10">
+      <div className="flex flex-col items-start gap-10 md:flex-row">
         {/* Avatar bên trái */}
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
@@ -91,9 +91,9 @@ export default function ProfilePage() {
                 }`
               }
               alt="Avatar"
-              className="w-36 h-36 rounded-full object-cover border-4 border-blue-300 shadow"
+              className="object-cover border-4 border-blue-300 rounded-full shadow w-36 h-36"
             />
-            <label className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 shadow">
+            <label className="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full shadow cursor-pointer hover:bg-blue-600">
               <input
                 type="file"
                 accept="image/*"
@@ -115,11 +115,11 @@ export default function ProfilePage() {
         </div>
 
         {/* Inputs bên phải */}
-        <div className="flex-1 w-full grid grid-cols-1 gap-4">
+        <div className="grid flex-1 w-full grid-cols-1 gap-4">
           <div>
             <label className="text-sm text-gray-500">Tên đăng nhập</label>
             <input
-              className="w-full mt-1 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 mt-1 bg-gray-100 border border-gray-300 rounded-lg outline-none"
               value={user.username}
               readOnly
             />
@@ -128,7 +128,7 @@ export default function ProfilePage() {
           <div>
             <label className="text-sm text-gray-500">Vai trò</label>
             <input
-              className="w-full mt-1 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 mt-1 bg-gray-100 border border-gray-300 rounded-lg outline-none"
               value={user.role_name || ""}
               readOnly
             />
@@ -137,7 +137,7 @@ export default function ProfilePage() {
           <div>
             <label className="text-sm text-gray-500">Họ và tên</label>
             <input
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg outline-none"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
@@ -146,7 +146,7 @@ export default function ProfilePage() {
           <div>
             <label className="text-sm text-gray-500">Giới tính</label>
             <select
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg outline-none"
               value={gender ?? ""}
               onChange={(e) => setGender(Number(e.target.value))}
             >
@@ -160,7 +160,7 @@ export default function ProfilePage() {
             <label className="text-sm text-gray-500">Email</label>
             <input
               type="email"
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg outline-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -169,7 +169,7 @@ export default function ProfilePage() {
           <div>
             <label className="text-sm text-gray-500">Số điện thoại</label>
             <input
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg outline-none"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg outline-none"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
@@ -178,7 +178,7 @@ export default function ProfilePage() {
           <div className="pt-4 text-right">
             <button
               onClick={handleSubmit}
-              className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold transition"
+              className="px-6 py-2 font-semibold text-white transition bg-blue-600 rounded-xl hover:bg-blue-700"
             >
               Lưu thông tin
             </button>

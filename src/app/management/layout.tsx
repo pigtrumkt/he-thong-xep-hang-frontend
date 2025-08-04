@@ -140,7 +140,7 @@ export default function ManagementLayout({
           </span>
           <button
             id="avatarBtn"
-            className="flex items-center justify-center w-10 h-10 overflow-hidden bg-blue-100 border-2 border-blue-200 rounded-full shadow cursor-pointer focus:ring-2 focus:ring-blue-400"
+            className="flex items-center justify-center w-10 h-10 overflow-hidden bg-blue-100 border-2 border-blue-200 rounded-full shadow focus:ring-2 focus:ring-blue-400"
           >
             {host && (
               <img
