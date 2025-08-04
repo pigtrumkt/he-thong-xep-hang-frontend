@@ -18,6 +18,7 @@ interface ServiceWithGroupName {
   range_end: number;
   status: number;
   order: number;
+  status_in_agency: number;
 }
 
 export default function ServicesManagementPage() {
@@ -25,7 +26,7 @@ export default function ServicesManagementPage() {
   const { popupMessage } = usePopup();
   const { hasAccess } = useGlobalParams();
 
-  const [services, setServices] = useState<ServiceWithGroupName[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [groupOptions, setGroupOptions] = useState<
     { id: number; name: string }[]
   >([]);
@@ -70,7 +71,9 @@ export default function ServicesManagementPage() {
   }, []);
 
   const handleToggleStatus = async (id: number, newStatus: number) => {
-    const res = await apiPost(`/services/${id}/status`, { status: newStatus });
+    const res = await apiPost(`/services/${id}/statusInAgency`, {
+      status: newStatus,
+    });
     if (![201, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       return;
@@ -79,7 +82,7 @@ export default function ServicesManagementPage() {
     if (res.status === 201) {
       setServices((prev) =>
         prev.map((item) =>
-          item.id === id ? { ...item, status: newStatus } : item
+          item.id === id ? { ...item, status_in_agency: newStatus } : item
         )
       );
     } else {
@@ -203,7 +206,7 @@ export default function ServicesManagementPage() {
                             <input
                               type="checkbox"
                               className="sr-only peer"
-                              checked={s.status === 1}
+                              checked={s.status_in_agency === 1}
                               onChange={(e) =>
                                 handleToggleStatus(
                                   s.id,
