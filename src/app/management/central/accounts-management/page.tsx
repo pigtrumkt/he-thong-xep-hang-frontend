@@ -211,12 +211,12 @@ export default function AccountsManagementPage() {
                   }) && (
                     <>
                       <label
-                        className={`relative inline-flex items-center cursor-pointer transition-opacity ${
+                        className={`relative inline-flex items-center transition-opacity ${
                           acc.id === globalParams.user.id ||
                           (globalParams.user.role_id == 2 &&
                             acc.role_id <= globalParams.user.role_id)
-                            ? "opacity-20 cursor-not-allowed"
-                            : ""
+                            ? "opacity-20"
+                            : "cursor-pointer"
                         }`}
                       >
                         <input

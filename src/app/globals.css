@@ -19,6 +19,10 @@ select:disabled {
   cursor: inherit;
 }
 
+input[type="time"] {
+  cursor: pointer;
+}
+
 /* Ẩn scrollbar mặc định (hiệu quả nhất trên Chrome, Edge) */
 ::-webkit-scrollbar {
   width: 0px;
