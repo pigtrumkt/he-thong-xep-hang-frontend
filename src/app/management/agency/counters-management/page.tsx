@@ -6,6 +6,7 @@ import { useGlobalParams } from "@/components/ClientWrapper";
 import { apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
+import AddOrUpdateCounterModal from "./component/AddOrUpdateCounterModal";
 
 export default function CountersPage() {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function CountersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [counters, setCounters] = useState<any[]>([]);
+  const [showAddPopup, setShowAddPopup] = useState(false);
+  const [editingCounter, setEditingCounter] = useState<any>(null);
 
   const fetchData = async () => {
     const res = await apiGet("/counters/findNotDeletedByAgency");
@@ -83,7 +86,13 @@ export default function CountersPage() {
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[40rem]">
       <div className="flex items-center justify-between mb-6">
-        <button className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow hover:bg-blue-900 rounded-xl">
+        <button
+          className="flex items-center gap-2 px-5 py-2 font-semibold text-white transition bg-blue-700 shadow hover:bg-blue-900 rounded-xl"
+          onClick={() => {
+            setEditingCounter(null);
+            setShowAddPopup(true);
+          }}
+        >
           <span className="font-bold">+</span>
           Thêm
         </button>
@@ -167,6 +176,10 @@ export default function CountersPage() {
                   <button
                     className="p-2 rounded-lg hover:bg-blue-100"
                     title="Chỉnh sửa"
+                    onClick={() => {
+                      setEditingCounter(c);
+                      setShowAddPopup(true);
+                    }}
                   >
                     <svg
                       className="w-6 h-6 text-blue-700"
@@ -219,6 +232,17 @@ export default function CountersPage() {
           ))}
         </tbody>
       </table>
+
+      {showAddPopup && (
+        <AddOrUpdateCounterModal
+          onClose={() => {
+            setShowAddPopup(false);
+            setEditingCounter(null);
+          }}
+          onSuccess={fetchData}
+          initialData={editingCounter}
+        />
+      )}
     </section>
   );
 }
