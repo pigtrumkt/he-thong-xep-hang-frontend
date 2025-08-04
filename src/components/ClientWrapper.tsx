@@ -75,20 +75,29 @@ export default function ClientWrapper({
       }
     }
 
-    if ([1, 2].includes(roleId) && !path.startsWith("/management/central")) {
+    if (
+      [1, 2].includes(roleId) &&
+      !path.startsWith("/management/central") &&
+      !path.startsWith("/management/profile")
+    ) {
       router.replace("/management/central");
       return;
     }
 
     if (
       [11, 12, 21].includes(roleId) &&
-      !path.startsWith("/management/agency")
+      !path.startsWith("/management/agency") &&
+      !path.startsWith("/management/profile")
     ) {
       router.replace("/management/agency");
       return;
     }
 
-    if (roleId === 31 && !path.startsWith("/management/device")) {
+    if (
+      roleId === 31 &&
+      !path.startsWith("/management/device") &&
+      !path.startsWith("/management/profile")
+    ) {
       router.replace("/management/device");
       return;
     }
