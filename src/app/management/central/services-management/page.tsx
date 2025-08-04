@@ -15,6 +15,7 @@ interface ServiceWithGroupName {
   name: string;
   group_id: number | null;
   groupName: string;
+  groupStatus?: number; //
   range_start: number;
   range_end: number;
   status: number;
@@ -52,6 +53,7 @@ export default function ServicesManagementPage() {
         return (group.services || []).map((s: any) => ({
           ...s,
           groupName,
+          groupStatus: group.status,
         }));
       }
     );
@@ -210,13 +212,22 @@ export default function ServicesManagementPage() {
                         <path d="M3 7v10"></path>
                       </svg>
                       {groupName}
+                      {servicesInGroup[0]?.groupStatus === 0 && (
+                        <span className="ml-2 text-sm font-bold text-red-500">
+                          (Đã tắt)
+                        </span>
+                      )}
                     </div>
                   </td>
                 </tr>
                 {servicesInGroup.map((s, idx) => (
                   <tr
                     key={s.id}
-                    className="transition border-b border-slate-300 hover:bg-blue-50 group"
+                    className={`transition border-b border-slate-300 group ${
+                      s.groupStatus === 0
+                        ? "bg-gray-100 text-gray-500"
+                        : "hover:bg-blue-50"
+                    }`}
                   >
                     <td className="px-4 py-3 font-semibold text-blue-800">
                       {idx + 1}
