@@ -2,26 +2,68 @@
 
 import { useEffect, useState } from "react";
 import feather from "feather-icons";
+import { apiGet } from "@/lib/api";
+
+interface AgencyForm {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  screen_notice: string;
+  allowed_days_of_week: string[];
+  ticket_time_start: string;
+  ticket_time_end: string;
+  allow_online_ticket: boolean;
+  min_time_between_ticket_online: number;
+  max_ticket_per_day_online: number;
+}
 
 export default function AgencySettingsPage() {
-  const [form, setForm] = useState({
-    name: "UBND xã Tân Quang",
-    address: "Tỉnh Tân Quang",
-    phone: "0982984984",
-    email: "ubnd@tanquang.gov.vn",
-    screen_notice:
-      "Vui lòng chuẩn bị giấy tờ khi đến lượt. Xin cảm ơn quý công dân đã hợp tác!",
-    allowed_days_of_week: ["1", "2", "3", "4", "5", "6", "0"],
-    ticket_time_start: "07:00",
+  const [form, setForm] = useState<AgencyForm>({
+    name: "",
+    address: "",
+    phone: "",
+    email: "",
+    screen_notice: "",
+    allowed_days_of_week: [],
+    ticket_time_start: "08:00",
     ticket_time_end: "17:00",
     allow_online_ticket: true,
-    min_time_between_ticket_online: 10,
-    max_ticket_per_day_online: 20,
+    min_time_between_ticket_online: 0,
+    max_ticket_per_day_online: 0,
   });
+
+  const [isActive, setIsActive] = useState(true); // Mặc định đang hoạt động
 
   useEffect(() => {
     feather.replace();
+    fetchAgencyData();
   }, []);
+
+  const fetchAgencyData = async () => {
+    const res = await apiGet("/agencies/getMyAgency");
+    if (res.status === 200) {
+      const agency = res.data;
+      const [start, end] = agency.ticket_time_range?.split("~") || ["", ""];
+      setForm({
+        name: agency.name || "",
+        address: agency.address || "",
+        phone: agency.phone || "",
+        email: agency.email || "",
+        screen_notice: agency.screen_notice || "",
+        allowed_days_of_week: agency.allowed_days_of_week?.split(",") || [],
+        ticket_time_start: start || "08:00",
+        ticket_time_end: end || "17:00",
+        allow_online_ticket: agency.allow_online_ticket === 1,
+        min_time_between_ticket_online:
+          agency.min_time_between_ticket_online || 0,
+        max_ticket_per_day_online: agency.max_ticket_per_day_online || 0,
+      });
+      setIsActive(agency.status === 1);
+    } else {
+      console.error("Không thể tải thông tin cơ quan");
+    }
+  };
 
   const handleCheckboxChange = (day: string) => {
     setForm((prev) => {
@@ -42,7 +84,6 @@ export default function AgencySettingsPage() {
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 lg:min-w-[55rem]">
       <form className="p-8 space-y-8">
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Thông tin cơ bản */}
           <FormCard title="Thông tin cơ bản" icon="info">
             <FormInput label="Tên trụ sở" icon="home" value={form.name} />
             <FormInput label="Địa chỉ" icon="map-pin" value={form.address} />
@@ -60,16 +101,14 @@ export default function AgencySettingsPage() {
             />
           </FormCard>
 
-          {/* Thông báo màn hình */}
-          <FormCard title="Thông báo chạy ở màn hình mỗi quầy" icon="monitor">
+          <FormCard title="Thông báo" icon="monitor">
             <FormTextarea
-              label="Nội dung thông báo"
+              label="Thông báo chạy ở màn hình mỗi quầy"
               icon="message-square"
               value={form.screen_notice}
             />
           </FormCard>
 
-          {/* Cấu hình thời gian */}
           <FormCard title="Cấu hình thời gian" icon="calendar">
             <div className="mb-8">
               <label className="flex items-center gap-2 mb-3 font-medium text-slate-700">
@@ -137,7 +176,6 @@ export default function AgencySettingsPage() {
             </div>
           </FormCard>
 
-          {/* Cấu hình lấy số */}
           <FormCard title="Cấu hình lấy số online" icon="smartphone">
             <div className="flex items-center justify-between p-4 mb-4 bg-white border border-blue-200 rounded-lg">
               <div className="flex items-center gap-3">
@@ -180,12 +218,23 @@ export default function AgencySettingsPage() {
           </FormCard>
         </div>
 
-        <div className="flex flex-col justify-end gap-3 pt-6 border-t sm:flex-row border-slate-200">
+        <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-200">
+          {/* Nút tạm dừng hoạt động */}
+          <button
+            type="button"
+            onClick={() => setIsActive(!isActive)}
+            className={`px-6 py-3 font-semibold rounded-lg shadow-sm transition-colors  ${
+              isActive
+                ? "bg-red-400 text-white hover:bg-red-500"
+                : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+            }`}
+          >
+            {isActive ? "Tạm dừng hoạt động" : "Tiếp tục hoạt động"}
+          </button>
           <button
             type="submit"
             className="px-6 py-3 font-medium text-white transition-colors bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700"
           >
-            <i data-feather="save" className="inline w-4 h-4 mr-2"></i>
             Lưu cài đặt
           </button>
         </div>
