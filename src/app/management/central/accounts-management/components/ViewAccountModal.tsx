@@ -74,6 +74,17 @@ export default function ViewAccountModal({
     setTimeout(() => setVisible(true), 10);
   }, [accountData]);
 
+  const host =
+    typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.hostname}:3001`
+      : "";
+
+  const avatarUrl = accountData?.avatar_url
+    ? `${host}/accounts/avatar/${accountData.avatar_url}?v=${Date.now()}`
+    : accountData?.gender === 0
+    ? `${host}/accounts/avatar/avatar_default_female.png`
+    : `${host}/accounts/avatar/avatar_default_male.png`;
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-100 bg-black/40 backdrop-blur-sm ${
@@ -91,6 +102,15 @@ export default function ViewAccountModal({
         <h2 className="pb-3 mb-6 text-2xl font-bold text-blue-700 border-b">
           Chi tiết tài khoản
         </h2>
+
+        {/* Ảnh đại diện */}
+        <div className="flex justify-center my-4">
+          <img
+            src={avatarUrl}
+            alt="Avatar"
+            className="object-cover w-32 h-32 mb-3 border-2 rounded-full shadow-md border-slate-400"
+          />
+        </div>
 
         <div className="space-y-5 text-sm text-gray-800">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
