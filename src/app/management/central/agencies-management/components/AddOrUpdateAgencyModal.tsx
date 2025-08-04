@@ -13,6 +13,7 @@ export default function AddOrUpdateAgencyModal({
   onSubmit,
   initialData,
 }: AddOrUpdateAgencyModalProps) {
+  const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
@@ -38,6 +39,11 @@ export default function AddOrUpdateAgencyModal({
     return "";
   };
 
+  const closeWithFade = () => {
+    setVisible(false);
+    setTimeout(() => onClose(), 100); // onClose vẫn dùng được
+  };
+
   useEffect(() => {
     if (initialData) {
       const [start, end] = initialData.ticket_time_range?.split("~") || [
@@ -61,6 +67,9 @@ export default function AddOrUpdateAgencyModal({
         ticket_time_end: end,
       });
     }
+
+    // Kích hoạt hiệu ứng hiện
+    setTimeout(() => setVisible(true), 10);
   }, [initialData]);
 
   const handleChange = (
@@ -125,10 +134,14 @@ export default function AddOrUpdateAgencyModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div
+      className={`transition-opacity duration-100 fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="relative w-full max-w-2xl p-8 bg-white border border-blue-200 shadow-2xl rounded-3xl">
         <button
-          onClick={onClose}
+          onClick={closeWithFade}
           className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
         >
           ×

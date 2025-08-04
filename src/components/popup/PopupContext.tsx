@@ -134,7 +134,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       messagePopup?.resolve();
       setMessagePopup(null);
-    }, 200);
+    }, 100);
   };
 
   const handleConfirm = (result: boolean) => {
@@ -142,7 +142,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       confirmPopup?.resolve(result);
       setConfirmPopup(null);
-    }, 200);
+    }, 100);
   };
 
   return (
@@ -161,7 +161,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
       {alert && (
         <div
           className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] text-white px-6 py-3 rounded-xl shadow-2xl drop-shadow-2xl text-sm font-semibold
-          transition-opacity duration-200 ${
+          transition-opacity duration-100 ${
             alertVisible ? "opacity-100" : "opacity-0"
           }
           ${alert.type === "green" ? "bg-green-400" : "bg-red-400"}`}
@@ -173,7 +173,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
       {/* Popup Message (OK button) */}
       {messagePopup && (
         <div
-          className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
+          className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-100 ${
             messageVisible ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -190,7 +190,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             )}
             <button
               onClick={closePopupMessage}
-              className="mt-4 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
+              className="px-4 py-2 mt-4 text-white bg-blue-400 rounded-lg hover:bg-blue-500"
             >
               OK
             </button>
@@ -201,7 +201,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
       {/* Popup Confirm */}
       {confirmPopup && (
         <div
-          className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
+          className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-100 ${
             confirmVisible ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -219,7 +219,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={() => handleConfirm(false)}
-                className="px-4 py-2 bg-gray-200 text-slate-700 rounded-lg hover:bg-gray-300 cursor-pointer"
+                className="px-4 py-2 bg-gray-200 rounded-lg cursor-pointer text-slate-700 hover:bg-gray-300"
               >
                 Hủy
               </button>

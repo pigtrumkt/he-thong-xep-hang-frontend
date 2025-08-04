@@ -13,11 +13,17 @@ export default function AddOrUpdateGroupServiceModal({
   onSubmit,
   initialData,
 }: AddOrUpdateGroupServiceModalProps) {
+  const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     name: "",
     status: true,
   });
+
+  const closeWithFade = () => {
+    setVisible(false);
+    setTimeout(() => onClose(), 100); // onClose vẫn dùng được
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -26,6 +32,9 @@ export default function AddOrUpdateGroupServiceModal({
         status: initialData.status === 1,
       });
     }
+
+    // Kích hoạt hiệu ứng hiện
+    setTimeout(() => setVisible(true), 10);
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,10 +62,14 @@ export default function AddOrUpdateGroupServiceModal({
     "w-full px-4 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-100 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="relative w-full max-w-xl p-8 bg-white border border-blue-200 shadow-2xl rounded-3xl">
         <button
-          onClick={onClose}
+          onClick={closeWithFade}
           className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
         >
           ×

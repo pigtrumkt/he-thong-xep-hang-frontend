@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 interface AgencyDetailModalProps {
   agency: any;
   onClose: () => void;
@@ -9,6 +11,7 @@ export default function AgencyDetailModal({
   agency,
   onClose,
 }: AgencyDetailModalProps) {
+  const [visible, setVisible] = useState(false);
   const weekdays = [
     { label: "Chủ nhật", value: "0" },
     { label: "Thứ 2", value: "1" },
@@ -22,12 +25,26 @@ export default function AgencyDetailModal({
   const allowed = (agency.allowed_days_of_week || "").split(",");
   const [start, end] = (agency.ticket_time_range || "").split("~");
 
+  const closeWithFade = () => {
+    setVisible(false);
+    setTimeout(() => onClose(), 100); // onClose vẫn dùng được
+  };
+
+  useEffect(() => {
+    // Kích hoạt hiệu ứng hiện
+    setTimeout(() => setVisible(true), 10);
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-100 bg-black/40 backdrop-blur-sm ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="relative w-full max-w-2xl p-8 bg-white border border-blue-200 shadow-2xl rounded-3xl">
         {/* Close */}
         <button
-          onClick={onClose}
+          onClick={closeWithFade}
           className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
         >
           ×

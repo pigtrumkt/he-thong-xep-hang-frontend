@@ -62,12 +62,12 @@ export default function PopupChangePassword({
     setVisible(false);
     setTimeout(() => {
       onClose();
-    }, 200); // thời gian khớp animation
+    }, 100); // thời gian khớp animation
   };
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-all duration-200 ${
+      className={`fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-all duration-100 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -78,46 +78,46 @@ export default function PopupChangePassword({
           onClick={() => {
             handleClose();
           }}
-          className="absolute top-2 right-3 text-gray-400 hover:text-red-500 text-xl cursor-pointer"
+          className="absolute text-xl text-gray-400 cursor-pointer top-2 right-3 hover:text-red-500"
         >
           ×
         </button>
-        <h2 className="text-xl font-bold text-blue-700 mb-4 text-center">
+        <h2 className="mb-4 text-xl font-bold text-center text-blue-700">
           Đổi mật khẩu
         </h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="block mb-1 text-sm font-medium text-gray-600">
               Mật khẩu cũ
             </label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
               value={oldPassword}
               style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
               onChange={(e) => setOldPassword(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="block mb-1 text-sm font-medium text-gray-600">
               Mật khẩu mới
             </label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
               value={newPassword}
               style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
               onChange={(e) => setNewPassword(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="block mb-1 text-sm font-medium text-gray-600">
               Xác nhận mật khẩu mới
             </label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
               value={confirmPassword}
               style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -130,13 +130,13 @@ export default function PopupChangePassword({
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={handleClose}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer"
+            className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
           >
             Hủy
           </button>
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600 disabled:opacity-50"
             disabled={disableSubmit}
           >
             Xác nhận
