@@ -261,6 +261,18 @@ export default function ProfilePage() {
             />
           </div>
 
+          {/* Chức danh */}
+          <div>
+            <label className="block mb-1 font-medium text-gray-600">
+              Chức danh
+            </label>
+            <input
+              readOnly
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700"
+              value={user.position}
+            />
+          </div>
+
           {/* Họ và tên */}
           <div>
             <label className="block mb-1 font-medium text-gray-600">
