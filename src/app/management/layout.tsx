@@ -166,14 +166,7 @@ export default function ManagementLayout({
               onClick={(e) => {
                 e.preventDefault();
                 hideProfileMenu();
-
-                if ([1, 2].includes(globalParams.user.role_id)) {
-                  router.push("/management/central/profile");
-                } else if ([11, 12, 21].includes(globalParams.user.role_id)) {
-                  router.push("/management/agency/profile");
-                } else if (globalParams.user.role_id === 31) {
-                  router.push("/management/device/profile");
-                }
+                router.push("/management/profile");
               }}
               className="flex items-center gap-3 px-3 py-2 font-semibold text-blue-700 rounded-lg hover:bg-blue-100"
             >
