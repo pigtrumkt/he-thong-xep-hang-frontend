@@ -14,6 +14,7 @@
     "@fortawesome/free-regular-svg-icons": "^7.0.0",
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
     "@fortawesome/react-fontawesome": "^0.2.3",
+    "feather-icons": "^4.29.2",
     "framer-motion": "^12.23.12",
     "jose": "^6.0.12",
     "next": "^15.4.5",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.11",
+    "@types/feather-icons": "^4.29.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
