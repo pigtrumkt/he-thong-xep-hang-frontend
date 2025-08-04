@@ -33,7 +33,7 @@ export default function AgencySettingsPage() {
     max_ticket_per_day_online: 0,
   });
 
-  const [isActive, setIsActive] = useState(true); // Mặc định đang hoạt động
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     feather.replace();
@@ -85,19 +85,31 @@ export default function AgencySettingsPage() {
       <form className="p-8 space-y-8">
         <div className="grid gap-8 lg:grid-cols-2">
           <FormCard title="Thông tin cơ bản" icon="info">
-            <FormInput label="Tên trụ sở" icon="home" value={form.name} />
-            <FormInput label="Địa chỉ" icon="map-pin" value={form.address} />
+            <FormInput
+              label="Tên trụ sở"
+              icon="home"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <FormInput
+              label="Địa chỉ"
+              icon="map-pin"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
             <FormInput
               label="Số điện thoại"
               icon="phone"
               value={form.phone}
               type="tel"
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
             <FormInput
               label="Email"
               icon="mail"
               value={form.email}
               type="email"
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
           </FormCard>
 
@@ -106,6 +118,9 @@ export default function AgencySettingsPage() {
               label="Thông báo chạy ở màn hình mỗi quầy"
               icon="message-square"
               value={form.screen_notice}
+              onChange={(e) =>
+                setForm({ ...form, screen_notice: e.target.value })
+              }
             />
           </FormCard>
 
@@ -157,6 +172,9 @@ export default function AgencySettingsPage() {
                     type="time"
                     value={form.ticket_time_start}
                     step="60"
+                    onChange={(e) =>
+                      setForm({ ...form, ticket_time_start: e.target.value })
+                    }
                     className="w-40 px-3 py-2 bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
@@ -169,6 +187,9 @@ export default function AgencySettingsPage() {
                     type="time"
                     value={form.ticket_time_end}
                     step="60"
+                    onChange={(e) =>
+                      setForm({ ...form, ticket_time_end: e.target.value })
+                    }
                     className="w-40 px-3 py-2 bg-white border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
@@ -191,6 +212,9 @@ export default function AgencySettingsPage() {
                 <input
                   type="checkbox"
                   checked={form.allow_online_ticket}
+                  onChange={(e) =>
+                    setForm({ ...form, allow_online_ticket: e.target.checked })
+                  }
                   className="sr-only peer"
                 />
                 <div className="h-6 transition duration-300 bg-gray-200 rounded-full w-11 peer-checked:bg-blue-600" />
@@ -202,12 +226,24 @@ export default function AgencySettingsPage() {
               icon="clock"
               type="number"
               value={form.min_time_between_ticket_online.toString()}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  min_time_between_ticket_online: Number(e.target.value),
+                })
+              }
             />
             <FormInput
               label="Giới hạn số lần lấy số trong ngày"
               icon="users"
               type="number"
               value={form.max_ticket_per_day_online.toString()}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  max_ticket_per_day_online: Number(e.target.value),
+                })
+              }
             />
             <FormInput
               label="Link lấy số online"
@@ -219,7 +255,6 @@ export default function AgencySettingsPage() {
         </div>
 
         <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-200">
-          {/* Nút tạm dừng hoạt động */}
           <button
             type="button"
             onClick={() => setIsActive(!isActive)}
@@ -271,12 +306,14 @@ function FormInput({
   icon,
   type = "text",
   readOnly = false,
+  onChange,
 }: {
   label: string;
   value: string;
   icon: string;
   type?: string;
   readOnly?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div>
@@ -288,6 +325,7 @@ function FormInput({
         type={type}
         value={value}
         readOnly={readOnly}
+        onChange={onChange}
         className={`w-full px-4 py-3 ${
           readOnly ? "bg-gray-50" : "bg-white"
         } border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none`}
@@ -300,10 +338,14 @@ function FormTextarea({
   label,
   value,
   icon,
+  readOnly = false,
+  onChange,
 }: {
   label: string;
   value: string;
   icon: string;
+  readOnly?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) {
   return (
     <div>
@@ -314,6 +356,8 @@ function FormTextarea({
       <textarea
         rows={4}
         value={value}
+        readOnly={readOnly}
+        onChange={onChange}
         className="w-full px-4 py-3 transition-colors bg-white border rounded-lg outline-none resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
     </div>
