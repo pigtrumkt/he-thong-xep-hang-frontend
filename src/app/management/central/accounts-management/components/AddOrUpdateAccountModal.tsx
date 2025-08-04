@@ -5,17 +5,13 @@ import { apiGet, apiPost } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
+import { useGlobalParams } from "@/components/ClientWrapper";
 
 interface AddOrUpdateAccountModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   initialData?: any;
 }
-
-const roleOptions = [
-  { id: 2, label: "Super Admin" },
-  { id: 11, label: "Admin cơ quan" },
-];
 
 const permissionGroups = [
   {
@@ -61,6 +57,20 @@ export default function AddOrUpdateAccountModal({
   onSuccess,
   initialData,
 }: AddOrUpdateAccountModalProps) {
+  const { globalParams } = useGlobalParams();
+  const currentUserRole = globalParams?.user?.role_id;
+
+  const allowedRoles =
+    currentUserRole === 1
+      ? [
+          { id: 1, label: "Super Admin (root)" },
+          { id: 2, label: "Super Admin" },
+          { id: 11, label: "Admin cơ quan" },
+        ]
+      : currentUserRole === 2
+      ? [{ id: 11, label: "Admin cơ quan" }]
+      : [];
+
   const router = useRouter();
   const { popupMessage } = usePopup();
   const [visible, setVisible] = useState(false);
@@ -338,7 +348,7 @@ export default function AddOrUpdateAccountModal({
                 required
               >
                 <option value="">-- Chọn vai trò --</option>
-                {roleOptions.map((r) => (
+                {allowedRoles.map((r) => (
                   <option key={r.id} value={r.id}>
                     {r.label}
                   </option>

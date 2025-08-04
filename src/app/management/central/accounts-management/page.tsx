@@ -212,7 +212,9 @@ export default function AccountsManagementPage() {
                     <>
                       <label
                         className={`relative inline-flex items-center cursor-pointer transition-opacity ${
-                          acc.id === globalParams.user.id
+                          acc.id === globalParams.user.id ||
+                          (globalParams.user.role_id == 2 &&
+                            acc.role_id <= globalParams.user.role_id)
                             ? "opacity-20 cursor-not-allowed"
                             : ""
                         }`}
@@ -221,7 +223,11 @@ export default function AccountsManagementPage() {
                           type="checkbox"
                           className="sr-only peer"
                           checked={acc.status === 1}
-                          disabled={acc.id === globalParams.user.id}
+                          disabled={
+                            acc.id === globalParams.user.id ||
+                            (globalParams.user.role_id == 2 &&
+                              acc.role_id <= globalParams.user.role_id)
+                          }
                           onChange={(e) =>
                             handleToggleStatus(acc.id, e.target.checked ? 1 : 0)
                           }
@@ -231,7 +237,11 @@ export default function AccountsManagementPage() {
                       </label>
                       <button
                         title="Sửa"
-                        className="p-2 rounded-lg hover:bg-blue-100"
+                        className="p-2 rounded-lg hover:bg-blue-100 disabled:opacity-20"
+                        disabled={
+                          globalParams.user.role_id == 2 &&
+                          acc.role_id <= globalParams.user.role_id
+                        }
                         onClick={() => {
                           setEditingAccount(acc);
                           setShowAddModal(true);
@@ -260,7 +270,12 @@ export default function AccountsManagementPage() {
                   }) && (
                     <button
                       title="Xoá"
-                      className="p-2 rounded-lg hover:bg-red-100"
+                      className="p-2 rounded-lg hover:bg-red-100 disabled:opacity-20"
+                      disabled={
+                        globalParams.user.id == acc.id ||
+                        (globalParams.user.role_id == 2 &&
+                          acc.role_id <= globalParams.user.role_id)
+                      }
                       onClick={() => {
                         popupConfirmRed({
                           title: "Xác nhận xoá tài khoản?",
