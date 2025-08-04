@@ -8,6 +8,25 @@ import { useRouter } from "next/navigation";
 import AvatarCropper from "@/components/avatar/AvatarCropper";
 import { useGlobalParams } from "@/components/ClientWrapper";
 
+function getRoleName(roleId: number): string {
+  switch (roleId) {
+    case 1:
+      return "Super admin (root)";
+    case 2:
+      return "Super admin";
+    case 11:
+      return "Admin cơ quan (root)";
+    case 12:
+      return "Admin cơ quan";
+    case 21:
+      return "Nhân viên";
+    case 31:
+      return "Thiết bị";
+    default:
+      return "Không xác định";
+  }
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const { popupMessage, popupConfirmRed } = usePopup();
@@ -238,7 +257,7 @@ export default function ProfilePage() {
             <input
               readOnly
               className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700"
-              value={user.role_name || ""}
+              value={getRoleName(user.role_id)}
             />
           </div>
 
