@@ -198,7 +198,19 @@ export default function ServicesManagementPage() {
                     colSpan={5}
                     className="px-4 py-3 font-bold text-blue-800 uppercase"
                   >
-                    {groupName}
+                    <div className="flex items-center gap-2 text-[1rem]">
+                      <svg
+                        className="w-5 h-5 text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <path d="M3 7v10"></path>
+                      </svg>
+                      {groupName}
+                    </div>
                   </td>
                 </tr>
                 {servicesInGroup.map((s, idx) => (
