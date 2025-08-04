@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGlobalParams } from "@/components/ClientWrapper";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
 
 export default function CountersPage() {
+  const router = useRouter();
   const { globalParams } = useGlobalParams();
   const { popupMessage } = usePopup();
   const [search, setSearch] = useState("");
@@ -16,7 +18,7 @@ export default function CountersPage() {
   const fetchData = async () => {
     const res = await apiGet("/counters/findNotDeletedByAgency");
     if (![200, 400].includes(res.status)) {
-      handleApiError(res, popupMessage);
+      handleApiError(res, popupMessage, router);
       return;
     }
     setCounters(res.data);
@@ -132,7 +134,32 @@ export default function CountersPage() {
                     <input
                       type="checkbox"
                       className="sr-only peer"
-                      defaultChecked={c.status === 1}
+                      checked={c.status === 1}
+                      onChange={async (e) => {
+                        e.target.disabled = true;
+                        const newStatus = e.target.checked ? 1 : 0;
+                        const res = await apiPost(`/counters/${c.id}/status`, {
+                          status: newStatus,
+                        });
+                        e.target.disabled = false;
+
+                        if (![201, 400].includes(res.status)) {
+                          popupMessage({
+                            title: "Cập nhật trạng thái thất bại",
+                            description: c.name,
+                          });
+                          return;
+                        }
+
+                        if (res.status === 201) {
+                          fetchData();
+                        } else {
+                          popupMessage({
+                            title: "Cập nhật trạng thái thất bại",
+                            description: c.name,
+                          });
+                        }
+                      }}
                     />
                     <div className="h-6 transition duration-300 bg-gray-200 rounded-full w-11 peer-checked:bg-blue-600" />
                     <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5" />
