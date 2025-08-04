@@ -92,7 +92,7 @@ export default function ClientWrapper({
       router.replace("/management/device");
       return;
     }
-  }, [globalParams, router]);
+  }, []);
 
   return (
     <UserContext.Provider value={{ globalParams, setGlobalParams, hasAccess }}>
