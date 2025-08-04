@@ -9,6 +9,16 @@ a:focus {
   text-decoration: none;
 }
 
+button,
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: inherit;
+}
+
 /* Ẩn scrollbar mặc định (hiệu quả nhất trên Chrome, Edge) */
 ::-webkit-scrollbar {
   width: 0px;
