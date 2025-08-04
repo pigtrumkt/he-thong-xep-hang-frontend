@@ -10,7 +10,7 @@ import { handleApiError } from "@/lib/handleApiError";
 export default function CountersPage() {
   const router = useRouter();
   const { globalParams } = useGlobalParams();
-  const { popupMessage } = usePopup();
+  const { popupMessage, popupConfirmRed } = usePopup();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [counters, setCounters] = useState<any[]>([]);
@@ -181,6 +181,27 @@ export default function CountersPage() {
                   <button
                     className="p-2 rounded-lg hover:bg-red-100"
                     title="Xóa"
+                    onClick={async () => {
+                      const confirmed = await popupConfirmRed({
+                        title: "Xác nhận xoá quầy?",
+                        description: c.name,
+                      });
+                      if (!confirmed) return;
+
+                      const res = await apiPost(`/counters/${c.id}/delete`, {});
+                      if (![201, 400].includes(res.status)) {
+                        handleApiError(res, popupMessage, router);
+                        return;
+                      }
+                      if (res.status === 201) {
+                        fetchData();
+                      } else {
+                        popupMessage({
+                          title: "Xóa thất bại",
+                          description: c.name,
+                        });
+                      }
+                    }}
                   >
                     <svg
                       className="w-6 h-6 text-red-400"
