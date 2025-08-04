@@ -185,7 +185,7 @@ export default function AddOrUpdateAccountModal({
   };
 
   const inputClass =
-    "w-full px-4 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500";
+    "w-full px-4 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 disabled:bg-gray-100";
 
   return (
     <div
@@ -345,6 +345,7 @@ export default function AddOrUpdateAccountModal({
                 className={`${inputClass} ${
                   errors.role_id ? "border-red-400" : ""
                 }`}
+                disabled={initialData?.id === globalParams?.user?.id}
                 required
               >
                 <option value="">-- Chọn vai trò --</option>

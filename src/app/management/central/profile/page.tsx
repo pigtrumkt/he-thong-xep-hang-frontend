@@ -243,8 +243,8 @@ export default function ProfilePage() {
               Tên đăng nhập
             </label>
             <input
-              readOnly
-              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700"
+              disabled={true}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-slate-700 disabled:bg-gray-100"
               value={user.username}
             />
           </div>
@@ -255,8 +255,8 @@ export default function ProfilePage() {
               Vai trò
             </label>
             <input
-              readOnly
-              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700"
+              disabled={true}
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700 disabled:bg-gray-100"
               value={getRoleName(user.role_id)}
             />
           </div>
@@ -267,8 +267,8 @@ export default function ProfilePage() {
               Chức danh
             </label>
             <input
-              readOnly
-              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700"
+              disabled={true}
+              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-slate-700 disabled:bg-gray-100"
               value={user.position}
             />
           </div>
