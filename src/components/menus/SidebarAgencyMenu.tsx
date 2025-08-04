@@ -234,9 +234,11 @@ export default function SidebarAgencyMenu() {
           }) && (
             <li>
               <Link
-                href="/management/agency/settings"
+                href="/management/agency/agency-settings"
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
-                  pathname === "/management/agency/settings" ? "active" : ""
+                  pathname === "/management/agency/agency-settings"
+                    ? "active"
+                    : ""
                 }`}
               >
                 <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
