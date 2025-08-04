@@ -63,26 +63,6 @@ export default function AccountsManagementPage() {
     }
   };
 
-  const handleSaveOrUpdateAccount = async (formData: any) => {
-    const isUpdate = !!editingAccount;
-    const endpoint = isUpdate
-      ? `/accounts/${editingAccount.id}/updateCentral`
-      : "/accounts/createCentral";
-
-    const res = await apiPost(endpoint, formData);
-    if (![201, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
-    }
-
-    if (res.status === 201) {
-      setShowAddModal(false);
-      setEditingAccount(null);
-      fetchData();
-    }
-
-    return res;
-  };
-
   const filteredAccounts = accounts.filter((acc) => {
     const matchText =
       acc.username?.toLowerCase().includes(search.toLowerCase()) ||
@@ -343,7 +323,7 @@ export default function AccountsManagementPage() {
             setShowAddModal(false);
             setEditingAccount(null);
           }}
-          onSubmit={handleSaveOrUpdateAccount}
+          onSuccess={fetchData}
           initialData={editingAccount}
         />
       )}

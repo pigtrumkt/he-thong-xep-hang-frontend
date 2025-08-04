@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { usePopup } from "@/components/popup/PopupContext";
+import { handleApiError } from "@/lib/handleApiError";
 
 interface AddOrUpdateAccountModalProps {
   onClose: () => void;
-  onSubmit: (formData: any) => Promise<{ status: number; data?: any } | void>;
+  onSuccess?: () => void;
   initialData?: any;
 }
 
@@ -57,7 +58,7 @@ const permissionGroups = [
 
 export default function AddOrUpdateAccountModal({
   onClose,
-  onSubmit,
+  onSuccess,
   initialData,
 }: AddOrUpdateAccountModalProps) {
   const router = useRouter();
@@ -147,8 +148,26 @@ export default function AddOrUpdateAccountModal({
       permission_ids: form.permission_ids?.join(",") || "",
     };
 
-    const result = await onSubmit(payload);
-    if (result && result.status === 400 && typeof result.data === "object") {
+    const endpoint = initialData
+      ? `/accounts/${initialData.id}/updateCentral`
+      : "/accounts/createCentral";
+
+    const result = await apiPost(endpoint, payload);
+    if (![201, 400].includes(result.status)) {
+      handleApiError(result, popupMessage, router);
+    }
+
+    if (result?.status === 201) {
+      setVisible(false);
+      setTimeout(() => {
+        onClose();
+        onSuccess?.();
+      }, 100);
+    } else if (
+      result &&
+      result.status === 400 &&
+      typeof result.data === "object"
+    ) {
       setErrors(result.data);
     } else {
       setErrors({});
