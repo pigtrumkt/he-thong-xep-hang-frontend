@@ -13,7 +13,7 @@ import ViewAccountModal from "./components/ViewAccountModal";
 export default function AccountsManagementPage() {
   const router = useRouter();
   const { popupMessage, popupConfirmRed } = usePopup();
-  const { hasAccess } = useGlobalParams();
+  const { hasAccess, globalParams } = useGlobalParams();
 
   const [accounts, setAccounts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -210,11 +210,18 @@ export default function AccountsManagementPage() {
                     allowedPermissions: [PermissionEnum.ACCOUNT_UPDATE_SUPER],
                   }) && (
                     <>
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      <label
+                        className={`relative inline-flex items-center cursor-pointer transition-opacity ${
+                          acc.id === globalParams.user.id
+                            ? "opacity-20 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
                         <input
                           type="checkbox"
                           className="sr-only peer"
                           checked={acc.status === 1}
+                          disabled={acc.id === globalParams.user.id}
                           onChange={(e) =>
                             handleToggleStatus(acc.id, e.target.checked ? 1 : 0)
                           }
