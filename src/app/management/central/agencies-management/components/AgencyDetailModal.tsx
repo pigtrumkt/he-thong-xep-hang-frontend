@@ -168,7 +168,7 @@ function Field({
   return (
     <div>
       <label className="block mb-1 font-medium text-gray-700">{label}</label>
-      <div className="px-3 py-2 bg-gray-100 rounded min-h-[40px] whitespace-pre-wrap break-words">
+      <div className="px-3 py-2 break-words whitespace-pre-wrap bg-gray-100 rounded">
         {value !== undefined && value !== null && value !== ""
           ? value
           : "(Không có)"}
