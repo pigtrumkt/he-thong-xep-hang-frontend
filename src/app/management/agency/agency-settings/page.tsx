@@ -360,7 +360,7 @@ export default function AgencySettingsPage() {
           allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
           allowedPermissions: [PermissionEnum.SETTINGS_UPDATE],
         }) && (
-          <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-200">
+          <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-300">
             <button
               type="button"
               onClick={handleToggleStatusLocal}
@@ -395,7 +395,7 @@ function FormCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="p-6 border bg-slate-50 rounded-xl border-slate-200">
+    <div className="p-6 border bg-slate-50 rounded-xl border-slate-300">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-blue-500 rounded-lg">
           <i data-feather={icon} className="w-5 h-5 text-white" />

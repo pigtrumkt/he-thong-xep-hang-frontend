@@ -136,7 +136,7 @@ export default function CountersPage() {
           {filtered.map((c, idx) => (
             <tr
               key={c.id}
-              className="transition border-b last:border-none hover:bg-blue-50 group"
+              className="transition border-b last:border-none hover:bg-blue-50 group border-slate-300"
             >
               <td className="px-4 py-3 font-semibold text-blue-800">
                 {idx + 1}
