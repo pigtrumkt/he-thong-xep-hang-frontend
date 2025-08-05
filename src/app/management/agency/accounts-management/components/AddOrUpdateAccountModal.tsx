@@ -144,6 +144,29 @@ export default function AddOrUpdateAccountModal({
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleChangeRole = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const roleId = e.target.value;
+
+    let defaultPermissions: string[] = [];
+
+    if (roleId === "12") {
+      defaultPermissions = permissionGroups
+        .flatMap((g) => g.children)
+        .map((p) => p.id.toString());
+    } else if (roleId === "21") {
+      defaultPermissions = ["130", "140", "150"];
+    } else {
+      defaultPermissions = [];
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      permission_ids: defaultPermissions,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -342,7 +365,10 @@ export default function AddOrUpdateAccountModal({
               <select
                 name="role_id"
                 value={form.role_id}
-                onChange={handleChange}
+                onChange={(e) => {
+                  handleChange(e);
+                  handleChangeRole(e);
+                }}
                 className={`${inputClass} ${
                   errors.role_id ? "border-red-400" : ""
                 }`}
