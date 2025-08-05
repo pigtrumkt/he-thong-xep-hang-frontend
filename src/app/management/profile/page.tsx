@@ -43,6 +43,7 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmiting, setSubmiting] = useState(false);
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
+  const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
   const host =
     typeof window !== "undefined"
@@ -168,7 +169,8 @@ export default function ProfilePage() {
                 : "avatar_default_male.png"
             }`}
             alt="Avatar"
-            className="object-cover w-32 h-32 mb-3 border-2 shadow-md border-slate-400"
+            className="object-cover w-32 h-32 mb-3 border-2 shadow-md cursor-pointer border-slate-400"
+            onClick={() => setShowAvatarPreview(true)}
           />
           <div className="flex gap-2">
             <label className="text-sm text-blue-600 underline cursor-pointer">
@@ -363,6 +365,33 @@ export default function ProfilePage() {
           </div>
         </form>
       </div>
+      {showAvatarPreview && (
+        <div
+          onClick={() => setShowAvatarPreview(false)}
+          className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
+        >
+          <img
+            src={`${host}/accounts/avatar/${
+              user.avatar_url
+                ? `${user.avatar_url}?v=${Date.now()}`
+                : gender === 0
+                ? "avatar_default_female.png"
+                : "avatar_default_male.png"
+            }`}
+            alt="Avatar full"
+            className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowAvatarPreview(false);
+            }}
+            className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </section>
   );
 }
