@@ -6,6 +6,8 @@ import { apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
+import { useGlobalParams } from "@/components/ClientWrapper";
+import { PermissionEnum, RoleEnum } from "@/constants/Enum";
 
 interface AgencyForm {
   id: number;
@@ -24,6 +26,7 @@ interface AgencyForm {
 
 export default function AgencySettingsPage() {
   const router = useRouter();
+  const { hasAccess } = useGlobalParams();
   const [form, setForm] = useState<AgencyForm>({
     id: 0,
     name: "",
@@ -348,25 +351,30 @@ export default function AgencySettingsPage() {
           </FormCard>
         </div>
 
-        <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-200">
-          <button
-            type="button"
-            onClick={handleToggleStatusLocal}
-            className={`px-6 py-3 font-semibold rounded-lg shadow-sm transition-colors  ${
-              isActiveLocal
-                ? "bg-red-400 text-white hover:bg-red-500"
-                : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-            }`}
-          >
-            {isActiveLocal ? "Tạm dừng hoạt động" : "Tiếp tục hoạt động"}
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-3 font-medium text-white transition-colors bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700"
-          >
-            Lưu cài đặt
-          </button>
-        </div>
+        {hasAccess({
+          allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+          allowedPermissions: [PermissionEnum.SETTINGS_UPDATE],
+        }) && (
+          <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-200">
+            <button
+              type="button"
+              onClick={handleToggleStatusLocal}
+              className={`px-6 py-3 font-semibold rounded-lg shadow-sm transition-colors  ${
+                isActiveLocal
+                  ? "bg-red-400 text-white hover:bg-red-500"
+                  : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+              }`}
+            >
+              {isActiveLocal ? "Tạm dừng hoạt động" : "Tiếp tục hoạt động"}
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 font-medium text-white transition-colors bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700"
+            >
+              Lưu cài đặt
+            </button>
+          </div>
+        )}
       </form>
     </section>
   );
