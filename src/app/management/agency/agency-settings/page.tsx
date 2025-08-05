@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import feather from "feather-icons";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
+import { usePopup } from "@/components/popup/PopupContext";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 
 interface AgencyForm {
+  id: number;
   name: string;
   address: string;
   phone: string;
@@ -19,7 +23,9 @@ interface AgencyForm {
 }
 
 export default function AgencySettingsPage() {
+  const router = useRouter();
   const [form, setForm] = useState<AgencyForm>({
+    id: 0,
     name: "",
     address: "",
     phone: "",
@@ -34,6 +40,16 @@ export default function AgencySettingsPage() {
   });
 
   const [isActive, setIsActive] = useState(true);
+  const { popupMessage } = usePopup();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const errorText = (field: string) => {
+    if (errors[field]) {
+      return <p className="mt-1 text-[1rem] text-red-400">{errors[field]}</p>;
+    }
+
+    return "";
+  };
 
   useEffect(() => {
     feather.replace();
@@ -46,6 +62,7 @@ export default function AgencySettingsPage() {
       const agency = res.data;
       const [start, end] = agency.ticket_time_range?.split("~") || ["", ""];
       setForm({
+        id: agency.id,
         name: agency.name || "",
         address: agency.address || "",
         phone: agency.phone || "",
@@ -61,7 +78,7 @@ export default function AgencySettingsPage() {
       });
       setIsActive(agency.status === 1);
     } else {
-      console.error("Không thể tải thông tin cơ quan");
+      popupMessage({ description: "Không thể tải thông tin cơ quan" });
     }
   };
 
@@ -77,24 +94,61 @@ export default function AgencySettingsPage() {
     });
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      name: form.name.trim(),
+      address: form.address.trim(),
+      phone: form.phone.trim(),
+      email: form.email?.trim() || "",
+      screen_notice: form.screen_notice?.trim() || "",
+      allow_online_ticket: form.allow_online_ticket ? 1 : 0,
+      min_time_between_ticket_online: form.min_time_between_ticket_online,
+      max_ticket_per_day_online: form.max_ticket_per_day_online,
+      allowed_days_of_week: form.allowed_days_of_week.join(","),
+      ticket_time_range: `${form.ticket_time_start}~${form.ticket_time_end}`,
+    };
+
+    const res = await apiPost(`/agencies/${form.id}/update`, payload);
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      setErrors({});
+      popupMessage({ description: "Lưu cài đặt thành công" });
+    } else if (res.status === 400 && typeof res.data === "object") {
+      setErrors(res.data);
+    } else {
+      popupMessage({
+        title: "Cập nhật trạng thái thất bại",
+        description: "Mạng không ổn định hoặc máy chủ không phản hồi.",
+      });
+    }
+  };
+
   const dayLabels = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
   const dayValues = ["1", "2", "3", "4", "5", "6", "0"];
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 lg:min-w-[55rem]">
-      <form className="p-8 space-y-8">
+      <form className="p-8 space-y-8" onSubmit={handleSubmit}>
         <div className="grid gap-8 lg:grid-cols-2">
           <FormCard title="Thông tin cơ bản" icon="info">
             <FormInput
               label="Tên trụ sở"
               icon="home"
               value={form.name}
+              errorText={errorText("name")}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
             <FormInput
               label="Địa chỉ"
               icon="map-pin"
               value={form.address}
+              errorText={errorText("address")}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
             <FormInput
@@ -102,6 +156,7 @@ export default function AgencySettingsPage() {
               icon="phone"
               value={form.phone}
               type="tel"
+              errorText={errorText("phone")}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
             <FormInput
@@ -109,6 +164,7 @@ export default function AgencySettingsPage() {
               icon="mail"
               value={form.email}
               type="email"
+              errorText={errorText("email")}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
           </FormCard>
@@ -118,6 +174,7 @@ export default function AgencySettingsPage() {
               label="Thông báo chạy ở màn hình mỗi quầy"
               icon="message-square"
               value={form.screen_notice}
+              errorText={errorText("screen_notice")}
               onChange={(e) =>
                 setForm({ ...form, screen_notice: e.target.value })
               }
@@ -156,6 +213,7 @@ export default function AgencySettingsPage() {
                   );
                 })}
               </div>
+              {errorText("allowed_days_of_week")}
             </div>
 
             <div>
@@ -194,6 +252,7 @@ export default function AgencySettingsPage() {
                   />
                 </div>
               </div>
+              {errorText("ticket_time_range")}
             </div>
           </FormCard>
 
@@ -226,6 +285,7 @@ export default function AgencySettingsPage() {
               icon="clock"
               type="number"
               value={form.min_time_between_ticket_online.toString()}
+              errorText={errorText("min_time_between_ticket_online")}
               onChange={(e) =>
                 setForm({
                   ...form,
@@ -238,6 +298,7 @@ export default function AgencySettingsPage() {
               icon="users"
               type="number"
               value={form.max_ticket_per_day_online.toString()}
+              errorText={errorText("max_ticket_per_day_online")}
               onChange={(e) =>
                 setForm({
                   ...form,
@@ -248,7 +309,7 @@ export default function AgencySettingsPage() {
             <FormInput
               label="Link lấy số online"
               icon="link"
-              value={`https://hethongxephang.com/take-number/1`}
+              value={`${window.location.protocol}//${window.location.host}/take-number/${form.id}`}
               readOnly
             />
           </FormCard>
@@ -306,6 +367,7 @@ function FormInput({
   icon,
   type = "text",
   readOnly = false,
+  errorText,
   onChange,
 }: {
   label: string;
@@ -313,6 +375,7 @@ function FormInput({
   icon: string;
   type?: string;
   readOnly?: boolean;
+  errorText?: React.ReactNode;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
@@ -330,6 +393,7 @@ function FormInput({
           readOnly ? "bg-gray-50" : "bg-white"
         } border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none`}
       />
+      {errorText}
     </div>
   );
 }
@@ -339,12 +403,14 @@ function FormTextarea({
   value,
   icon,
   readOnly = false,
+  errorText,
   onChange,
 }: {
   label: string;
   value: string;
   icon: string;
   readOnly?: boolean;
+  errorText?: React.ReactNode;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) {
   return (
@@ -360,6 +426,7 @@ function FormTextarea({
         onChange={onChange}
         className="w-full px-4 py-3 transition-colors bg-white border rounded-lg outline-none resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
+      {errorText}
     </div>
   );
 }
