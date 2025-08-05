@@ -177,6 +177,7 @@ export default function AgencySettingsPage() {
               label="Tên trụ sở"
               icon="home"
               value={form.name}
+              require={true}
               errorText={errorText("name")}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
@@ -184,6 +185,7 @@ export default function AgencySettingsPage() {
               label="Địa chỉ"
               icon="map-pin"
               value={form.address}
+              require={true}
               errorText={errorText("address")}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
@@ -191,6 +193,7 @@ export default function AgencySettingsPage() {
               label="Số điện thoại"
               icon="phone"
               value={form.phone}
+              require={true}
               type="tel"
               errorText={errorText("phone")}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -221,7 +224,7 @@ export default function AgencySettingsPage() {
             <div className="mb-8">
               <label className="flex items-center gap-2 mb-3 font-medium text-slate-700">
                 <i data-feather="calendar" className="w-4 h-4 text-slate-500" />
-                Những ngày được lấy số
+                Những ngày được lấy số <span className="text-red-400">*</span>
               </label>
               <div className="grid grid-cols-7 gap-2">
                 {dayLabels.map((label, idx) => {
@@ -255,7 +258,7 @@ export default function AgencySettingsPage() {
             <div>
               <label className="flex items-center gap-2 mb-3 font-medium text-slate-700">
                 <i data-feather="clock" className="w-4 h-4 text-slate-500" />
-                Khoảng thời gian lấy số
+                Khoảng thời gian lấy số <span className="text-red-400">*</span>
               </label>
               <div className="flex items-end gap-4">
                 <div>
@@ -266,6 +269,7 @@ export default function AgencySettingsPage() {
                     type="time"
                     value={form.ticket_time_start}
                     step="60"
+                    required
                     onChange={(e) =>
                       setForm({ ...form, ticket_time_start: e.target.value })
                     }
@@ -281,6 +285,7 @@ export default function AgencySettingsPage() {
                     type="time"
                     value={form.ticket_time_end}
                     step="60"
+                    required
                     onChange={(e) =>
                       setForm({ ...form, ticket_time_end: e.target.value })
                     }
@@ -407,6 +412,7 @@ function FormInput({
   value,
   icon,
   type = "text",
+  require = false,
   readOnly = false,
   errorText,
   onChange,
@@ -415,6 +421,7 @@ function FormInput({
   value: string;
   icon: string;
   type?: string;
+  require?: boolean;
   readOnly?: boolean;
   errorText?: React.ReactNode;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -424,10 +431,12 @@ function FormInput({
       <label className="flex items-center gap-2 mb-2 font-medium text-slate-700">
         <i data-feather={icon} className="w-4 h-4 text-slate-500" />
         {label}
+        {require && <span className="text-red-400">*</span>}
       </label>
       <input
         type={type}
         value={value}
+        required={require}
         readOnly={readOnly}
         onChange={onChange}
         className={`w-full px-4 py-3 ${
