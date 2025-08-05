@@ -11,6 +11,7 @@ interface AddOrUpdateAccountModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   initialData?: any;
+  groupedActiveServices: any[];
 }
 
 const permissionGroups = [
@@ -56,6 +57,7 @@ export default function AddOrUpdateAccountModal({
   onClose,
   onSuccess,
   initialData,
+  groupedActiveServices,
 }: AddOrUpdateAccountModalProps) {
   const { globalParams } = useGlobalParams();
   const currentUserRole = globalParams?.user?.role_id;
@@ -93,6 +95,7 @@ export default function AddOrUpdateAccountModal({
     position: "",
     role_id: "",
     permission_ids: [] as string[],
+    assigned_service_ids: [] as string[],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -127,16 +130,10 @@ export default function AddOrUpdateAccountModal({
         permission_ids: initialData.permission_ids
           ? initialData.permission_ids.split(",")
           : [],
+        assigned_service_ids: initialData.assigned_service_ids
+          ? initialData.assigned_service_ids.split(",")
+          : [],
       });
-    } else {
-      const allPermissionIds = permissionGroups
-        .flatMap((g) => g.children)
-        .map((p) => p.id.toString());
-
-      setForm((prev) => ({
-        ...prev,
-        permission_ids: allPermissionIds,
-      }));
     }
 
     setTimeout(() => setVisible(true), 10);
@@ -191,6 +188,7 @@ export default function AddOrUpdateAccountModal({
       position: form.position.trim(),
       role_id: Number(form.role_id),
       permission_ids: form.permission_ids?.join(",") || "",
+      assigned_service_ids: form.assigned_service_ids.join(","),
     };
 
     const endpoint = initialData
@@ -444,6 +442,52 @@ export default function AddOrUpdateAccountModal({
               </div>
             </div>
           )}
+
+          {Number(form.role_id) === 21 && groupedActiveServices.length > 0 && (
+            <div>
+              <label className="block mb-1 font-medium">
+                Dịch vụ được hỗ trợ
+              </label>
+              <div className="grid grid-cols-2 gap-2 p-3 overflow-y-auto border rounded-lg max-h-64">
+                {groupedActiveServices.map((group) => (
+                  <div key={group.id}>
+                    <div className="mb-1 font-semibold text-blue-700">
+                      {group.name}
+                    </div>
+                    {group.services.map((s: any) => (
+                      <label
+                        key={s.id}
+                        className="flex items-center gap-2 mb-1 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          value={s.id}
+                          checked={form.assigned_service_ids.includes(
+                            s.id.toString()
+                          )}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const value = s.id.toString();
+                            setForm((prev) => ({
+                              ...prev,
+                              assigned_service_ids: checked
+                                ? [...prev.assigned_service_ids, value]
+                                : prev.assigned_service_ids.filter(
+                                    (id) => id !== value
+                                  ),
+                            }));
+                          }}
+                        />
+                        {s.name}
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              {errorText("assigned_service_ids")}
+            </div>
+          )}
+
           {errorText("message")}
           <div className="pt-4 text-right">
             <button

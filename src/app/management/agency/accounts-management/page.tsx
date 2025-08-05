@@ -25,6 +25,8 @@ export default function AccountsAgencyPage() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
+  const [groupedActiveServices, setGroupedActiveServices] = useState<any[]>([]);
+
   const fetchData = async () => {
     const res = await apiGet("/accounts/findAllNotDeletedAgency");
     if (![200, 400].includes(res.status)) {
@@ -33,6 +35,14 @@ export default function AccountsAgencyPage() {
     }
 
     setAccounts(res.data);
+
+    const res1 = await apiGet("/services/findGroupedActiveServicesInAgency");
+    if (![200, 400].includes(res1.status)) {
+      handleApiError(res1, popupMessage, router);
+      return;
+    }
+
+    setGroupedActiveServices(res1.data);
   };
 
   useEffect(() => {
@@ -339,6 +349,7 @@ export default function AccountsAgencyPage() {
       {showViewModal && selectedAccount && (
         <ViewAccountModal
           accountData={selectedAccount}
+          groupedActiveServices={groupedActiveServices}
           onClose={() => {
             setShowViewModal(false);
             setSelectedAccount(null);
@@ -354,6 +365,7 @@ export default function AccountsAgencyPage() {
           }}
           onSuccess={fetchData}
           initialData={editingAccount}
+          groupedActiveServices={groupedActiveServices}
         />
       )}
     </section>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface ViewAccountModalProps {
   onClose: () => void;
   accountData: any;
+  groupedActiveServices: any[];
 }
 
 const roleLabels: Record<number, string> = {
@@ -56,9 +57,11 @@ const permissionGroups = [
 export default function ViewAccountModal({
   onClose,
   accountData,
+  groupedActiveServices,
 }: ViewAccountModalProps) {
   const [visible, setVisible] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [assignedServiceIds, setAssignedServiceIds] = useState<string[]>([]);
 
   const closeWithFade = () => {
     setVisible(false);
@@ -69,6 +72,12 @@ export default function ViewAccountModal({
     if (accountData?.permission_ids) {
       setPermissions(accountData.permission_ids.split(","));
     }
+
+    const assigned = accountData.assigned_service_ids
+      ? accountData.assigned_service_ids.split(",")
+      : [];
+    setAssignedServiceIds(assigned);
+
     setTimeout(() => setVisible(true), 10);
   }, [accountData]);
 
@@ -163,6 +172,39 @@ export default function ViewAccountModal({
                           className="w-4 h-4 accent-blue-600"
                         />
                         {p.label}
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {accountData.role_id === 21 && groupedActiveServices.length > 0 && (
+            <div>
+              <label className="block mt-6 mb-1 font-medium text-gray-700">
+                Dịch vụ được hỗ trợ
+              </label>
+              <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto border border-blue-200 md:grid-cols-2 bg-blue-50/50 rounded-xl max-h-64">
+                {groupedActiveServices.map((group) => (
+                  <div key={group.id}>
+                    <div className="mb-2 font-semibold text-blue-700">
+                      {group.name}
+                    </div>
+                    {group.services.map((service: any) => (
+                      <label
+                        key={service.id}
+                        className="flex items-center gap-2 mb-1 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={assignedServiceIds.includes(
+                            service.id.toString()
+                          )}
+                          disabled
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        {service.name}
                       </label>
                     ))}
                   </div>
