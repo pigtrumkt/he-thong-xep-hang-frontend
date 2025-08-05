@@ -104,6 +104,10 @@ export default function AddOrUpdateAccountModal({
     return "";
   };
 
+  const currentUserPermissions = globalParams?.user?.permission_ids
+    ? globalParams.user.permission_ids.split(",")
+    : [];
+
   const closeWithFade = () => {
     setVisible(false);
     setTimeout(() => onClose(), 100);
@@ -159,6 +163,13 @@ export default function AddOrUpdateAccountModal({
       defaultPermissions = ["130", "140", "150"];
     } else {
       defaultPermissions = [];
+    }
+
+    // Nếu người tạo không phải là admin root thì lọc lại theo quyền họ đang có
+    if ([12, 21].includes(currentUserRole)) {
+      defaultPermissions = defaultPermissions.filter((p) =>
+        currentUserPermissions.includes(p)
+      );
     }
 
     setForm((prev) => ({
@@ -419,6 +430,10 @@ export default function AddOrUpdateAccountModal({
                               };
                             });
                           }}
+                          disabled={
+                            [12, 21].includes(currentUserRole) &&
+                            !currentUserPermissions.includes(p.id.toString())
+                          }
                         />
                         {p.label}
                       </label>
@@ -429,7 +444,7 @@ export default function AddOrUpdateAccountModal({
               </div>
             </div>
           )}
-
+          {errorText("message")}
           <div className="pt-4 text-right">
             <button
               type="submit"
