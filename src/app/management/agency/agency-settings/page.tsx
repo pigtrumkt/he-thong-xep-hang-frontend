@@ -39,8 +39,8 @@ export default function AgencySettingsPage() {
     max_ticket_per_day_online: 0,
   });
 
-  const [isActive, setIsActive] = useState(true);
-  const { popupMessage } = usePopup();
+  const [isActiveLocal, setIsActiveLocal] = useState(true);
+  const { popupMessage, popupConfirmRed } = usePopup();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const errorText = (field: string) => {
@@ -76,7 +76,7 @@ export default function AgencySettingsPage() {
           agency.min_time_between_ticket_online || 0,
         max_ticket_per_day_online: agency.max_ticket_per_day_online || 0,
       });
-      setIsActive(agency.status === 1);
+      setIsActiveLocal(agency.status_local === 1);
     } else {
       popupMessage({ description: "Không thể tải thông tin cơ quan" });
     }
@@ -125,6 +125,39 @@ export default function AgencySettingsPage() {
       popupMessage({
         title: "Cập nhật trạng thái thất bại",
         description: "Mạng không ổn định hoặc máy chủ không phản hồi.",
+      });
+    }
+  };
+
+  const handleToggleStatusLocal = async () => {
+    const newStatus = isActiveLocal ? 0 : 1;
+
+    const confirmed = await popupConfirmRed({
+      title: isActiveLocal
+        ? "Xác nhận tạm dừng hoạt động?"
+        : "Xác nhận tiếp tục hoạt động?",
+      description: isActiveLocal
+        ? "Sau khi tạm dừng, hệ thống sẽ ngừng lấy số và ngừng phục vụ."
+        : "Cơ quan sẽ được hoạt động trở lại.",
+    });
+
+    if (!confirmed) return;
+
+    const res = await apiPost("/agencies/updateStatusLocal", {
+      status: newStatus,
+    });
+
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      setIsActiveLocal(!!newStatus);
+    } else {
+      popupMessage({
+        title: "Cập nhật thất bại",
+        description: "Không thể cập nhật trạng thái hoạt động.",
       });
     }
   };
@@ -318,14 +351,14 @@ export default function AgencySettingsPage() {
         <div className="flex flex-col justify-end gap-6 pt-6 border-t sm:flex-row border-slate-200">
           <button
             type="button"
-            onClick={() => setIsActive(!isActive)}
+            onClick={handleToggleStatusLocal}
             className={`px-6 py-3 font-semibold rounded-lg shadow-sm transition-colors  ${
-              isActive
+              isActiveLocal
                 ? "bg-red-400 text-white hover:bg-red-500"
                 : "bg-blue-100 text-blue-600 hover:bg-blue-200"
             }`}
           >
-            {isActive ? "Tạm dừng hoạt động" : "Tiếp tục hoạt động"}
+            {isActiveLocal ? "Tạm dừng hoạt động" : "Tiếp tục hoạt động"}
           </button>
           <button
             type="submit"
