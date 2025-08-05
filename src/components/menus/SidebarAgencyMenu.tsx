@@ -21,16 +21,32 @@ export default function SidebarAgencyMenu() {
     return null;
   }
 
+  const showGroupOperate = hasAccess({
+    allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+    allowedPermissions: [PermissionEnum.CALL],
+  });
+  const showGroupManagement = hasAccess({
+    allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+    allowedPermissions: [
+      PermissionEnum.COUNTER_VIEW,
+      PermissionEnum.SERVICE_VIEW,
+      PermissionEnum.ACCOUNT_VIEW,
+      PermissionEnum.SETTINGS_VIEW,
+    ],
+  });
+
   return (
     <>
       {/* Vận hành */}
       <div>
-        <div className="flex items-center mb-2">
-          <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
-          <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
-            Vận hành
-          </span>
-        </div>
+        {showGroupOperate && (
+          <div className="flex items-center mb-2">
+            <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
+            <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
+              Vận hành
+            </span>
+          </div>
+        )}
         <ul className="flex flex-col gap-1 font-semibold text-white">
           {hasAccess({
             allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
@@ -62,12 +78,14 @@ export default function SidebarAgencyMenu() {
       </div>
       {/* Quản lý */}
       <div>
-        <div className="flex items-center mb-2">
-          <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
-          <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
-            Quản lý
-          </span>
-        </div>
+        {showGroupManagement && (
+          <div className="flex items-center mb-2">
+            <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
+            <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
+              Quản lý
+            </span>
+          </div>
+        )}
         <ul className="flex flex-col gap-1 font-semibold text-white">
           {hasAccess({
             allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],

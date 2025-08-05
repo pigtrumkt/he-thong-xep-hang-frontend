@@ -17,14 +17,26 @@ export default function SidebarCentralMenu() {
     return null;
   }
 
+  const showGroupManagement = hasAccess({
+    allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
+    allowedPermissions: [
+      PermissionEnum.SERVICE_GROUP_VIEW_SUPER,
+      PermissionEnum.SERVICE_VIEW_SUPER,
+      PermissionEnum.AGENCY_VIEW_SUPER,
+      PermissionEnum.ACCOUNT_VIEW_SUPER,
+    ],
+  });
+
   return (
     <div>
-      <div className="flex items-center mb-2">
-        <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
-        <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
-          Quản lý
-        </span>
-      </div>
+      {showGroupManagement && (
+        <div className="flex items-center mb-2">
+          <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
+          <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
+            Quản lý
+          </span>
+        </div>
+      )}
       <ul className="flex flex-col gap-1 font-semibold text-white">
         {hasAccess({
           allowedRoles: [RoleEnum.SUPER_ADMIN_ROOT],
