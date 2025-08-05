@@ -1,0 +1,204 @@
+"use client";
+
+import { RoleEnum } from "@/constants/Enum";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useGlobalParams } from "../ClientWrapper";
+import { useEffect, useState } from "react";
+import { usePopup } from "../popup/PopupContext";
+export default function SidebarDeviceMenu() {
+  const pathname = usePathname();
+  const { hasAccess } = useGlobalParams();
+  const { popupConfirm } = usePopup();
+
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("audio-enabled");
+      return saved === "true";
+    }
+
+    return false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("audio-enabled", String(isAudioEnabled));
+  }, [isAudioEnabled]);
+
+  if (
+    !hasAccess({
+      allowedRoles: [RoleEnum.DEVICE],
+      allowedPermissions: [],
+    })
+  ) {
+    return null;
+  }
+
+  return (
+    <>
+      <div>
+        <div className="flex items-center mb-2">
+          <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
+          <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
+            Màn hình
+          </span>
+        </div>
+        <ul className="flex flex-col gap-1 font-semibold text-white">
+          <li>
+            <Link
+              href="/management/device/take-number"
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                pathname === "/management/device/take-number" ? "active" : ""
+              }`}
+            >
+              <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M4 4h16v16H4z" />
+                </svg>
+              </span>
+              Màn hình lấy số
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/management/device/counter-status"
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                pathname === "/management/device/counter-status" ? "active" : ""
+              }`}
+            >
+              <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <rect x="3" y="7" width="18" height="13" rx="2" />
+                  <path d="M16 3v4M8 3v4" />
+                </svg>
+              </span>
+              Màn hình trạng thái quầy
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/management/device/service-feedback"
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                pathname === "/management/device/service-feedback"
+                  ? "active"
+                  : ""
+              }`}
+            >
+              <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  viewBox="0 0 24 24"
+                >
+                  <polygon points="12 17 7 20 8.5 14 4 10.5 10 10 12 4 14 10 20 10.5 15.5 14 17 20 12 17" />
+                </svg>
+              </span>
+              Màn hình đánh giá
+            </Link>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div className="flex items-center mb-2">
+          <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
+          <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
+            Âm thanh
+          </span>
+        </div>
+        <ul className="flex flex-col gap-1 font-semibold text-white select-none">
+          <li className="relative overflow-hidden transition-all duration-300 ease-out border group rounded-xl bg-gradient-to-r from-slate-800/50 to-slate-700/30 backdrop-blur-sm border-slate-600/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20">
+            <label className="flex items-center px-4 py-4 transition-all duration-300 cursor-pointer hover:bg-gradient-to-r hover:from-blue-600/10 hover:to-purple-600/10">
+              {/* Custom Checkbox */}
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isAudioEnabled}
+                  onChange={async (e) => {
+                    const nextValue = !isAudioEnabled;
+                    const confirm = await popupConfirm({
+                      title: nextValue
+                        ? "Bật phát âm thanh"
+                        : "Tắt phát âm thanh",
+                    });
+
+                    if (confirm) {
+                      setIsAudioEnabled(nextValue);
+                    }
+                  }}
+                  className="sr-only peer"
+                />
+              </div>
+
+              {/* Text with Icon */}
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-lg transition-all duration-300 ${
+                    isAudioEnabled
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-slate-600/30 text-slate-400 group-hover:text-slate-300"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.788L4.036 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.036l4.347-3.788a1 1 0 011.617.788zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.984 3.984 0 00-1.172-2.828 1 1 0 010-1.415z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+
+                <span
+                  className={`text-lg transition-all duration-300 ${
+                    isAudioEnabled
+                      ? "text-green-400 font-semibold"
+                      : "text-slate-200 group-hover:text-white"
+                  }`}
+                >
+                  Phát âm thanh
+                </span>
+              </div>
+
+              {/* Status Indicator */}
+              <div className="flex items-center gap-2 ml-auto">
+                <div
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    isAudioEnabled
+                      ? "bg-green-400 animate-pulse"
+                      : "bg-slate-500"
+                  }`}
+                />
+                <span
+                  className={`text-sm font-medium transition-all duration-300 ${
+                    isAudioEnabled
+                      ? "text-green-300"
+                      : "text-slate-400 group-hover:text-slate-300"
+                  }`}
+                >
+                  {isAudioEnabled ? "BẬT" : "TẮT"}
+                </span>
+              </div>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </>
+  );
+}

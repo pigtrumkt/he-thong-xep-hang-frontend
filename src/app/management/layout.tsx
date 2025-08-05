@@ -8,6 +8,7 @@ import { apiPost } from "@/lib/api";
 import PopupChangePassword from "@/components/popup/PopupChangePassword";
 import { useRouter } from "next/navigation";
 import SidebarAgencyMenu from "@/components/menus/SidebarAgencyMenu";
+import SidebarDeviceMenu from "@/components/menus/SidebarDeviceMenu";
 
 function applyDropdownToggle() {
   const avatar = document.getElementById("avatarBtn");
@@ -229,6 +230,7 @@ export default function ManagementLayout({
           <nav className="flex flex-col gap-8">
             <SidebarCentralMenu />
             <SidebarAgencyMenu />
+            <SidebarDeviceMenu />
           </nav>
         </aside>
         <main className="w-full h-[calc(100vh-4rem)] overflow-y-auto transition-all bg-blue-100">

@@ -46,7 +46,11 @@ export default async function RootLayout({
       });
 
       if (res.ok) {
-        user = await res.json();
+        const userRes = await res.json();
+        user = {
+          ...userRes,
+          token,
+        };
       }
     } catch (err) {
       console.error("Lỗi gọi API /accounts/me:", err);
