@@ -239,8 +239,10 @@ export default function AccountsManagementPage() {
                         title="Sửa"
                         className="p-2 rounded-lg hover:bg-blue-100 disabled:opacity-20"
                         disabled={
-                          globalParams.user.role_id == 2 &&
-                          acc.role_id <= globalParams.user.role_id
+                          (globalParams.user.role_id != 1 &&
+                            acc.id === globalParams.user.id) ||
+                          (globalParams.user.role_id == 2 &&
+                            acc.role_id <= globalParams.user.role_id)
                         }
                         onClick={() => {
                           setEditingAccount(acc);

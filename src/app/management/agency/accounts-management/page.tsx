@@ -242,6 +242,8 @@ export default function AccountsAgencyPage() {
                         title="Sửa"
                         className="p-2 rounded-lg hover:bg-blue-100 disabled:opacity-20"
                         disabled={
+                          (globalParams.user.role_id != 11 &&
+                            acc.id === globalParams.user.id) ||
                           (globalParams.user.role_id == 12 &&
                             acc.role_id <= 12) ||
                           (globalParams.user.role_id == 21 && acc.role_id < 21)
