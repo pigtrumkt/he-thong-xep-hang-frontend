@@ -226,62 +226,80 @@ export default function AddOrUpdateAccountModal({
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="relative w-full max-w-2xl p-8 bg-white border border-blue-200 shadow-2xl rounded-3xl">
-        <button
-          onClick={closeWithFade}
-          className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
-        >
-          ×
-        </button>
+      <div className="justify-center w-full h-full p-10 overflow-auto">
+        <div className="relative w-full max-w-2xl p-8 m-auto bg-white border border-blue-200 shadow-2xl rounded-3xl">
+          <button
+            onClick={closeWithFade}
+            className="absolute text-2xl text-gray-400 top-4 right-4 hover:text-red-500"
+          >
+            ×
+          </button>
 
-        <h2 className="pb-3 mb-6 text-2xl font-bold text-blue-700 border-b">
-          {initialData ? "Cập nhật tài khoản" : "Thêm tài khoản"}
-        </h2>
+          <h2 className="pb-3 mb-6 text-2xl font-bold text-blue-700 border-b">
+            {initialData ? "Cập nhật tài khoản" : "Thêm tài khoản"}
+          </h2>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 text-sm text-gray-800"
-        >
-          {/* Username + Password or Full Name */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">
-                Tên đăng nhập <span className="text-red-400">*</span>
-              </label>
-              <input
-                name="username"
-                autoComplete="off"
-                value={form.username}
-                onChange={handleChange}
-                className={inputClass}
-                required
-                disabled={!!initialData}
-              />
-              {errorText("username")}
-            </div>
-
-            {!initialData ? (
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 text-sm text-gray-800"
+          >
+            {/* Username + Password or Full Name */}
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block mb-1 font-medium">
-                  Mật khẩu <span className="text-red-400">*</span>
+                  Tên đăng nhập <span className="text-red-400">*</span>
                 </label>
                 <input
-                  name="password"
-                  type="text"
-                  autoComplete="new-password"
-                  style={
-                    {
-                      WebkitTextSecurity: "disc",
-                    } as React.CSSProperties
-                  }
-                  value={form.password}
+                  name="username"
+                  autoComplete="off"
+                  value={form.username}
                   onChange={handleChange}
                   className={inputClass}
                   required
+                  disabled={!!initialData}
                 />
-                {errorText("password")}
+                {errorText("username")}
               </div>
-            ) : (
+
+              {!initialData ? (
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Mật khẩu <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    name="password"
+                    type="text"
+                    autoComplete="new-password"
+                    style={
+                      {
+                        WebkitTextSecurity: "disc",
+                      } as React.CSSProperties
+                    }
+                    value={form.password}
+                    onChange={handleChange}
+                    className={inputClass}
+                    required
+                  />
+                  {errorText("password")}
+                </div>
+              ) : (
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Họ và tên <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    name="full_name"
+                    value={form.full_name}
+                    onChange={handleChange}
+                    className={inputClass}
+                    required
+                  />
+                  {errorText("full_name")}
+                </div>
+              )}
+            </div>
+
+            {!initialData && (
               <div>
                 <label className="block mb-1 font-medium">
                   Họ và tên <span className="text-red-400">*</span>
@@ -296,208 +314,193 @@ export default function AddOrUpdateAccountModal({
                 {errorText("full_name")}
               </div>
             )}
-          </div>
 
-          {!initialData && (
-            <div>
-              <label className="block mb-1 font-medium">
-                Họ và tên <span className="text-red-400">*</span>
-              </label>
-              <input
-                name="full_name"
-                value={form.full_name}
-                onChange={handleChange}
-                className={inputClass}
-                required
-              />
-              {errorText("full_name")}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">
-                Giới tính <span className="text-red-400">*</span>
-              </label>
-              <select
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                className={inputClass}
-                required
-              >
-                <option value="1">Nam</option>
-                <option value="0">Nữ</option>
-              </select>
-              {errorText("gender")}
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">Chức danh</label>
-              <input
-                name="position"
-                value={form.position}
-                onChange={handleChange}
-                className={inputClass}
-              />
-              {errorText("position")}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">Số điện thoại</label>
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                className={inputClass}
-              />
-              {errorText("phone")}
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">Email</label>
-              <input
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                className={inputClass}
-              />
-              {errorText("email")}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">
-                Vai trò <span className="text-red-400">*</span>
-              </label>
-              <select
-                name="role_id"
-                value={form.role_id}
-                onChange={(e) => {
-                  handleChange(e);
-                  handleChangeRole(e);
-                }}
-                className={`${inputClass} ${
-                  errors.role_id ? "border-red-400" : ""
-                }`}
-                disabled={initialData?.id === globalParams?.user?.id}
-                required
-              >
-                <option value="">-- Chọn vai trò --</option>
-                {allowedRoles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-              {errorText("role_id")}
-            </div>
-          </div>
-
-          {[12, 21].includes(Number(form.role_id)) && (
-            <div>
-              <label className="block mb-1 font-medium">Phân quyền</label>
-              <div className="grid grid-cols-2 gap-2 p-3 overflow-y-auto border rounded-lg">
-                {permissionGroups.map((group, gi) => (
-                  <div key={gi}>
-                    <div className="mb-1 font-semibold text-blue-700">
-                      {group.label}
-                    </div>
-                    {group.children.map((p) => (
-                      <label
-                        key={p.id}
-                        className="flex items-center gap-2 mb-1 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          value={p.id}
-                          checked={form.permission_ids.includes(
-                            p.id.toString()
-                          )}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            const value = p.id.toString();
-                            setForm((prev) => {
-                              const current = prev.permission_ids;
-                              return {
-                                ...prev,
-                                permission_ids: checked
-                                  ? [...current, value]
-                                  : current.filter((id) => id !== value),
-                              };
-                            });
-                          }}
-                          disabled={
-                            [12, 21].includes(currentUserRole) &&
-                            !currentUserPermissions.includes(p.id.toString())
-                          }
-                        />
-                        {p.label}
-                      </label>
-                    ))}
-                  </div>
-                ))}
-                {errorText("permission_ids")}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 font-medium">
+                  Giới tính <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className={inputClass}
+                  required
+                >
+                  <option value="1">Nam</option>
+                  <option value="0">Nữ</option>
+                </select>
+                {errorText("gender")}
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Chức danh</label>
+                <input
+                  name="position"
+                  value={form.position}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+                {errorText("position")}
               </div>
             </div>
-          )}
 
-          {Number(form.role_id) === 21 && groupedActiveServices.length > 0 && (
-            <div>
-              <label className="block mb-1 font-medium">
-                Dịch vụ được hỗ trợ
-              </label>
-              <div className="grid grid-cols-2 gap-2 p-3 overflow-y-auto border rounded-lg max-h-64">
-                {groupedActiveServices.map((group) => (
-                  <div key={group.id}>
-                    <div className="mb-1 font-semibold text-blue-700">
-                      {group.name}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 font-medium">Số điện thoại</label>
+                <input
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+                {errorText("phone")}
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Email</label>
+                <input
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+                {errorText("email")}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 font-medium">
+                  Vai trò <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="role_id"
+                  value={form.role_id}
+                  onChange={(e) => {
+                    handleChange(e);
+                    handleChangeRole(e);
+                  }}
+                  className={`${inputClass} ${
+                    errors.role_id ? "border-red-400" : ""
+                  }`}
+                  disabled={initialData?.id === globalParams?.user?.id}
+                  required
+                >
+                  <option value="">-- Chọn vai trò --</option>
+                  {allowedRoles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
+                {errorText("role_id")}
+              </div>
+            </div>
+
+            {[12, 21].includes(Number(form.role_id)) && (
+              <div>
+                <label className="block mb-1 font-medium">Phân quyền</label>
+                <div className="grid grid-cols-2 gap-2 p-3 overflow-y-auto border rounded-lg">
+                  {permissionGroups.map((group, gi) => (
+                    <div key={gi}>
+                      <div className="mb-1 font-semibold text-blue-700">
+                        {group.label}
+                      </div>
+                      {group.children.map((p) => (
+                        <label
+                          key={p.id}
+                          className="flex items-center gap-2 mb-1 text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            value={p.id}
+                            checked={form.permission_ids.includes(
+                              p.id.toString()
+                            )}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              const value = p.id.toString();
+                              setForm((prev) => {
+                                const current = prev.permission_ids;
+                                return {
+                                  ...prev,
+                                  permission_ids: checked
+                                    ? [...current, value]
+                                    : current.filter((id) => id !== value),
+                                };
+                              });
+                            }}
+                            disabled={
+                              [12, 21].includes(currentUserRole) &&
+                              !currentUserPermissions.includes(p.id.toString())
+                            }
+                          />
+                          {p.label}
+                        </label>
+                      ))}
                     </div>
-                    {group.services.map((s: any) => (
-                      <label
-                        key={s.id}
-                        className="flex items-center gap-2 mb-1 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          value={s.id}
-                          checked={form.assigned_service_ids.includes(
-                            s.id.toString()
-                          )}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            const value = s.id.toString();
-                            setForm((prev) => ({
-                              ...prev,
-                              assigned_service_ids: checked
-                                ? [...prev.assigned_service_ids, value]
-                                : prev.assigned_service_ids.filter(
-                                    (id) => id !== value
-                                  ),
-                            }));
-                          }}
-                        />
-                        {s.name}
-                      </label>
+                  ))}
+                  {errorText("permission_ids")}
+                </div>
+              </div>
+            )}
+
+            {Number(form.role_id) === 21 &&
+              groupedActiveServices.length > 0 && (
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Dịch vụ được hỗ trợ
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 p-3 overflow-y-auto border rounded-lg max-h-64">
+                    {groupedActiveServices.map((group) => (
+                      <div key={group.id}>
+                        <div className="mb-1 font-semibold text-blue-700">
+                          {group.name}
+                        </div>
+                        {group.services.map((s: any) => (
+                          <label
+                            key={s.id}
+                            className="flex items-center gap-2 mb-1 text-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              value={s.id}
+                              checked={form.assigned_service_ids.includes(
+                                s.id.toString()
+                              )}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                const value = s.id.toString();
+                                setForm((prev) => ({
+                                  ...prev,
+                                  assigned_service_ids: checked
+                                    ? [...prev.assigned_service_ids, value]
+                                    : prev.assigned_service_ids.filter(
+                                        (id) => id !== value
+                                      ),
+                                }));
+                              }}
+                            />
+                            {s.name}
+                          </label>
+                        ))}
+                      </div>
                     ))}
                   </div>
-                ))}
-              </div>
-              {errorText("assigned_service_ids")}
-            </div>
-          )}
+                  {errorText("assigned_service_ids")}
+                </div>
+              )}
 
-          {errorText("message")}
-          <div className="pt-4 text-right">
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition shadow rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
-            >
-              {initialData ? "Cập nhật" : "Lưu lại"}
-            </button>
-          </div>
-        </form>
+            {errorText("message")}
+            <div className="pt-4 text-right">
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition shadow rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+              >
+                {initialData ? "Cập nhật" : "Lưu lại"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
