@@ -37,7 +37,10 @@ export default function ClientWrapper({
   const [globalParams, setGlobalParams] = useState(value ?? null);
 
   const hasAccess = (config: AccessConfig): boolean => {
-    if (!globalParams.user) return false;
+    if (!globalParams.user && !globalParams.user.id) {
+      router.replace("/login");
+      return false;
+    }
 
     const { allowedRoles = [], allowedPermissions = [] } = config;
 
@@ -46,6 +49,7 @@ export default function ClientWrapper({
     }
 
     if (
+      globalParams.user.permissions &&
       allowedPermissions.some((p) => globalParams.user.permissions.includes(p))
     ) {
       return true;
