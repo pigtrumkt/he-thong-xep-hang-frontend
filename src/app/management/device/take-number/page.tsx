@@ -77,8 +77,8 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col items-center w-full h-full bg-gradient-to-br from-blue-50 to-sky-100">
-      <div className="w-full max-w-[100rem] pt-8 px-8 mt-10 flex-1 flex flex-col">
+    <div className="flex flex-col items-center w-full h-full pt-10 bg-gradient-to-br from-blue-50 to-sky-100">
+      <div className="w-full h-full max-w-[100rem] pt-8 px-8 flex-1 flex flex-col">
         <div className="flex items-center gap-6 mb-10 ml-7">
           <img
             src="/img/vn-circle.png"
@@ -100,7 +100,7 @@ export default function Page() {
             {services.map((service) => (
               <button
                 key={service.id}
-                className="py-10 text-3xl font-bold text-blue-600 transition-all bg-white rounded-3xl drop-shadow-md active:scale-98 active:drop-shadow-sm active:bg-blue-50"
+                className="px-4 py-10 text-3xl font-bold text-blue-600 transition-all bg-white rounded-3xl drop-shadow-md active:scale-98 active:drop-shadow-sm active:bg-blue-50"
                 onClick={() => {
                   setSelectedService(service);
                   setShowConfirm(true);
