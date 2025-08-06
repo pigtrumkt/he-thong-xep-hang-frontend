@@ -1,31 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const services = [
-  "Cấp CCCD/CMND",
-  "Khai sinh",
-  "Đăng ký hôn nhân",
-  "Giấy phép lái xe",
-  "Gia hạn hộ chiếu",
-  "Sổ đỏ/Sổ hồng",
-  "Chứng thực văn bản",
-  "Tạm trú/Tạm vắng",
-  "Xác nhận độc thân",
-  "Chuyển hộ khẩu",
-  "Thẻ BHYT",
-  "Giấy tờ dân sự",
-  "Giấy tờ dân sự",
-  "Giấy tờ dân sự",
-  "Giấy tờ dân sự",
-];
+import { apiGet, apiPost } from "@/lib/api";
 
 export default function Page() {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [services, setServices] = useState<{ id: number; name: string }[]>([]);
+  const [selectedService, setSelectedService] = useState<any>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [queueNumber] = useState("1001");
   const [countdown, setCountdown] = useState(10);
+  const [ticketData, setTicketData] = useState<any>(null);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   useEffect(() => {
     if (!showSuccess) return;
@@ -34,6 +22,7 @@ export default function Page() {
         if (prev <= 1) {
           clearInterval(timer);
           setShowSuccess(false);
+          setTicketData(null);
           return 10;
         }
         return prev - 1;
@@ -41,6 +30,31 @@ export default function Page() {
     }, 1000);
     return () => clearInterval(timer);
   }, [showSuccess]);
+
+  async function fetchServices() {
+    const res = await apiGet("/services/findGroupedActiveServicesInAgency");
+    if (res.status === 200) {
+      const flat = (res.data || []).flatMap((g: any) => g.services || []);
+      setServices(flat);
+    }
+  }
+
+  async function handleGetNumber(serviceId: number) {
+    try {
+      const result = await apiPost("/tickets/get-number", {
+        service_id: serviceId,
+        source: 1,
+      });
+      if (result.status !== 201 && result.status !== 200) {
+        throw new Error(result.data?.message || "Lỗi lấy số");
+      }
+      setTicketData(result.data);
+      setShowSuccess(true);
+      setCountdown(10);
+    } catch (err: any) {
+      alert(err.message);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-50 to-sky-100">
@@ -63,31 +77,30 @@ export default function Page() {
 
         <div className="overflow-y-auto max-h-[calc(100vh-15rem)] p-8 flex-1 custom-scroll">
           <div className="grid grid-cols-1 gap-8 pr-4 md:grid-cols-2">
-            {services.map((service, index) => (
+            {services.map((service) => (
               <button
-                key={index}
+                key={service.id}
                 className="py-10 text-3xl font-bold text-blue-600 transition-all bg-white rounded-3xl drop-shadow-md active:scale-98 active:drop-shadow-sm active:bg-blue-50"
                 onClick={() => {
                   setSelectedService(service);
                   setShowConfirm(true);
                 }}
               >
-                {service}
+                {service.name}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Modal xác nhận */}
-      {showConfirm && (
+      {showConfirm && selectedService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center">
             <h2 className="mb-8 text-4xl font-bold text-blue-900">
               XÁC NHẬN DỊCH VỤ
             </h2>
             <div className="p-6 mb-8 text-3xl font-bold text-blue-600 border border-blue-200 bg-blue-50 rounded-2xl">
-              {selectedService}
+              {selectedService.name}
             </div>
             <div className="flex justify-center gap-6">
               <button
@@ -99,8 +112,7 @@ export default function Page() {
               <button
                 onClick={() => {
                   setShowConfirm(false);
-                  setShowSuccess(true);
-                  setCountdown(10);
+                  handleGetNumber(selectedService.id);
                 }}
                 className="px-10 py-4 bg-blue-600 text-white text-2xl rounded-2xl w-[12rem]"
               >
@@ -111,8 +123,7 @@ export default function Page() {
         </div>
       )}
 
-      {/* Modal thành công */}
-      {showSuccess && (
+      {showSuccess && ticketData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center">
             <h2 className="mb-8 text-4xl font-black text-blue-900">
@@ -120,22 +131,37 @@ export default function Page() {
             </h2>
             <div className="p-8 mb-4 text-blue-600 border border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl">
               <p className="text-[2rem] font-bold text-blue-800 uppercase">
-                UBND xã Tân Quang
+                {ticketData.agency_name || "Tên cơ quan"}
               </p>
-              <p className="text-[1.5rem] mt-1">Địa chỉ: Tỉnh Tuyên Quang</p>
-              <p className="text-[1.5rem]">Điện thoại: 0982984984</p>
+              <p className="text-[1.5rem] mt-1">
+                Địa chỉ: {ticketData.agency_address || "-"}
+              </p>
+              <p className="text-[1.5rem]">
+                Điện thoại: {ticketData.agency_phone || "-"}
+              </p>
               <div className="mt-4 mb-6 border-t border-blue-300 border-dashed" />
-              <p className="text-[2.5rem] font-bold">{selectedService}</p>
+              <p className="text-[2.5rem] font-bold">
+                {ticketData.service_name}
+              </p>
               <div className="text-[8rem] font-black text-blue-600 mb-8">
-                {queueNumber}
+                {ticketData.queue_number}
               </div>
               <p className="text-[1.5rem]">
-                Trước bạn còn <strong>5</strong> người, vui lòng chờ đến lượt.
+                Trước bạn còn <strong>{ticketData.waitingAhead}</strong> người,
+                vui lòng chờ đến lượt.
               </p>
               <div className="mt-4 mb-2 border-t border-blue-300 border-dashed" />
               <div className="flex justify-end text-[1.2rem]">
                 <span className="mr-1">Thời gian in:</span>
-                <span>08:00 - 15/08/2025</span>
+                <span>
+                  {new Date(ticketData.created_at).toLocaleString("vi-VN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
               </div>
             </div>
 
