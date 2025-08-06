@@ -104,3 +104,18 @@ aside .active svg {
 .animate-fade-in-out-popup {
   animation: fade-in-out-popup 4s ease forwards;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #inDay,
+  #inDay * {
+    visibility: visible;
+  }
+  #inDay {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}

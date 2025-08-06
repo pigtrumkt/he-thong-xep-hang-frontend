@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
-import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
   const parentRef = useRef<HTMLDivElement | null>(null);
+
   const [services, setServices] = useState<{ id: number; name: string }[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -87,6 +87,10 @@ export default function Page() {
       setTicketData(result.data);
       setShowSuccess(true);
       setCountdown(10);
+
+      setTimeout(() => {
+        printTicket();
+      }, 500);
     } catch (err: any) {
       showMessage({
         title: "LẤY SỐ THẤT BẠI",
@@ -103,6 +107,10 @@ export default function Page() {
     } else {
       document.exitFullscreen?.();
     }
+  };
+
+  const printTicket = () => {
+    window.print();
   };
 
   return (
@@ -198,7 +206,10 @@ export default function Page() {
             <h2 className="mb-8 text-4xl font-black text-blue-900">
               PHIẾU CỦA BẠN
             </h2>
-            <div className="p-8 mb-4 text-blue-600 border border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl">
+            <div
+              id="inDay"
+              className="p-8 mb-4 text-blue-600 border border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl"
+            >
               <p className="text-[2rem] font-bold text-blue-800 uppercase">
                 {ticketData.agency_name || "Tên cơ quan"}
               </p>
