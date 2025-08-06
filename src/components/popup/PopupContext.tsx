@@ -190,7 +190,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             )}
             <button
               onClick={closePopupMessage}
-              className="px-4 py-2 mt-4 text-white bg-blue-400 rounded-lg hover:bg-blue-500"
+              className="px-8 py-2 mt-4 text-white bg-blue-400 rounded-lg hover:bg-blue-500"
             >
               OK
             </button>
