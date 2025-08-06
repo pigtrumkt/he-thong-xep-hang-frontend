@@ -59,7 +59,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 font-inter">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200">
       <div className="fixed inset-0 z-20 flex items-center justify-center px-2">
         <div className="flex flex-col md:flex-row w-[60rem] bg-white/95 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
           {/* Intro trái */}
@@ -70,7 +70,7 @@ export default function LoginPage() {
                 className="text-5xl text-white"
               />
             </div>
-            <h1 className="text-4xl font-extrabold leading-tight text-center drop-shadow-lg mb-7">
+            <h1 className="text-4xl font-bold leading-tight text-center drop-shadow-lg mb-7">
               Hệ Thống Xếp Hàng
             </h1>
             <ul className="space-y-4 text-lg">

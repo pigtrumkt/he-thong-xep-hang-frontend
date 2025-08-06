@@ -117,7 +117,7 @@ export default function ManagementLayout({
     <>
       {/* Header */}
       <header className="relative flex items-center justify-between w-full h-16 px-10 border-b border-blue-200 shadow-md bg-white/90 backdrop-blur z-100">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 select-none">
           <div className="p-2 shadow-lg bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl">
             <svg
               className="w-6 h-6 text-white"
@@ -142,7 +142,7 @@ export default function ManagementLayout({
           </span>
           <button
             id="avatarBtn"
-            className="flex items-center justify-center w-10 h-10 overflow-hidden bg-blue-100 border-2 border-blue-200 rounded-full shadow focus:ring-2 focus:ring-blue-400"
+            className="flex items-center justify-center w-10 h-10 overflow-hidden bg-blue-100 border-2 border-blue-200 rounded-full shadow select-none focus:ring-2 focus:ring-blue-400"
           >
             {host && (
               <img
@@ -226,7 +226,7 @@ export default function ManagementLayout({
       </header>
 
       <div className="min-w-full flex h-[calc(100vh-4rem)]">
-        <aside className="min-w-[18rem] bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 border-r border-blue-700 shadow-lg px-3 py-6 overflow-y-auto">
+        <aside className="min-w-[18rem] bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700 border-r border-blue-700 shadow-lg px-3 py-6 overflow-y-auto select-none">
           <nav className="flex flex-col gap-8">
             <SidebarCentralMenu />
             <SidebarAgencyMenu />

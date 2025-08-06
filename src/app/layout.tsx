@@ -1,18 +1,11 @@
 import { cookies } from "next/headers";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Inter } from "next/font/google";
 import ClientWrapper from "@/components/ClientWrapper";
 
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
-
-const inter = Inter({
-  subsets: ["vietnamese"], // hoặc ['latin'] nếu không cần Tiếng Việt
-  weight: ["300", "400", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Hệ thống xếp hàng",
@@ -59,9 +52,7 @@ export default async function RootLayout({
 
   return (
     <html lang="vi" data-scroll-behavior="smooth">
-      <body
-        className={`${inter.className} text-[18px] min-h-[100vh] min-w-[800px]`}
-      >
+      <body className="text-[18px] min-h-[100vh] min-w-[800px]">
         <ClientWrapper value={{ user }}>{children}</ClientWrapper>
       </body>
     </html>

@@ -77,7 +77,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-50 to-sky-100">
+    <div className="flex flex-col items-center w-full h-full bg-gradient-to-br from-blue-50 to-sky-100">
       <div className="w-full max-w-[100rem] pt-8 px-8 mt-10 flex-1 flex flex-col">
         <div className="flex items-center gap-6 mb-10 ml-7">
           <img
@@ -185,28 +185,134 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="flex justify-center mt-10 text-lg font-medium text-blue-500">
-              <span className="text-[2.2rem]">🖨️</span>
-              <span className="text-[1.8rem] ml-2">Đang in phiếu</span>
-              <span className="flex gap-1 mt-2 ml-2">
-                <span className="w-2 h-2 bg-blue-600 rounded-full dot animate-bounce"></span>
-                <span className="w-2 h-2 delay-100 bg-blue-600 rounded-full dot animate-bounce"></span>
-                <span className="w-2 h-2 delay-200 bg-blue-600 rounded-full dot animate-bounce"></span>
-              </span>
+            <div className="flex justify-center mt-10">
+              <div className="flex items-center gap-2 text-lg font-medium text-blue-500">
+                <span className="text-[2.2rem]">🖨️</span>
+                <span className="text-[1.8rem]">Đang in phiếu</span>
+                <span className="flex gap-1 mt-2">
+                  <span className="w-2 h-2 bg-blue-600 rounded-full dot"></span>
+                  <span className="w-2 h-2 bg-blue-600 rounded-full dot"></span>
+                  <span className="w-2 h-2 bg-blue-600 rounded-full dot"></span>
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center justify-center w-full mt-4">
               <button
                 onClick={() => setShowSuccess(false)}
-                className="flex w-[12rem] px-8 py-4 bg-blue-600 text-white text-[1.5rem] rounded-2xl justify-center items-center"
+                className="flex w-[12rem] px-8 py-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-[1.5rem] rounded-2xl drop-shadow-md transition-colors active:scale-98 justify-center items-center"
               >
                 <div className="pr-2">Đóng</div>
-                <div>({countdown})</div>
+                <div className="text-[1.5rem]">({countdown})</div>
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        * {
+          user-select: none;
+          -webkit-user-select: none;
+          -ms-user-select: none;
+          -webkit-touch-callout: none;
+        }
+
+        html {
+          font-size: 1.2vmin;
+        }
+
+        html,
+        body {
+          touch-action: manipulation;
+          overscroll-behavior: none;
+          position: fixed;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          overflow: hidden;
+        }
+
+        .custom-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(180, 190, 205, 0.4) rgba(230, 236, 245, 0.2);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+          width: 8px;
+          background: rgba(230, 236, 245, 0.15);
+          border-radius: 12px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+          background: rgba(160, 170, 190, 0.23);
+          border-radius: 12px;
+          border: 2px solid rgba(0, 0, 0, 0);
+          min-height: 40px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(110, 130, 180, 0.27);
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(10px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.1s ease;
+        }
+
+        .modal-overlay.active {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 24px;
+          padding: 3rem;
+          max-width: 90%;
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+          transform: scale(0.8) translateY(2rem);
+          transition: all 0.1s ease;
+          text-align: center;
+        }
+
+        .modal-overlay.active .modal-content {
+          transform: scale(1) translateY(0);
+        }
+
+        @keyframes bounce {
+          0%,
+          80%,
+          100% {
+            transform: scale(0);
+          }
+          40% {
+            transform: scale(1);
+          }
+        }
+        .dot {
+          animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+        .dot:nth-child(2) {
+          animation-delay: -0.16s;
+        }
+      `}</style>
     </div>
   );
 }
