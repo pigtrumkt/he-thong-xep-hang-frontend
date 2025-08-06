@@ -15,7 +15,25 @@ export default function Page() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [ticketData, setTicketData] = useState<any>(null);
-  const { popupMessage } = usePopup();
+
+  const [popupMessageData, setPopupMessageData] = useState<{
+    title?: string;
+    description?: string;
+  } | null>(null);
+
+  const showMessage = ({
+    title,
+    description,
+  }: {
+    title?: string;
+    description?: string;
+  }) => {
+    setPopupMessageData({ title, description });
+  };
+
+  const closeMessage = () => {
+    setPopupMessageData(null);
+  };
 
   useEffect(() => {
     fetchServices();
@@ -40,7 +58,7 @@ export default function Page() {
   async function fetchServices() {
     const res = await apiGet("/services/findGroupedActiveServicesInAgency");
     if (![200, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
+      handleApiError(res, showMessage, router);
       return;
     }
 
@@ -58,7 +76,7 @@ export default function Page() {
       });
 
       if (![201, 400].includes(result.status)) {
-        handleApiError(result, popupMessage, router);
+        handleApiError(result, showMessage, router);
         return;
       }
 
@@ -70,8 +88,8 @@ export default function Page() {
       setShowSuccess(true);
       setCountdown(10);
     } catch (err: any) {
-      popupMessage({
-        title: "Lấy số thất bại",
+      showMessage({
+        title: "LẤY SỐ THẤT BẠI",
         description: err.message,
       });
     }
@@ -146,7 +164,7 @@ export default function Page() {
 
       {showConfirm && selectedService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center">
+          <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center min-w-[40rem]">
             <h2 className="mb-8 text-4xl font-bold text-blue-900">
               XÁC NHẬN DỊCH VỤ
             </h2>
@@ -194,7 +212,7 @@ export default function Page() {
               <p className="text-[2.5rem] font-bold">
                 {ticketData.service_name}
               </p>
-              <div className="text-[8rem] font-black text-blue-600 mb-8">
+              <div className="text-[8rem] font-black text-blue-600 mb-10 leading-34">
                 {ticketData.queue_number}
               </div>
               <p className="text-[1.5rem]">
@@ -237,6 +255,29 @@ export default function Page() {
                 <div className="text-[1.5rem]">({countdown})</div>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {popupMessageData && (
+        <div className="text-3xl fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center transition-opacity duration-100">
+          <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center min-w-[40rem]">
+            {popupMessageData.title && (
+              <h2 className="mb-8 text-4xl font-bold text-blue-900">
+                {popupMessageData.title}
+              </h2>
+            )}
+            {popupMessageData.description && (
+              <p className="px-12 pb-6 mb-8 text-3xl text-gray-600 rounded-2xl">
+                {popupMessageData.description}
+              </p>
+            )}
+            <button
+              onClick={closeMessage}
+              className="px-10 py-4 bg-blue-600 text-white text-2xl rounded-2xl w-[12rem]"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
