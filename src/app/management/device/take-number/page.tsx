@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
+  const parentRef = useRef<HTMLDivElement | null>(null);
   const [services, setServices] = useState<{ id: number; name: string }[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -76,8 +77,38 @@ export default function Page() {
     }
   }
 
+  const toggleFullscreen = () => {
+    const target = parentRef.current;
+    if (!target) return;
+    if (!document.fullscreenElement) {
+      target.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center w-full h-full pt-10 bg-gradient-to-br from-blue-50 to-sky-100">
+    <div
+      ref={parentRef}
+      className="relative flex flex-col items-center w-full h-full pt-10 bg-gradient-to-br from-blue-50 to-sky-100"
+    >
+      {/* FULLSCREEN BUTTON */}
+      <button
+        onClick={toggleFullscreen}
+        title="Toàn màn hình"
+        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
+        </svg>
+      </button>
+
       <div className="w-full h-full max-w-[100rem] pt-8 px-8 flex-1 flex flex-col">
         <div className="flex items-center gap-6 mb-10 ml-7">
           <img
@@ -95,7 +126,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(100vh-15rem)] p-8 flex-1 custom-scroll">
+        <div className="flex-1 p-8 overflow-y-auto custom-scroll">
           <div className="grid grid-cols-1 gap-8 pr-4 md:grid-cols-2">
             {services.map((service) => (
               <button
@@ -119,7 +150,7 @@ export default function Page() {
             <h2 className="mb-8 text-4xl font-bold text-blue-900">
               XÁC NHẬN DỊCH VỤ
             </h2>
-            <div className="p-6 mb-8 text-3xl font-bold text-blue-600 border border-blue-200 bg-blue-50 rounded-2xl">
+            <div className="px-12 py-6 mb-8 text-3xl font-bold text-blue-600 border border-blue-200 bg-blue-50 rounded-2xl">
               {selectedService.name}
             </div>
             <div className="flex justify-center gap-6">
