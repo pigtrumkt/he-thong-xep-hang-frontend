@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-const mockServices = [
+const services = [
   "Cấp CCCD/CMND",
   "Khai sinh",
   "Đăng ký hôn nhân",
@@ -20,46 +20,31 @@ const mockServices = [
   "Giấy tờ dân sự",
 ];
 
-export default function TakeNumberPage() {
-  const [selectedService, setSelectedService] = useState("");
-  const [queueNumber, setQueueNumber] = useState("1001");
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+export default function Page() {
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [queueNumber] = useState("1001");
   const [countdown, setCountdown] = useState(10);
-  const countdownInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const startCountdown = () => {
-    if (countdownInterval.current) clearInterval(countdownInterval.current);
-
-    let time = 10;
-    setCountdown(time);
-
-    countdownInterval.current = setInterval(() => {
-      time--;
-      setCountdown(time);
-      if (time <= 0 && countdownInterval.current) {
-        clearInterval(countdownInterval.current);
-        setShowSuccessModal(false);
-      }
+  useEffect(() => {
+    if (!showSuccess) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setShowSuccess(false);
+          return 10;
+        }
+        return prev - 1;
+      });
     }, 1000);
-  };
-
-  const handleServiceClick = (name: string) => {
-    setSelectedService(name);
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirm = () => {
-    setShowConfirmModal(false);
-    setQueueNumber("1001"); // bạn có thể thay bằng call API lấy số
-    setShowSuccessModal(true);
-    startCountdown();
-  };
+    return () => clearInterval(timer);
+  }, [showSuccess]);
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-50 to-sky-100">
       <div className="w-full max-w-[100rem] pt-8 px-8 mt-10 flex-1 flex flex-col">
-        {/* Header */}
         <div className="flex items-center gap-6 mb-10 ml-7">
           <img
             src="/img/vn-circle.png"
@@ -76,14 +61,16 @@ export default function TakeNumberPage() {
           </div>
         </div>
 
-        {/* Danh sách dịch vụ */}
-        <div className="custom-scroll overflow-y-auto max-h-[calc(100vh-15rem)] p-8 flex-1">
+        <div className="overflow-y-auto max-h-[calc(100vh-15rem)] p-8 flex-1 custom-scroll">
           <div className="grid grid-cols-1 gap-8 pr-4 md:grid-cols-2">
-            {mockServices.map((service) => (
+            {services.map((service, index) => (
               <button
-                key={service}
-                onClick={() => handleServiceClick(service)}
+                key={index}
                 className="py-10 text-3xl font-bold text-blue-600 transition-all bg-white rounded-3xl drop-shadow-md active:scale-98 active:drop-shadow-sm active:bg-blue-50"
+                onClick={() => {
+                  setSelectedService(service);
+                  setShowConfirm(true);
+                }}
               >
                 {service}
               </button>
@@ -93,9 +80,9 @@ export default function TakeNumberPage() {
       </div>
 
       {/* Modal xác nhận */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay active bg-black/50 backdrop-blur">
-          <div className="modal-content bg-white rounded-3xl p-12 max-w-[90%] text-center shadow-xl">
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center">
             <h2 className="mb-8 text-4xl font-bold text-blue-900">
               XÁC NHẬN DỊCH VỤ
             </h2>
@@ -104,14 +91,18 @@ export default function TakeNumberPage() {
             </div>
             <div className="flex justify-center gap-6">
               <button
-                onClick={() => setShowConfirmModal(false)}
-                className="px-10 py-4 text-2xl text-white bg-gray-500 hover:bg-gray-600 rounded-2xl"
+                onClick={() => setShowConfirm(false)}
+                className="px-10 py-4 bg-gray-600 text-white text-2xl rounded-2xl w-[12rem]"
               >
                 Hủy bỏ
               </button>
               <button
-                onClick={handleConfirm}
-                className="px-10 py-4 text-2xl text-white bg-blue-500 hover:bg-blue-600 rounded-2xl"
+                onClick={() => {
+                  setShowConfirm(false);
+                  setShowSuccess(true);
+                  setCountdown(10);
+                }}
+                className="px-10 py-4 bg-blue-600 text-white text-2xl rounded-2xl w-[12rem]"
               >
                 Lấy số
               </button>
@@ -121,9 +112,9 @@ export default function TakeNumberPage() {
       )}
 
       {/* Modal thành công */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay active bg-black/50 backdrop-blur">
-          <div className="modal-content bg-white rounded-3xl p-12 max-w-[90%] text-center shadow-xl">
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-12 shadow-2xl max-w-[90%] text-center">
             <h2 className="mb-8 text-4xl font-black text-blue-900">
               PHIẾU CỦA BẠN
             </h2>
@@ -131,43 +122,40 @@ export default function TakeNumberPage() {
               <p className="text-[2rem] font-bold text-blue-800 uppercase">
                 UBND xã Tân Quang
               </p>
-              <p className="text-[1.5rem] text-blue-600 mt-1">
-                Địa chỉ: Tỉnh Tuyên Quang
-              </p>
-              <p className="text-[1.5rem] text-blue-600">
-                Điện thoại: 0982984984
-              </p>
-              <div className="mt-4 mb-6 border-t border-blue-300 border-dashed"></div>
-              <p className="text-[2.5rem] font-bold text-blue-600">
-                {selectedService}
-              </p>
+              <p className="text-[1.5rem] mt-1">Địa chỉ: Tỉnh Tuyên Quang</p>
+              <p className="text-[1.5rem]">Điện thoại: 0982984984</p>
+              <div className="mt-4 mb-6 border-t border-blue-300 border-dashed" />
+              <p className="text-[2.5rem] font-bold">{selectedService}</p>
               <div className="text-[8rem] font-black text-blue-600 mb-8">
                 {queueNumber}
               </div>
-              <p className="text-[1.5rem] text-blue-600">
+              <p className="text-[1.5rem]">
                 Trước bạn còn <strong>5</strong> người, vui lòng chờ đến lượt.
               </p>
-              <div className="mt-4 mb-2 border-t border-blue-300 border-dashed"></div>
-              <div className="flex justify-end text-[1.2rem] text-blue-600">
+              <div className="mt-4 mb-2 border-t border-blue-300 border-dashed" />
+              <div className="flex justify-end text-[1.2rem]">
                 <span className="mr-1">Thời gian in:</span>
-                <span>{new Date().toLocaleString("vi-VN")}</span>
+                <span>08:00 - 15/08/2025</span>
               </div>
             </div>
-            <div className="flex justify-center gap-2 mt-10 text-lg font-medium text-blue-500">
+
+            <div className="flex justify-center mt-10 text-lg font-medium text-blue-500">
               <span className="text-[2.2rem]">🖨️</span>
-              <span className="text-[1.8rem]">Đang in phiếu</span>
-              <span className="flex gap-1 mt-2">
+              <span className="text-[1.8rem] ml-2">Đang in phiếu</span>
+              <span className="flex gap-1 mt-2 ml-2">
                 <span className="w-2 h-2 bg-blue-600 rounded-full dot animate-bounce"></span>
-                <span className="w-2 h-2 delay-150 bg-blue-600 rounded-full dot animate-bounce"></span>
-                <span className="w-2 h-2 delay-300 bg-blue-600 rounded-full dot animate-bounce"></span>
+                <span className="w-2 h-2 delay-100 bg-blue-600 rounded-full dot animate-bounce"></span>
+                <span className="w-2 h-2 delay-200 bg-blue-600 rounded-full dot animate-bounce"></span>
               </span>
             </div>
-            <div className="flex justify-center w-full mt-4">
+
+            <div className="flex items-center justify-center w-full mt-4">
               <button
-                onClick={() => setShowSuccessModal(false)}
-                className="w-[12rem] px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white text-[1.5rem] rounded-2xl mt-6"
+                onClick={() => setShowSuccess(false)}
+                className="flex w-[12rem] px-8 py-4 bg-blue-600 text-white text-[1.5rem] rounded-2xl justify-center items-center"
               >
-                Đóng ({countdown})
+                <div className="pr-2">Đóng</div>
+                <div>({countdown})</div>
               </button>
             </div>
           </div>
