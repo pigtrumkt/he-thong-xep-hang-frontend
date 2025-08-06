@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
+import { usePopup } from "@/components/popup/PopupContext";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
   const [services, setServices] = useState<{ id: number; name: string }[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [ticketData, setTicketData] = useState<any>(null);
+  const { popupMessage } = usePopup();
 
   useEffect(() => {
     fetchServices();
@@ -33,6 +38,11 @@ export default function Page() {
 
   async function fetchServices() {
     const res = await apiGet("/services/findGroupedActiveServicesInAgency");
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
     if (res.status === 200) {
       const flat = (res.data || []).flatMap((g: any) => g.services || []);
       setServices(flat);
@@ -45,14 +55,24 @@ export default function Page() {
         service_id: serviceId,
         source: 1,
       });
+
+      if (![201, 400].includes(result.status)) {
+        handleApiError(result, popupMessage, router);
+        return;
+      }
+
       if (result.status !== 201 && result.status !== 200) {
         throw new Error(result.data?.message || "Lỗi lấy số");
       }
+
       setTicketData(result.data);
       setShowSuccess(true);
       setCountdown(10);
     } catch (err: any) {
-      alert(err.message);
+      popupMessage({
+        title: "Lấy số thất bại",
+        description: err.message,
+      });
     }
   }
 
