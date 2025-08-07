@@ -16,8 +16,8 @@ export default function CounterStatusPage() {
 
   const [counters, setCounters] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
-  const [counterSelected, setCounterSelected] = useState<any>(null);
-  const [serviceSelected, setServiceSelected] = useState<any>(null);
+  const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
+  const [serviceIdSelected, setServiceIdSelected] = useState<any>(null);
 
   const [isReady, setIsReady] = useState(false);
 
@@ -58,8 +58,51 @@ export default function CounterStatusPage() {
     }
   };
 
-  const onConfirmSelected = () => {
+  const handleConfirmSelected = () => {
     socket.connect();
+
+    // connect thất bại
+    socket.once("connect_error", (err) => {
+      popupMessage({
+        title: "Mất kết nối",
+        description: "Vui lòng thử lại sau.",
+      });
+    });
+
+    // connect thành công
+    socket.once("connect", () => {
+      socket.emit(
+        "join_call_screen",
+        {
+          counterId: counterIdSelected,
+          serviceId: serviceIdSelected,
+        },
+        (response: any) => {
+          if (response === "success") {
+          } else if (response === "empty") {
+          } else if (response === "update") {
+            for (const [key, value] of Object.entries(response)) {
+              if (key === "status") {
+                return;
+              }
+            }
+            setIsReady(true);
+          } else if (response === "error") {
+            popupMessage({
+              title: "Không thể đăng ký quầy",
+              description: response?.message || "Đã xảy ra lỗi",
+            });
+            return;
+          } else if (response === "logout") {
+          } else {
+            popupMessage({
+              title: "Lỗi không xác định",
+              description: response?.message,
+            });
+          }
+        }
+      );
+    });
   };
 
   useEffect(() => {
@@ -221,8 +264,8 @@ export default function CounterStatusPage() {
             <button
               className="absolute top-4 left-4 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-semibold border border-gray-200 shadow-sm active:scale-[0.98]"
               onClick={() => {
-                setCounterSelected(null);
-                setServiceSelected(null);
+                setCounterIdSelected(null);
+                setServiceIdSelected(null);
               }}
             >
               <svg
@@ -331,8 +374,8 @@ export default function CounterStatusPage() {
             </label>
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setCounterSelected(e.target.value)}
-              value={counterSelected || ""}
+              onChange={(e) => setCounterIdSelected(e.target.value)}
+              value={counterIdSelected || ""}
             >
               <option value="" disabled>
                 -- Chọn quầy --
@@ -351,8 +394,8 @@ export default function CounterStatusPage() {
             </label>
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setServiceSelected(e.target.value)}
-              value={serviceSelected || ""}
+              onChange={(e) => setServiceIdSelected(e.target.value)}
+              value={serviceIdSelected || ""}
             >
               <option value="" disabled>
                 -- Chọn dịch vụ --
@@ -373,12 +416,12 @@ export default function CounterStatusPage() {
         {/* Nút xác nhận */}
         <button
           className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
-            counterSelected && serviceSelected
+            counterIdSelected && serviceIdSelected
               ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
               : "bg-gray-300 cursor-not-allowed"
           }`}
-          disabled={!counterSelected || !serviceSelected}
-          onChange={onConfirmSelected}
+          disabled={!counterIdSelected || !serviceIdSelected}
+          onClick={handleConfirmSelected}
         >
           Xác nhận
         </button>
