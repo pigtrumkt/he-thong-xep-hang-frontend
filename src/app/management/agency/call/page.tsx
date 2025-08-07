@@ -10,7 +10,7 @@ import { Socket } from "socket.io-client";
 
 export default function CounterStatusPage() {
   const router = useRouter();
-  const { popupMessage, popupConfirmRed } = usePopup();
+  const { popupMessage } = usePopup();
   const parentRef = useRef<HTMLDivElement | null>(null);
   const scaleRef = useRef<HTMLElement | null>(null);
 

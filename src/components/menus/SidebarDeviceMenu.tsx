@@ -84,7 +84,7 @@ export default function SidebarDeviceMenu() {
                   <path d="M16 3v4M8 3v4" />
                 </svg>
               </span>
-              Màn hình trạng thái quầy
+              Màn hình tại quầy
             </Link>
           </li>
           <li>

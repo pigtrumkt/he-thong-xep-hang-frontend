@@ -1,62 +1,183 @@
 "use client";
 
+import { useGlobalParams } from "@/components/ClientWrapper";
+import { usePopup } from "@/components/popup/PopupContext";
+import { apiGet } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { Socket } from "socket.io-client";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type HistoryItem = {
-  counter: number;
-  number: number;
-  status: "done" | "missed";
-  justAdded?: boolean;
+  id: number;
+  counter_name: string;
+  queue_number: number;
+  status: number;
 };
 
 export default function CounterStatusScreen() {
-  const [currentNumber, setCurrentNumber] = useState(1005);
+  const router = useRouter();
+  const { popupMessage } = usePopup();
+  const { socket, globalParams } = useGlobalParams() as {
+    socket: Socket;
+    globalParams: any;
+  };
+  const [counters, setCounters] = useState<any[]>([]);
+  const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
+  const [counterNameSelected, setCounterNameSelected] = useState<any>(null);
+  const [isReady, setIsReady] = useState<any>(false);
+
+  const [currentServingNumber, setCurrentServingNumber] = useState<
+    string | null
+  >(null);
+  const [serviceName, setServiceName] = useState(null);
+
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const next = currentNumber + 1;
+  const fetchData = async () => {
+    const counterRes = await apiGet("/counters/findActiveByAgency");
+    if (![200, 400].includes(counterRes.status)) {
+      handleApiError(counterRes, popupMessage, router);
+      return;
+    }
 
-      // hiệu ứng số chính
-      if (mainRef.current) {
-        mainRef.current.classList.remove("pulse-once");
-        void mainRef.current.offsetWidth;
-        mainRef.current.classList.add("pulse-once");
+    if (counterRes.status === 200 && counterRes.data) {
+      setCounters(counterRes.data);
+    }
+  };
+
+  const onConnectError = () => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
+  };
+
+  const onConnect = () => {
+    initDataSocket();
+  };
+
+  const listingServer = (response: any) => {
+    if (response.status === "update") {
+      setCurrentServingNumber(response.currentServingNumber);
+    }
+
+    if (response.status === "empty") {
+      setCurrentServingNumber(null);
+    }
+  };
+
+  const initDataSocket = () => {
+    socket.emit(
+      "join_counter_status_screen",
+      {
+        counterId: counterIdSelected,
+      },
+      (response: any) => {
+        if (response.status === "success") {
+        } else if (response.status === "empty") {
+        } else if (response.status === "update") {
+          setIsReady(true);
+          setCurrentServingNumber(response.currentServingNumber);
+          setHistory(response.history);
+          setServiceName(response.serviceName);
+        } else if (response.status === "error") {
+          popupMessage({
+            description: response?.message || "Đã xảy ra lỗi",
+          });
+          return;
+        } else if (response.status === "logout") {
+          router.push("/login");
+        } else {
+          popupMessage({
+            title: "Lỗi không xác định",
+            description: response?.message,
+          });
+        }
       }
+    );
+  };
 
-      setCurrentNumber(next);
-      setHistory((prev) => {
-        const newItem: HistoryItem = {
-          counter: 3,
-          number: next - 1,
-          status: Math.random() < 0.8 ? "done" : "missed",
-          justAdded: true,
-        };
-        const updated = [...prev, newItem];
-        return updated.slice(-4); // giữ lại 4 dòng
-      });
+  const handleConfirmSelected = () => {
+    // set name counter
+    setCounterNameSelected(
+      counters.find((c) => c.id === counterIdSelected)?.name
+    );
 
-      // xoá hiệu ứng sau khi render
-      setTimeout(() => {
-        setHistory((prev) =>
-          prev.map((item) => {
-            const { justAdded, ...rest } = item;
-            return rest;
-          })
-        );
-      }, 300);
-    }, 3000);
+    socket.off("connect", onConnect);
+    socket.off("connect_error", onConnectError);
+    socket.off("ListingServer", listingServer);
 
-    return () => clearInterval(interval);
-  }, [currentNumber]);
+    socket.on("connect", onConnect);
+    socket.on("connect_error", onConnectError);
+    socket.on("ListingServer", listingServer);
 
-  return (
+    // connect
+    if (!socket.connected) {
+      socket.connect();
+    } else {
+      initDataSocket();
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    return () => {
+      if (socket) {
+        socket.off("connect", onConnect);
+        socket.off("connect_error", onConnectError);
+        socket.off("ListingServer", listingServer);
+      }
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const next = currentNumber + 1;
+
+  //     // hiệu ứng số chính
+  //     if (mainRef.current) {
+  //       mainRef.current.classList.remove("pulse-once");
+  //       void mainRef.current.offsetWidth;
+  //       mainRef.current.classList.add("pulse-once");
+  //     }
+
+  //     //setCurrentNumber(next);
+  //     setHistory((prev) => {
+  //       const newItem: HistoryItem = {
+  //         counter: 3,
+  //         number: next - 1,
+  //         status: Math.random() < 0.8 ? "done" : "missed",
+  //         justAdded: true,
+  //       };
+  //       const updated = [...prev, newItem];
+  //       return updated.slice(-4); // giữ lại 4 dòng
+  //     });
+
+  //     // xoá hiệu ứng sau khi render
+  //     setTimeout(() => {
+  //       setHistory((prev) =>
+  //         prev.map((item) => {
+  //           const { justAdded, ...rest } = item;
+  //           return rest;
+  //         })
+  //       );
+  //     }, 300);
+  //   }, 3000);
+
+  //   return () => clearInterval(interval);
+  // }, [currentNumber]);
+
+  return isReady ? (
     <div className="flex flex-col h-screen font-sans text-gray-800 uppercase bg-blue-50">
       {/* HEADER */}
       <header className="px-5 pt-2 pb-10 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-        <h1 className="font-bold text-9xl leading-[1.4]">QUẦY SỐ 3</h1>
-        <p className="text-6xl">Đăng ký cư trú</p>
+        <h1 className="font-bold text-9xl leading-[1.4]">
+          {counterNameSelected}
+        </h1>
+        <p className="text-6xl">{serviceName}</p>
       </header>
 
       {/* MAIN */}
@@ -64,13 +185,13 @@ export default function CounterStatusScreen() {
         {/* SỐ CHÍNH */}
         <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
           <div className="text-6xl font-semibold tracking-wide text-blue-800">
-            Mời công dân có số
+            {currentServingNumber && "Mời công dân có số"}
           </div>
           <div
             ref={mainRef}
             className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop"
           >
-            {currentNumber}
+            {currentServingNumber}
           </div>
         </section>
 
@@ -82,27 +203,25 @@ export default function CounterStatusScreen() {
           <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
             {[...history].reverse().map((item, idx) => (
               <div
-                key={item.number}
+                key={item.id}
                 className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
-                  idx === 0 && item.justAdded
-                    ? "animate-zoom-in"
-                    : "animate-slide-down"
+                  idx === 0 ? "animate-zoom-in" : "animate-slide-down"
                 }`}
               >
                 <div className="text-3xl text-blue-600">
-                  Quầy số {item.counter}
+                  {item.counter_name}
                 </div>
                 <div className="font-bold text-blue-800 text-8xl">
-                  {item.number}
+                  {item.queue_number}
                 </div>
                 <div
                   className={`flex gap-x-1.5 text-3xl mt-2 ${
-                    item.status === "done" ? "text-green-600" : "text-red-500"
+                    item.status === 3 ? "text-green-600" : "text-red-500"
                   }`}
                 >
-                  <span>{item.status === "done" ? "✔️" : "❌"}</span>
+                  <span>{item.status === 3 ? "✔️" : "❌"}</span>
                   <span>
-                    {item.status === "done" ? "Đã phục vụ" : "Không có mặt"}
+                    {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
                   </span>
                 </div>
               </div>
@@ -209,6 +328,48 @@ export default function CounterStatusScreen() {
           animation: scrollText 15s linear infinite;
         }
       `}</style>
+    </div>
+  ) : (
+    <div className="h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-blue-100 to-white px-4 py-8">
+      <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
+        <h2 className="text-2xl font-bold text-blue-800">Màn hình tại quầy</h2>
+
+        {/* Form chọn */}
+        <div className="space-y-4 text-left">
+          <div>
+            <label className="block mb-1 font-semibold text-blue-700">
+              Chọn quầy:
+            </label>
+            <select
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+              onChange={(e) => setCounterIdSelected(Number(e.target.value))}
+              value={counterIdSelected || ""}
+            >
+              <option value="" disabled>
+                -- Chọn quầy --
+              </option>
+              {counters.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Nút xác nhận */}
+        <button
+          className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
+            counterIdSelected
+              ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+              : "bg-gray-300 cursor-not-allowed"
+          }`}
+          disabled={!counterIdSelected}
+          onClick={handleConfirmSelected}
+        >
+          Xác nhận
+        </button>
+      </div>
     </div>
   );
 }
