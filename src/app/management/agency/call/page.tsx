@@ -17,11 +17,21 @@ export default function CounterStatusPage() {
   const [counters, setCounters] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
+  const [counterNameSelected, setCounterNameSelected] = useState<any>(null);
   const [serviceIdSelected, setServiceIdSelected] = useState<any>(null);
+  const [serviceNameSelected, setServiceNameSelected] = useState<any>(null);
 
   const [isReady, setIsReady] = useState(false);
+  const [currentNumber, setCurrentNumber] = useState(null);
+  const [statusTicket, setStatusTicket] = useState(null);
+  const [totalServed, setTotalServed] = useState(null);
+  const [waitingAhead, setWaitingAhead] = useState(null);
+  const [serviceTimer, setServiceTimer] = useState(null);
 
-  const { socket } = useGlobalParams() as { socket: Socket };
+  const { socket, globalParams } = useGlobalParams() as {
+    socket: Socket;
+    globalParams: any;
+  };
 
   const toggleFullscreen = () => {
     const target = parentRef.current;
@@ -59,6 +69,19 @@ export default function CounterStatusPage() {
   };
 
   const handleConfirmSelected = () => {
+    // set name counter
+    setCounterNameSelected(
+      counters.find((c) => c.id === counterIdSelected)?.name
+    );
+
+    // set name service
+    setServiceNameSelected(
+      services
+        .flatMap((g) => g.services)
+        .find((s) => s.id === serviceIdSelected)?.name
+    );
+
+    // connect
     socket.connect();
 
     // connect thất bại
@@ -78,22 +101,21 @@ export default function CounterStatusPage() {
           serviceId: serviceIdSelected,
         },
         (response: any) => {
-          if (response === "success") {
-          } else if (response === "empty") {
-          } else if (response === "update") {
-            for (const [key, value] of Object.entries(response)) {
-              if (key === "status") {
-                return;
-              }
-            }
+          if (response.status === "success") {
+          } else if (response.status === "empty") {
+          } else if (response.status === "update") {
             setIsReady(true);
-          } else if (response === "error") {
+            setCurrentNumber(response.currentNumber);
+            setStatusTicket(response.statusTicket);
+            setTotalServed(response.totalServed);
+            setWaitingAhead(response.waitingAhead);
+          } else if (response.status === "error") {
             popupMessage({
               title: "Không thể đăng ký quầy",
               description: response?.message || "Đã xảy ra lỗi",
             });
             return;
-          } else if (response === "logout") {
+          } else if (response.status === "logout") {
           } else {
             popupMessage({
               title: "Lỗi không xác định",
@@ -149,7 +171,7 @@ export default function CounterStatusPage() {
   return isReady ? (
     <div
       ref={parentRef}
-      className="h-[calc(100vh-4rem)] w-full min-w-[42rem] min-h-[64rem] lg:min-w-[67rem] lg:min-h-[42rem] px-4 py-8 bg-blue-100"
+      className="h-[calc(100vh-4rem)] w-full min-w-[42rem] min-h-[64rem] lg:min-w-[67rem] lg:min-h-[42rem] px-4 py-8 bg-blue-100 select-none"
     >
       <section
         ref={scaleRef}
@@ -192,7 +214,7 @@ export default function CounterStatusPage() {
                   />
                 </svg>
                 <span className="font-semibold text-blue-800">
-                  Nguyễn Văn A
+                  {globalParams.user.full_name}
                 </span>
               </div>
             </div>
@@ -200,22 +222,30 @@ export default function CounterStatusPage() {
             {/* Counter info */}
             <div className="mt-6 mb-6 text-center">
               <div className="text-[2rem] font-bold text-blue-800 mb-1">
-                QUẦY SỐ 1
+                {counterNameSelected}
               </div>
               <div className="text-lg font-medium text-blue-600">
-                Cấp lại CMND/CCCD
+                {serviceNameSelected}
               </div>
             </div>
 
             {/* Queue Number */}
-            <div className="relative mb-8">
+            <div className="relative mb-8 min-w-[20rem]">
               <div className="absolute bg-blue-200 -inset-1 rounded-2xl blur opacity-10" />
               <div className="relative p-8 bg-white border border-blue-100 shadow-lg rounded-2xl">
                 <div className="px-4 mb-2 font-extrabold text-center text-blue-600 text-8xl">
-                  1001
+                  {currentNumber || (
+                    <span className="text-6xl font-light">-</span>
+                  )}
                 </div>
                 <div className="font-medium text-center text-blue-800">
-                  Đang phục vụ
+                  {statusTicket === 2
+                    ? "Đang phục vụ"
+                    : statusTicket === 3
+                    ? "Phục vụ xong"
+                    : statusTicket === 4
+                    ? "Vắng mặt"
+                    : "\u00A0"}
                 </div>
               </div>
             </div>
@@ -236,7 +266,9 @@ export default function CounterStatusPage() {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="font-bold text-blue-900">00:31</span>
+                <span className="font-bold text-blue-900">
+                  {serviceTimer || "00:00"}
+                </span>
               </div>
             </div>
 
@@ -247,14 +279,16 @@ export default function CounterStatusPage() {
                   Đã phục vụ
                 </span>
                 <span className="mt-1 text-xl font-bold text-green-900">
-                  20
+                  {totalServed}
                 </span>
               </div>
               <div className="flex flex-col items-center p-3 bg-amber-100/80 rounded-xl">
                 <span className="text-sm font-medium text-amber-600">
                   Còn chờ
                 </span>
-                <span className="mt-1 text-xl font-bold text-amber-900">5</span>
+                <span className="mt-1 text-xl font-bold text-amber-900">
+                  {waitingAhead}
+                </span>
               </div>
             </div>
           </div>
@@ -374,7 +408,7 @@ export default function CounterStatusPage() {
             </label>
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setCounterIdSelected(e.target.value)}
+              onChange={(e) => setCounterIdSelected(Number(e.target.value))}
               value={counterIdSelected || ""}
             >
               <option value="" disabled>
@@ -394,7 +428,7 @@ export default function CounterStatusPage() {
             </label>
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setServiceIdSelected(e.target.value)}
+              onChange={(e) => setServiceIdSelected(Number(e.target.value))}
               value={serviceIdSelected || ""}
             >
               <option value="" disabled>
