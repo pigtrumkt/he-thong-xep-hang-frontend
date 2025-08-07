@@ -127,6 +127,109 @@ export default function CounterStatusPage() {
     });
   };
 
+  const handleCall = () => {
+    socket.emit(
+      "join_call_screen",
+      {
+        counterId: counterIdSelected,
+        serviceId: serviceIdSelected,
+      },
+      (response: any) => {
+        if (response.status === "success") {
+        } else if (response.status === "empty") {
+        } else if (response.status === "update") {
+          setCurrentNumber(response.currentNumber);
+          setStatusTicket(response.statusTicket);
+          setTotalServed(response.totalServed);
+          setWaitingAhead(response.waitingAhead);
+        } else if (response.status === "error") {
+          popupMessage({
+            title: "Không thể đăng ký quầy",
+            description: response?.message || "Đã xảy ra lỗi",
+          });
+          return;
+        } else if (response.status === "logout") {
+        } else {
+          popupMessage({
+            title: "Lỗi không xác định",
+            description: response?.message,
+          });
+        }
+      }
+    );
+  };
+
+  const handleDone = () => {
+    socket.emit(
+      "join_call_screen",
+      {
+        counterId: counterIdSelected,
+        serviceId: serviceIdSelected,
+      },
+      (response: any) => {
+        if (response.status === "success") {
+        } else if (response.status === "empty") {
+        } else if (response.status === "update") {
+          setCurrentNumber(response.currentNumber);
+          setStatusTicket(response.statusTicket);
+          setTotalServed(response.totalServed);
+          setWaitingAhead(response.waitingAhead);
+        } else if (response.status === "error") {
+          popupMessage({
+            title: "Không thể đăng ký quầy",
+            description: response?.message || "Đã xảy ra lỗi",
+          });
+          return;
+        } else if (response.status === "logout") {
+        } else {
+          popupMessage({
+            title: "Lỗi không xác định",
+            description: response?.message,
+          });
+        }
+      }
+    );
+  };
+
+  const handleMissed = () => {
+    socket.emit(
+      "join_call_screen",
+      {
+        counterId: counterIdSelected,
+        serviceId: serviceIdSelected,
+      },
+      (response: any) => {
+        if (response.status === "success") {
+        } else if (response.status === "empty") {
+        } else if (response.status === "update") {
+          setCurrentNumber(response.currentNumber);
+          setStatusTicket(response.statusTicket);
+          setTotalServed(response.totalServed);
+          setWaitingAhead(response.waitingAhead);
+        } else if (response.status === "error") {
+          popupMessage({
+            title: "Không thể đăng ký quầy",
+            description: response?.message || "Đã xảy ra lỗi",
+          });
+          return;
+        } else if (response.status === "logout") {
+        } else {
+          popupMessage({
+            title: "Lỗi không xác định",
+            description: response?.message,
+          });
+        }
+      }
+    );
+  };
+
+  const changeService = () => {
+    socket.disconnect();
+    setIsReady(false);
+    setCounterIdSelected(null);
+    setServiceIdSelected(null);
+  };
+
   useEffect(() => {
     fetchData();
     const handleResize = () => {
@@ -298,8 +401,7 @@ export default function CounterStatusPage() {
             <button
               className="absolute top-4 left-4 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-semibold border border-gray-200 shadow-sm active:scale-[0.98]"
               onClick={() => {
-                setCounterIdSelected(null);
-                setServiceIdSelected(null);
+                changeService();
               }}
             >
               <svg
@@ -327,7 +429,14 @@ export default function CounterStatusPage() {
             </button>
 
             <div className="flex flex-col justify-center h-full mt-16 space-y-6 lg:mt-0">
-              <button className="group relative w-full py-8 px-6 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-bold shadow-lg transition-all active:scale-[0.98] overflow-hidden">
+              <button
+                className={`group relative w-full py-8 px-6 rounded-xl bg-gradient-to-r  text-white font-bold shadow-lg transition-all  overflow-hidden ${
+                  currentNumber == null
+                    ? "from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 active:scale-[0.98]"
+                    : "from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-[0.98]"
+                }`}
+                onClick={handleCall}
+              >
                 <div className="relative z-10 flex items-center justify-center gap-4">
                   <svg
                     className="w-8 h-8"
@@ -342,13 +451,25 @@ export default function CounterStatusPage() {
                       d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                     />
                   </svg>
-                  <span className="text-2xl">Gọi lại</span>
+                  <span className="text-2xl">
+                    {currentNumber ? "Gọi lại" : "Gọi"}
+                  </span>
                 </div>
                 <div className="absolute inset-0 transition-all duration-300 bg-white/10 group-hover:bg-white/0"></div>
               </button>
 
               <div className="flex gap-5">
-                <button className="flex-1 group relative py-7 px-4 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold shadow-lg transition-all active:scale-[0.98] overflow-hidden">
+                <button
+                  disabled={currentNumber == null}
+                  onClick={handleDone}
+                  className={`flex-1 group relative py-7 px-4 rounded-xl font-bold text-white shadow-lg transition-all overflow-hidden
+    ${
+      currentNumber == null
+        ? "bg-gray-300"
+        : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 active:scale-[0.98]"
+    }
+  `}
+                >
                   <div className="relative z-10 flex items-center justify-center gap-3">
                     <svg
                       className="w-7 h-7"
@@ -368,7 +489,18 @@ export default function CounterStatusPage() {
                   <div className="absolute inset-0 transition-all duration-300 bg-white/10 group-hover:bg-white/0"></div>
                 </button>
 
-                <button className="flex-1 group relative py-7 px-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold shadow-lg transition-all active:scale-[0.98] overflow-hidden">
+                <button
+                  onClick={handleMissed}
+                  disabled={currentNumber == null}
+                  className={`
+    flex-1 group relative py-7 px-4 rounded-xl font-bold shadow-lg transition-all overflow-hidden
+    ${
+      currentNumber == null
+        ? "bg-gray-300 text-white"
+        : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white active:scale-[0.98]"
+    }
+  `}
+                >
                   <div className="relative z-10 flex items-center justify-center gap-3">
                     <svg
                       className="w-7 h-7"
