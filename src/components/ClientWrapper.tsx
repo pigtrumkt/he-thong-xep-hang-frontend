@@ -65,6 +65,7 @@ export default function ClientWrapper({
     if (!globalParams.user) return;
 
     setSocket(getSocket(globalParams.user.token));
+
     const path = window.location.pathname;
     const roleId = globalParams.user["role_id"];
     if (path === "/") {
