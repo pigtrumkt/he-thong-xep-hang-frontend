@@ -1,4 +1,4 @@
-import io from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 const SOCKET_BASE_URL = (() => {
   if (typeof window !== "undefined") {
@@ -9,9 +9,9 @@ const SOCKET_BASE_URL = (() => {
   return "";
 })();
 
-let socket: ReturnType<typeof io> | null = null;
+let socket: Socket;
 
-export const getSocket = (token: string): ReturnType<typeof io> => {
+export const getSocket = (token: string): Socket => {
   if (!socket || socket.disconnected) {
     socket = io(SOCKET_BASE_URL, {
       transports: ["websocket"],

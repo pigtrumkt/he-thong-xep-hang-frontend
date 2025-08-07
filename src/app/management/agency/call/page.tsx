@@ -1,10 +1,12 @@
 "use client";
 
+import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
 import { apiGet } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
 
 export default function CounterStatusPage() {
   const router = useRouter();
@@ -18,6 +20,8 @@ export default function CounterStatusPage() {
   const [serviceSelected, setServiceSelected] = useState<any>(null);
 
   const [isReady, setIsReady] = useState(false);
+
+  const { socket } = useGlobalParams() as { socket: Socket };
 
   const toggleFullscreen = () => {
     const target = parentRef.current;
@@ -54,7 +58,9 @@ export default function CounterStatusPage() {
     }
   };
 
-  const onConfirmSelected = () => {};
+  const onConfirmSelected = () => {
+    socket.connect();
+  };
 
   useEffect(() => {
     fetchData();
@@ -326,7 +332,7 @@ export default function CounterStatusPage() {
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
               onChange={(e) => setCounterSelected(e.target.value)}
-              value={counterSelected || null}
+              value={counterSelected || ""}
             >
               <option value="" disabled>
                 -- Chọn quầy --
@@ -346,7 +352,7 @@ export default function CounterStatusPage() {
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
               onChange={(e) => setServiceSelected(e.target.value)}
-              value={serviceSelected || null}
+              value={serviceSelected || ""}
             >
               <option value="" disabled>
                 -- Chọn dịch vụ --

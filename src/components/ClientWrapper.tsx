@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { PopupProvider } from "./popup/PopupContext";
 import { getSocket } from "@/lib/socket";
+import { io, Socket } from "socket.io-client";
 
 const UserContext = createContext<any>(null);
 
@@ -36,7 +37,7 @@ export default function ClientWrapper({
 }) {
   const router = useRouter();
   const [globalParams, setGlobalParams] = useState(value ?? null);
-  const [socket, setSocket] = useState<any>(null);
+  const [socket, setSocket] = useState<Socket>();
 
   const hasAccess = (config: AccessConfig): boolean => {
     if (!globalParams.user && !globalParams.user.id) {
