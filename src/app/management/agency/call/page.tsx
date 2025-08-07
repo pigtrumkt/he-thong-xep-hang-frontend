@@ -83,9 +83,7 @@ export default function CounterStatusPage() {
         .find((s) => s.id === serviceIdSelected)?.name
     );
 
-    socket.off("connect_error", onConnectError);
-    socket.off("connect", onConnect);
-    socket.off("ListingServer", listingServer);
+    socket.removeAllListeners();
 
     //connect thất bại
     socket.on("connect_error", onConnectError);
