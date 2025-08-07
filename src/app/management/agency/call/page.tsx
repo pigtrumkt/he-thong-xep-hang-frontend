@@ -444,7 +444,17 @@ export default function CounterStatusPage() {
                     <span className="text-6xl font-light">-</span>
                   )}
                 </div>
-                <div className="font-medium text-center text-blue-800">
+                <div
+                  className={`font-medium text-center ${
+                    statusTicket === 2
+                      ? "text-blue-600"
+                      : statusTicket === 3
+                      ? "text-green-600"
+                      : statusTicket === 4
+                      ? "text-red-600"
+                      : ""
+                  }`}
+                >
                   {statusTicket === 2
                     ? "Đang phục vụ"
                     : statusTicket === 3
