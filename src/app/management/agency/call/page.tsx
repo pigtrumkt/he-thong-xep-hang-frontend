@@ -348,9 +348,7 @@ export default function CounterStatusPage() {
       window.removeEventListener("resize", handleResize);
 
       if (socket) {
-        socket.off("connect_error", onConnectError);
-        socket.off("connect", onConnect);
-        socket.off("ListingServer", listingServer);
+        socket.removeAllListeners();
         socket.disconnect();
       }
     };
