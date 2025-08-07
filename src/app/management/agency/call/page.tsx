@@ -28,7 +28,7 @@ export default function CounterStatusPage() {
   const [waitingAhead, setWaitingAhead] = useState(null);
   const [serviceTimer, setServiceTimer] = useState<string | null>(null);
   const [ticketId, setTicketId] = useState(null);
-  const [createAt, setCreateAt] = useState<Date | null>(null);
+  const [calledAt, setCalledAt] = useState<Date | null>(null);
 
   const { socket, globalParams } = useGlobalParams() as {
     socket: Socket;
@@ -118,8 +118,8 @@ export default function CounterStatusPage() {
             setCurrentNumber(response.currentServingNumber);
             setStatusTicket(response.statusTicket);
             setTicketId(response.ticketId);
-            if (response.createAt) {
-              setCreateAt(new Date(response.createAt));
+            if (response.calledAt) {
+              setCalledAt(new Date(response.calledAt));
             }
           } else if (response.status === "error") {
             popupMessage({
@@ -183,7 +183,7 @@ export default function CounterStatusPage() {
         } else if (response.status === "update") {
           setStatusTicket(response.statusTicket);
           setTotalServed(response.totalServed);
-          setCreateAt(null);
+          setCalledAt(null);
         } else if (response.status === "error") {
           popupMessage({
             description: response?.message || "Đã xảy ra lỗi",
@@ -216,7 +216,7 @@ export default function CounterStatusPage() {
         } else if (response.status === "update") {
           setStatusTicket(response.statusTicket);
           setTotalServed(response.totalServed);
-          setCreateAt(null);
+          setCalledAt(null);
         } else if (response.status === "error") {
           popupMessage({
             description: response?.message || "Đã xảy ra lỗi",
@@ -284,8 +284,8 @@ export default function CounterStatusPage() {
           setTotalServed(response.totalServed);
           setWaitingAhead(response.waitingAhead);
           setTicketId(response.ticketId);
-          if (response.createAt) {
-            setCreateAt(new Date(response.createAt));
+          if (response.calledAt) {
+            setCalledAt(new Date(response.calledAt));
           }
         } else if (response.status === "error") {
           popupMessage({
@@ -359,10 +359,10 @@ export default function CounterStatusPage() {
   }, []);
 
   useEffect(() => {
-    if (!createAt) return;
+    if (!calledAt) return;
     const interval = setInterval(() => {
       const now = new Date();
-      const diffMs = now.getTime() - createAt.getTime();
+      const diffMs = now.getTime() - calledAt.getTime();
       const diffSeconds = Math.floor(diffMs / 1000);
       const minutes = Math.floor(diffSeconds / 60)
         .toString()
@@ -372,7 +372,7 @@ export default function CounterStatusPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [createAt]);
+  }, [calledAt]);
 
   return isReady ? (
     <div
