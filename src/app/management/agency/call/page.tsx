@@ -85,18 +85,15 @@ export default function CounterStatusPage() {
 
     socket.removeAllListeners();
 
-    //connect thất bại
     socket.on("connect_error", onConnectError);
-
-    // connect thành công
     socket.on("connect", onConnect);
-
-    // lắng nghe update từ server socket
     socket.on("ListingServer", listingServer);
 
     // connect
     if (!socket.connected) {
       socket.connect();
+    } else {
+      initDataSocket();
     }
   };
 
@@ -254,6 +251,7 @@ export default function CounterStatusPage() {
         setTicketId(null);
         setWaitingAhead(null);
         setTotalServed(null);
+        setCalledAt(null);
       }
     );
   };
@@ -266,6 +264,10 @@ export default function CounterStatusPage() {
   };
 
   const onConnect = () => {
+    initDataSocket();
+  };
+
+  const initDataSocket = () => {
     socket.emit(
       "join_call_screen",
       {

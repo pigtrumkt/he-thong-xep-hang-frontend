@@ -105,10 +105,7 @@ export default function CounterStatusScreen() {
       counters.find((c) => c.id === counterIdSelected)?.name
     );
 
-    socket.off("connect", onConnect);
-    socket.off("connect_error", onConnectError);
-    socket.off("ListingServer", listingServer);
-
+    socket.removeAllListeners();
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
     socket.on("ListingServer", listingServer);
@@ -126,9 +123,7 @@ export default function CounterStatusScreen() {
 
     return () => {
       if (socket) {
-        socket.off("connect", onConnect);
-        socket.off("connect_error", onConnectError);
-        socket.off("ListingServer", listingServer);
+        socket.removeAllListeners();
       }
     };
   }, []);
