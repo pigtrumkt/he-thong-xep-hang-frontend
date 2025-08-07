@@ -55,7 +55,7 @@ export default function SidebarDeviceMenu() {
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  strokeWidth="2"
                   viewBox="0 0 24 24"
                 >
                   <circle cx="12" cy="12" r="3" />
@@ -77,7 +77,7 @@ export default function SidebarDeviceMenu() {
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  strokeWidth="2"
                   viewBox="0 0 24 24"
                 >
                   <rect x="3" y="7" width="18" height="13" rx="2" />
@@ -101,7 +101,7 @@ export default function SidebarDeviceMenu() {
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1.7"
+                  strokeWidth="1.7"
                   viewBox="0 0 24 24"
                 >
                   <polygon points="12 17 7 20 8.5 14 4 10.5 10 10 12 4 14 10 20 10.5 15.5 14 17 20 12 17" />

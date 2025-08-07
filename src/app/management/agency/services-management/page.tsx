@@ -174,7 +174,7 @@ export default function ServicesManagementPage() {
                         className="w-5 h-5 text-blue-400"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                         viewBox="0 0 24 24"
                       >
                         <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>

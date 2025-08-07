@@ -64,7 +64,7 @@ export default function SidebarAgencyMenu() {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
                     <path d="M22 16.92V19a2 2 0 01-2.18 2A19.72 19.72 0 013 5.18 2 2 0 015 3h2.09a2 2 0 012 1.72c.13 1.13.39 2.23.78 3.29a2 2 0 01-.45 2.11l-1.27 1.27a16 16 0 006.58 6.58l1.27-1.27a2 2 0 012.11-.45c1.06.39 2.16.65 3.29.78a2 2 0 011.72 2V19z" />
@@ -105,7 +105,7 @@ export default function SidebarAgencyMenu() {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="1.5"
+                    strokeWidth="1.5"
                     viewBox="0 0 24 24"
                   >
                     <rect
@@ -182,7 +182,7 @@ export default function SidebarAgencyMenu() {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="1.5"
+                    strokeWidth="1.5"
                     viewBox="0 0 24 24"
                   >
                     <rect
@@ -236,7 +236,7 @@ export default function SidebarAgencyMenu() {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
                     <path d="M17 21v-2a4 4 0 00-3-3.87M9 21v-2a4 4 0 013-3.87m6-7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -264,7 +264,7 @@ export default function SidebarAgencyMenu() {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
                     <circle cx="12" cy="12" r="3" />
