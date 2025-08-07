@@ -45,9 +45,7 @@ export default async function RootLayout({
           token,
         };
       }
-    } catch (err) {
-      console.error("Lỗi gọi API /accounts/me:", err);
-    }
+    } catch (err) {}
   }
 
   return (
