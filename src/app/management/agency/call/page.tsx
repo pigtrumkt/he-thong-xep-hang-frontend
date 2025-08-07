@@ -1,12 +1,22 @@
 "use client";
 
+import { usePopup } from "@/components/popup/PopupContext";
+import { apiGet } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function CounterStatusPage() {
+  const router = useRouter();
+  const { popupMessage, popupConfirmRed } = usePopup();
   const parentRef = useRef<HTMLDivElement | null>(null);
   const scaleRef = useRef<HTMLElement | null>(null);
+
+  const [counters, setCounters] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [counterSelected, setCounterSelected] = useState<any>(null);
   const [serviceSelected, setServiceSelected] = useState<any>(null);
+
   const [isReady, setIsReady] = useState(false);
 
   const toggleFullscreen = () => {
@@ -20,9 +30,34 @@ export default function CounterStatusPage() {
     }
   };
 
+  const fetchData = async () => {
+    const counterRes = await apiGet("/counters/findActiveByAgency");
+    if (![200, 400].includes(counterRes.status)) {
+      handleApiError(counterRes, popupMessage, router);
+      return;
+    }
+
+    if (counterRes.status === 200 && counterRes.data) {
+      setCounters(counterRes.data);
+    }
+
+    const serviceRes = await apiGet(
+      "/services/findGroupedActiveServicesInAgency"
+    );
+    if (![200, 400].includes(serviceRes.status)) {
+      handleApiError(serviceRes, popupMessage, router);
+      return;
+    }
+
+    if (serviceRes.status === 200 && serviceRes.data) {
+      setServices(serviceRes.data);
+    }
+  };
+
   const onConfirmSelected = () => {};
 
   useEffect(() => {
+    fetchData();
     const handleResize = () => {
       if (
         !document.fullscreenElement ||
@@ -296,9 +331,11 @@ export default function CounterStatusPage() {
               <option value="" disabled>
                 -- Chọn quầy --
               </option>
-              <option value="1">Quầy số 1</option>
-              <option value="2">Quầy số 2</option>
-              <option value="3">Quầy số 3</option>
+              {counters.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -314,9 +351,11 @@ export default function CounterStatusPage() {
               <option value="" disabled>
                 -- Chọn dịch vụ --
               </option>
-              <option value="101">Cấp lại CMND/CCCD</option>
-              <option value="102">Đăng ký khai sinh</option>
-              <option value="103">Cấp sổ hộ khẩu</option>
+              {services.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
