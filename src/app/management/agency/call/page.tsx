@@ -194,7 +194,7 @@ export default function CounterStatusPage() {
                   className="text-gray-200 fill-current"
                 />
               </svg>
-              Ngừng phục vụ
+              Thay đổi dịch vụ
             </button>
 
             <div className="flex flex-col justify-center h-full mt-16 space-y-6 lg:mt-0">
