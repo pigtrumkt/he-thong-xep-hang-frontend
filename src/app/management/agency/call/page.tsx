@@ -26,8 +26,9 @@ export default function CounterStatusPage() {
   const [statusTicket, setStatusTicket] = useState(null);
   const [totalServed, setTotalServed] = useState(null);
   const [waitingAhead, setWaitingAhead] = useState(null);
-  const [serviceTimer, setServiceTimer] = useState(null);
+  const [serviceTimer, setServiceTimer] = useState<string | null>(null);
   const [ticketId, setTicketId] = useState(null);
+  const [createAt, setCreateAt] = useState<Date | null>(null);
 
   const { socket, globalParams } = useGlobalParams() as {
     socket: Socket;
@@ -117,6 +118,9 @@ export default function CounterStatusPage() {
             setCurrentNumber(response.currentServingNumber);
             setStatusTicket(response.statusTicket);
             setTicketId(response.ticketId);
+            if (response.createAt) {
+              setCreateAt(new Date(response.createAt));
+            }
           } else if (response.status === "error") {
             popupMessage({
               description: response?.message || "Đã xảy ra lỗi",
@@ -179,6 +183,7 @@ export default function CounterStatusPage() {
         } else if (response.status === "update") {
           setStatusTicket(response.statusTicket);
           setTotalServed(response.totalServed);
+          setCreateAt(null);
         } else if (response.status === "error") {
           popupMessage({
             description: response?.message || "Đã xảy ra lỗi",
@@ -211,6 +216,7 @@ export default function CounterStatusPage() {
         } else if (response.status === "update") {
           setStatusTicket(response.statusTicket);
           setTotalServed(response.totalServed);
+          setCreateAt(null);
         } else if (response.status === "error") {
           popupMessage({
             description: response?.message || "Đã xảy ra lỗi",
@@ -250,7 +256,6 @@ export default function CounterStatusPage() {
         setTicketId(null);
         setWaitingAhead(null);
         setTotalServed(null);
-        setServiceTimer(null);
       }
     );
   };
@@ -279,6 +284,9 @@ export default function CounterStatusPage() {
           setTotalServed(response.totalServed);
           setWaitingAhead(response.waitingAhead);
           setTicketId(response.ticketId);
+          if (response.createAt) {
+            setCreateAt(new Date(response.createAt));
+          }
         } else if (response.status === "error") {
           popupMessage({
             description: response?.message || "Đã xảy ra lỗi",
@@ -349,6 +357,22 @@ export default function CounterStatusPage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!createAt) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diffMs = now.getTime() - createAt.getTime();
+      const diffSeconds = Math.floor(diffMs / 1000);
+      const minutes = Math.floor(diffSeconds / 60)
+        .toString()
+        .padStart(2, "0");
+      const seconds = (diffSeconds % 60).toString().padStart(2, "0");
+      setServiceTimer(`${minutes}:${seconds}`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [createAt]);
 
   return isReady ? (
     <div
@@ -449,7 +473,7 @@ export default function CounterStatusPage() {
                   />
                 </svg>
                 <span className="font-bold text-blue-900">
-                  {serviceTimer || "00:00"}
+                  {serviceTimer || "--:--"}
                 </span>
               </div>
             </div>
