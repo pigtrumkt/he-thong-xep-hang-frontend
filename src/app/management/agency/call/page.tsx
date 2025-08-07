@@ -84,49 +84,6 @@ export default function CounterStatusPage() {
 
     // connect
     socket.connect();
-
-    // connect thất bại
-    socket.once("connect_error", (err) => {
-      popupMessage({
-        title: "Mất kết nối",
-        description: "Vui lòng thử lại sau.",
-      });
-    });
-
-    // connect thành công
-    socket.once("connect", () => {
-      socket.emit(
-        "join_call_screen",
-        {
-          counterId: counterIdSelected,
-          serviceId: serviceIdSelected,
-        },
-        (response: any) => {
-          if (response.status === "success") {
-          } else if (response.status === "empty") {
-          } else if (response.status === "update") {
-            setIsReady(true);
-            setCurrentNumber(response.currentNumber);
-            setStatusTicket(response.statusTicket);
-            setTotalServed(response.totalServed);
-            setWaitingAhead(response.waitingAhead);
-            setTicketId(response.ticketId);
-          } else if (response.status === "error") {
-            popupMessage({
-              description: response?.message || "Đã xảy ra lỗi",
-            });
-            return;
-          } else if (response.status === "logout") {
-            router.push("/login");
-          } else {
-            popupMessage({
-              title: "Lỗi không xác định",
-              description: response?.message,
-            });
-          }
-        }
-      );
-    });
   };
 
   const handleCall = () => {
@@ -265,13 +222,56 @@ export default function CounterStatusPage() {
         action: "leaveCounter",
       },
       (response: any) => {
-        socket.disconnect();
+        if (socket.connected) {
+          socket.disconnect();
+        }
       }
     );
 
     setIsReady(false);
     setCounterIdSelected(null);
     setServiceIdSelected(null);
+  };
+
+  const onConnectError = (err) => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
+  };
+
+  const onConnect = () => {
+    socket.emit(
+      "join_call_screen",
+      {
+        counterId: counterIdSelected,
+        serviceId: serviceIdSelected,
+      },
+      (response: any) => {
+        if (response.status === "success") {
+        } else if (response.status === "empty") {
+        } else if (response.status === "update") {
+          setIsReady(true);
+          setCurrentNumber(response.currentNumber);
+          setStatusTicket(response.statusTicket);
+          setTotalServed(response.totalServed);
+          setWaitingAhead(response.waitingAhead);
+          setTicketId(response.ticketId);
+        } else if (response.status === "error") {
+          popupMessage({
+            description: response?.message || "Đã xảy ra lỗi",
+          });
+          return;
+        } else if (response.status === "logout") {
+          router.push("/login");
+        } else {
+          popupMessage({
+            title: "Lỗi không xác định",
+            description: response?.message,
+          });
+        }
+      }
+    );
   };
 
   useEffect(() => {
@@ -303,15 +303,25 @@ export default function CounterStatusPage() {
       }
     };
 
-    document.addEventListener("fullscreenchange", () => {
+    const fullscreenHandler = () => {
       if (document.fullscreenElement) handleResize();
       else handleExit();
-    });
+    };
+    document.addEventListener("fullscreenchange", fullscreenHandler);
+
     window.addEventListener("resize", handleResize);
 
+    // connect thất bại
+    socket.once("connect_error", onConnectError);
+
+    // connect thành công
+    socket.once("connect", onConnect);
+
     return () => {
-      document.removeEventListener("fullscreenchange", handleResize);
+      document.removeEventListener("fullscreenchange", fullscreenHandler);
       window.removeEventListener("resize", handleResize);
+      socket.off("connect_error", onConnectError);
+      socket.off("connect", onConnect);
     };
   }, []);
 
