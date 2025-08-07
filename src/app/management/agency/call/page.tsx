@@ -326,7 +326,7 @@ export default function CounterStatusPage() {
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
               onChange={(e) => setCounterSelected(e.target.value)}
-              value={counterSelected || ""}
+              value={counterSelected || null}
             >
               <option value="" disabled>
                 -- Chọn quầy --
@@ -346,15 +346,19 @@ export default function CounterStatusPage() {
             <select
               className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
               onChange={(e) => setServiceSelected(e.target.value)}
-              value={serviceSelected || ""}
+              value={serviceSelected || null}
             >
               <option value="" disabled>
                 -- Chọn dịch vụ --
               </option>
-              {services.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
+              {services.map((group) => (
+                <optgroup key={group.id} label={group.name}>
+                  {group.services.map((s: any) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
