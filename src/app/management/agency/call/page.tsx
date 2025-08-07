@@ -27,6 +27,7 @@ export default function CounterStatusPage() {
   const [totalServed, setTotalServed] = useState(null);
   const [waitingAhead, setWaitingAhead] = useState(null);
   const [serviceTimer, setServiceTimer] = useState(null);
+  const [ticketId, setTicketId] = useState(null);
 
   const { socket, globalParams } = useGlobalParams() as {
     socket: Socket;
@@ -109,13 +110,14 @@ export default function CounterStatusPage() {
             setStatusTicket(response.statusTicket);
             setTotalServed(response.totalServed);
             setWaitingAhead(response.waitingAhead);
+            setTicketId(response.ticketId);
           } else if (response.status === "error") {
             popupMessage({
-              title: "Không thể đăng ký quầy",
               description: response?.message || "Đã xảy ra lỗi",
             });
             return;
           } else if (response.status === "logout") {
+            router.push("/login");
           } else {
             popupMessage({
               title: "Lỗi không xác định",
@@ -128,59 +130,90 @@ export default function CounterStatusPage() {
   };
 
   const handleCall = () => {
-    socket.emit(
-      "join_call_screen",
-      {
-        counterId: counterIdSelected,
-        serviceId: serviceIdSelected,
-      },
-      (response: any) => {
-        if (response.status === "success") {
-        } else if (response.status === "empty") {
-        } else if (response.status === "update") {
-          setCurrentNumber(response.currentNumber);
-          setStatusTicket(response.statusTicket);
-          setTotalServed(response.totalServed);
-          setWaitingAhead(response.waitingAhead);
-        } else if (response.status === "error") {
-          popupMessage({
-            title: "Không thể đăng ký quầy",
-            description: response?.message || "Đã xảy ra lỗi",
-          });
-          return;
-        } else if (response.status === "logout") {
-        } else {
-          popupMessage({
-            title: "Lỗi không xác định",
-            description: response?.message,
-          });
+    if (!statusTicket && statusTicket !== 2 && !currentNumber) {
+      socket.emit(
+        "action:call",
+        {
+          counterId: counterIdSelected,
+          serviceId: serviceIdSelected,
+          action: "call",
+        },
+        (response: any) => {
+          if (response.status === "success") {
+          } else if (response.status === "empty") {
+          } else if (response.status === "update") {
+            setCurrentNumber(response.currentServingNumber);
+            setStatusTicket(response.statusTicket);
+            setTicketId(response.ticketId);
+          } else if (response.status === "error") {
+            popupMessage({
+              description: response?.message || "Đã xảy ra lỗi",
+            });
+            return;
+          } else if (response.status === "logout") {
+            router.push("/login");
+          } else {
+            popupMessage({
+              title: "Lỗi không xác định",
+              description: response?.message,
+            });
+          }
         }
-      }
-    );
+      );
+    } else {
+      socket.emit(
+        "action:call",
+        {
+          counterId: counterIdSelected,
+          serviceId: serviceIdSelected,
+          counterName: counterNameSelected,
+          currentServingNumber: currentNumber,
+          action: "recall",
+        },
+        (response: any) => {
+          if (response.status === "success") {
+          } else if (response.status === "empty") {
+          } else if (response.status === "update") {
+          } else if (response.status === "error") {
+            popupMessage({
+              description: response?.message || "Đã xảy ra lỗi",
+            });
+            return;
+          } else if (response.status === "logout") {
+            router.push("/login");
+          } else {
+            popupMessage({
+              title: "Lỗi không xác định",
+              description: response?.message,
+            });
+          }
+        }
+      );
+    }
   };
 
   const handleDone = () => {
     socket.emit(
-      "join_call_screen",
+      "action:call",
       {
         counterId: counterIdSelected,
         serviceId: serviceIdSelected,
+        ticketId: ticketId,
+        action: "done",
       },
       (response: any) => {
         if (response.status === "success") {
         } else if (response.status === "empty") {
         } else if (response.status === "update") {
-          setCurrentNumber(response.currentNumber);
           setStatusTicket(response.statusTicket);
           setTotalServed(response.totalServed);
-          setWaitingAhead(response.waitingAhead);
         } else if (response.status === "error") {
           popupMessage({
-            title: "Không thể đăng ký quầy",
             description: response?.message || "Đã xảy ra lỗi",
           });
           return;
         } else if (response.status === "logout") {
+          router.push("/login");
         } else {
           popupMessage({
             title: "Lỗi không xác định",
@@ -193,26 +226,25 @@ export default function CounterStatusPage() {
 
   const handleMissed = () => {
     socket.emit(
-      "join_call_screen",
+      "action:call",
       {
         counterId: counterIdSelected,
         serviceId: serviceIdSelected,
+        action: "missed",
       },
       (response: any) => {
         if (response.status === "success") {
         } else if (response.status === "empty") {
         } else if (response.status === "update") {
-          setCurrentNumber(response.currentNumber);
           setStatusTicket(response.statusTicket);
           setTotalServed(response.totalServed);
-          setWaitingAhead(response.waitingAhead);
         } else if (response.status === "error") {
           popupMessage({
-            title: "Không thể đăng ký quầy",
             description: response?.message || "Đã xảy ra lỗi",
           });
           return;
         } else if (response.status === "logout") {
+          router.push("/login");
         } else {
           popupMessage({
             title: "Lỗi không xác định",
@@ -224,7 +256,18 @@ export default function CounterStatusPage() {
   };
 
   const changeService = () => {
-    socket.disconnect();
+    socket.emit(
+      "action:call",
+      {
+        counterId: counterIdSelected,
+        serviceId: serviceIdSelected,
+        action: "leaveCounter",
+      },
+      (response: any) => {
+        socket.disconnect();
+      }
+    );
+
     setIsReady(false);
     setCounterIdSelected(null);
     setServiceIdSelected(null);
