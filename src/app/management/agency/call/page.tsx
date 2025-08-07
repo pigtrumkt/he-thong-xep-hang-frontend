@@ -130,7 +130,7 @@ export default function CounterStatusPage() {
   };
 
   const handleCall = () => {
-    if (!statusTicket && statusTicket !== 2 && !currentNumber) {
+    if (statusTicket != 2 || currentNumber == null) {
       socket.emit(
         "action:call",
         {
@@ -230,6 +230,7 @@ export default function CounterStatusPage() {
       {
         counterId: counterIdSelected,
         serviceId: serviceIdSelected,
+        ticketId: ticketId,
         action: "missed",
       },
       (response: any) => {
@@ -474,9 +475,9 @@ export default function CounterStatusPage() {
             <div className="flex flex-col justify-center h-full mt-16 space-y-6 lg:mt-0">
               <button
                 className={`group relative w-full py-8 px-6 rounded-xl bg-gradient-to-r  text-white font-bold shadow-lg transition-all  overflow-hidden ${
-                  currentNumber == null
-                    ? "from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 active:scale-[0.98]"
-                    : "from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-[0.98]"
+                  statusTicket == 2 && currentNumber
+                    ? "from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-[0.98]"
+                    : "from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 active:scale-[0.98]"
                 }`}
                 onClick={handleCall}
               >
@@ -495,7 +496,7 @@ export default function CounterStatusPage() {
                     />
                   </svg>
                   <span className="text-2xl">
-                    {currentNumber ? "Gọi lại" : "Gọi"}
+                    {statusTicket == 2 && currentNumber ? "Gọi lại" : "Gọi"}
                   </span>
                 </div>
                 <div className="absolute inset-0 transition-all duration-300 bg-white/10 group-hover:bg-white/0"></div>
@@ -503,11 +504,11 @@ export default function CounterStatusPage() {
 
               <div className="flex gap-5">
                 <button
-                  disabled={currentNumber == null}
+                  disabled={statusTicket != 2 || currentNumber == null}
                   onClick={handleDone}
                   className={`flex-1 group relative py-7 px-4 rounded-xl font-bold text-white shadow-lg transition-all overflow-hidden
     ${
-      currentNumber == null
+      statusTicket != 2 || currentNumber == null
         ? "bg-gray-300"
         : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 active:scale-[0.98]"
     }
@@ -534,11 +535,11 @@ export default function CounterStatusPage() {
 
                 <button
                   onClick={handleMissed}
-                  disabled={currentNumber == null}
+                  disabled={statusTicket != 2 || currentNumber == null}
                   className={`
     flex-1 group relative py-7 px-4 rounded-xl font-bold shadow-lg transition-all overflow-hidden
     ${
-      currentNumber == null
+      statusTicket != 2 || currentNumber == null
         ? "bg-gray-300 text-white"
         : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white active:scale-[0.98]"
     }
