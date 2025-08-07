@@ -82,8 +82,23 @@ export default function CounterStatusPage() {
         .find((s) => s.id === serviceIdSelected)?.name
     );
 
+    socket.off("connect_error", onConnectError);
+    socket.off("connect", onConnect);
+    socket.off("ListingServer", listingServer);
+
+    //connect thất bại
+    socket.on("connect_error", onConnectError);
+
+    // connect thành công
+    socket.on("connect", onConnect);
+
+    // lắng nghe update từ server socket
+    socket.on("ListingServer", listingServer);
+
     // connect
-    socket.connect();
+    if (!socket.connected) {
+      socket.connect();
+    }
   };
 
   const handleCall = () => {
@@ -222,18 +237,25 @@ export default function CounterStatusPage() {
         action: "leaveCounter",
       },
       (response: any) => {
-        if (socket.connected) {
+        if (socket) {
           socket.disconnect();
         }
+
+        setIsReady(false);
+        setCounterIdSelected(null);
+        setServiceIdSelected(null);
+        setServiceTimer(null);
+        setCurrentNumber(null);
+        setStatusTicket(null);
+        setTicketId(null);
+        setWaitingAhead(null);
+        setTotalServed(null);
+        setServiceTimer(null);
       }
     );
-
-    setIsReady(false);
-    setCounterIdSelected(null);
-    setServiceIdSelected(null);
   };
 
-  const onConnectError = (err) => {
+  const onConnectError = () => {
     popupMessage({
       title: "Mất kết nối",
       description: "Vui lòng thử lại sau.",
@@ -274,54 +296,57 @@ export default function CounterStatusPage() {
     );
   };
 
+  const listingServer = (res: any) => {
+    if (res.status === "update") {
+      setWaitingAhead(res.waitingAhead);
+    }
+  };
+
+  const handleResize = () => {
+    if (!document.fullscreenElement || !scaleRef.current || !parentRef.current)
+      return;
+
+    const winW = window.innerWidth - 40;
+    const winH = window.innerHeight - 40;
+
+    const scale = Math.min(
+      winW / scaleRef.current.offsetWidth,
+      winH / scaleRef.current.offsetHeight
+    );
+
+    parentRef.current.classList.add("apply-full-screen-css");
+    scaleRef.current.style.transform = `scale(${scale})`;
+  };
+
+  const handleExit = () => {
+    if (scaleRef.current && parentRef.current) {
+      scaleRef.current.style.transform = "";
+      parentRef.current.classList.remove("apply-full-screen-css");
+    }
+  };
+
+  const fullscreenHandler = () => {
+    if (document.fullscreenElement) handleResize();
+    else handleExit();
+  };
+
   useEffect(() => {
     fetchData();
-    const handleResize = () => {
-      if (
-        !document.fullscreenElement ||
-        !scaleRef.current ||
-        !parentRef.current
-      )
-        return;
 
-      const winW = window.innerWidth - 40;
-      const winH = window.innerHeight - 40;
-
-      const scale = Math.min(
-        winW / scaleRef.current.offsetWidth,
-        winH / scaleRef.current.offsetHeight
-      );
-
-      parentRef.current.classList.add("apply-full-screen-css");
-      scaleRef.current.style.transform = `scale(${scale})`;
-    };
-
-    const handleExit = () => {
-      if (scaleRef.current && parentRef.current) {
-        scaleRef.current.style.transform = "";
-        parentRef.current.classList.remove("apply-full-screen-css");
-      }
-    };
-
-    const fullscreenHandler = () => {
-      if (document.fullscreenElement) handleResize();
-      else handleExit();
-    };
     document.addEventListener("fullscreenchange", fullscreenHandler);
 
     window.addEventListener("resize", handleResize);
 
-    // connect thất bại
-    socket.once("connect_error", onConnectError);
-
-    // connect thành công
-    socket.once("connect", onConnect);
-
     return () => {
       document.removeEventListener("fullscreenchange", fullscreenHandler);
       window.removeEventListener("resize", handleResize);
-      socket.off("connect_error", onConnectError);
-      socket.off("connect", onConnect);
+
+      if (socket) {
+        socket.off("connect_error", onConnectError);
+        socket.off("connect", onConnect);
+        socket.off("ListingServer", listingServer);
+        socket.disconnect();
+      }
     };
   }, []);
 
