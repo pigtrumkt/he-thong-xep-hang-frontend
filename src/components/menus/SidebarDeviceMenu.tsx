@@ -6,23 +6,86 @@ import { usePathname } from "next/navigation";
 import { useGlobalParams } from "../ClientWrapper";
 import { useEffect, useState } from "react";
 import { usePopup } from "../popup/PopupContext";
+import { Socket } from "socket.io-client";
 export default function SidebarDeviceMenu() {
+  const { popupMessage } = usePopup();
+  const { socketSound, globalParams } = useGlobalParams() as {
+    socketSound: Socket;
+    globalParams: any;
+  };
   const pathname = usePathname();
   const { hasAccess } = useGlobalParams();
   const { popupConfirm } = usePopup();
 
-  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("audio-enabled");
-      return saved === "true";
-    }
-
-    return false;
-  });
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     localStorage.setItem("audio-enabled", String(isAudioEnabled));
   }, [isAudioEnabled]);
+
+  const voice = (message: string) => {
+    if (!message) {
+      return;
+    }
+
+    const voices = speechSynthesis.getVoices();
+    const listVoice = voices.filter((v) => v.lang === "vi-VN");
+
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = "vi-VN";
+    utterance.volume = 1;
+    utterance.rate = 0.9;
+    utterance.voice =
+      listVoice.length == 2
+        ? listVoice[1]
+        : listVoice.length > 0
+        ? listVoice[0]
+        : null;
+    speechSynthesis.speak(utterance);
+  };
+
+  const initDataSocket = () => {
+    socketSound.emit("join_sound", {}, (response: any) => {});
+  };
+
+  const onConnect = () => {
+    initDataSocket();
+  };
+
+  const onConnectError = () => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
+  };
+
+  const listingServer = (response: any) => {
+    voice(response.message);
+  };
+
+  const handleSound = async () => {
+    const nextValue = !isAudioEnabled;
+    const confirm = await popupConfirm({
+      title: nextValue ? "Bật phát âm thanh" : "Tắt phát âm thanh",
+    });
+
+    if (!confirm) {
+      return;
+    }
+
+    socketSound.removeAllListeners();
+    socketSound.disconnect();
+
+    setIsAudioEnabled(nextValue);
+    if (nextValue) {
+      socketSound.on("connect", onConnect);
+      socketSound.on("connect_error", onConnectError);
+      socketSound.on("ListingServer", listingServer);
+      if (!socketSound.connected) {
+        socketSound.connect();
+      }
+    }
+  };
 
   if (
     !hasAccess({
@@ -127,18 +190,7 @@ export default function SidebarDeviceMenu() {
                 <input
                   type="checkbox"
                   checked={isAudioEnabled}
-                  onChange={async (e) => {
-                    const nextValue = !isAudioEnabled;
-                    const confirm = await popupConfirm({
-                      title: nextValue
-                        ? "Bật phát âm thanh"
-                        : "Tắt phát âm thanh",
-                    });
-
-                    if (confirm) {
-                      setIsAudioEnabled(nextValue);
-                    }
-                  }}
+                  onChange={handleSound}
                   className="sr-only peer"
                 />
               </div>

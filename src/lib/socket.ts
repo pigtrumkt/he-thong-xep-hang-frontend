@@ -10,6 +10,7 @@ const SOCKET_BASE_URL = (() => {
 })();
 
 let socket: Socket;
+let socketSound: Socket;
 
 export const getSocket = (token: string): Socket => {
   if (!socket || socket.disconnected) {
@@ -24,4 +25,19 @@ export const getSocket = (token: string): Socket => {
   }
 
   return socket;
+};
+
+export const getSocketSound = (token: string): Socket => {
+  if (!socketSound || socketSound.disconnected) {
+    socketSound = io(SOCKET_BASE_URL, {
+      transports: ["websocket"],
+      autoConnect: false,
+      reconnection: true,
+      auth: {
+        token: token,
+      },
+    });
+  }
+
+  return socketSound;
 };
