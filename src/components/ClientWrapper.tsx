@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { PopupProvider } from "./popup/PopupContext";
-import { getSocket } from "@/lib/socket";
+import { getSocket, getSocketSound } from "@/lib/socket";
 import { io, Socket } from "socket.io-client";
 
 const UserContext = createContext<any>(null);
@@ -38,6 +38,7 @@ export default function ClientWrapper({
   const router = useRouter();
   const [globalParams, setGlobalParams] = useState(value ?? null);
   const [socket, setSocket] = useState<Socket>();
+  const [socketSound, setSocketSound] = useState<Socket>();
 
   const hasAccess = (config: AccessConfig): boolean => {
     if (!globalParams.user && !globalParams.user.id) {
@@ -66,6 +67,7 @@ export default function ClientWrapper({
     if (!globalParams.user) return;
 
     setSocket(getSocket(globalParams.user.token));
+    setSocketSound(getSocketSound(globalParams.user.token));
 
     const path = window.location.pathname;
     const roleId = globalParams.user["role_id"];
@@ -114,7 +116,7 @@ export default function ClientWrapper({
 
   return (
     <UserContext.Provider
-      value={{ globalParams, setGlobalParams, hasAccess, socket }}
+      value={{ globalParams, setGlobalParams, hasAccess, socket, socketSound }}
     >
       <PopupProvider>{children}</PopupProvider>
     </UserContext.Provider>
