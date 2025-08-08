@@ -17,9 +17,9 @@ export default function CounterStatusPage() {
   const [counters, setCounters] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
-  const [counterNameSelected, setCounterNameSelected] = useState<any>(null);
+  const counterNameSelectedRef = useRef("");
   const [serviceIdSelected, setServiceIdSelected] = useState<any>(null);
-  const [serviceNameSelected, setServiceNameSelected] = useState<any>(null);
+  const serviceNameSelectedRef = useRef("");
 
   const [isReady, setIsReady] = useState(false);
   const [currentNumber, setCurrentNumber] = useState(null);
@@ -72,16 +72,14 @@ export default function CounterStatusPage() {
 
   const handleConfirmSelected = () => {
     // set name counter
-    setCounterNameSelected(
-      counters.find((c) => c.id === counterIdSelected)?.name
-    );
+    counterNameSelectedRef.current = counters.find(
+      (c) => c.id === counterIdSelected
+    )?.name;
 
     // set name service
-    setServiceNameSelected(
-      services
-        .flatMap((g) => g.services)
-        .find((s) => s.id === serviceIdSelected)?.name
-    );
+    serviceNameSelectedRef.current = services
+      .flatMap((g) => g.services)
+      .find((s) => s.id === serviceIdSelected)?.name;
 
     socket.removeAllListeners();
 
@@ -137,7 +135,7 @@ export default function CounterStatusPage() {
         {
           counterId: counterIdSelected,
           serviceId: serviceIdSelected,
-          counterName: counterNameSelected,
+          counterName: counterNameSelectedRef.current,
           currentServingNumber: currentNumber,
           action: "recall",
         },
@@ -273,6 +271,7 @@ export default function CounterStatusPage() {
       {
         counterId: counterIdSelected,
         serviceId: serviceIdSelected,
+        serviceName: serviceNameSelectedRef.current,
       },
       (response: any) => {
         if (response.status === "success") {
@@ -426,10 +425,10 @@ export default function CounterStatusPage() {
             {/* Counter info */}
             <div className="mt-6 mb-6 text-center">
               <div className="text-[2rem] font-bold text-blue-800 mb-1">
-                {counterNameSelected}
+                {counterNameSelectedRef.current}
               </div>
               <div className="text-lg font-medium text-blue-600">
-                {serviceNameSelected}
+                {serviceNameSelectedRef.current}
               </div>
             </div>
 

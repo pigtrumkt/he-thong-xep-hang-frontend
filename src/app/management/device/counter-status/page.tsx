@@ -60,11 +60,19 @@ export default function CounterStatusScreen() {
 
   const listingServer = (response: any) => {
     if (response.status === "update") {
-      setCurrentServingNumber(response.currentServingNumber);
+      if (response.currentServingNumber !== undefined) {
+        setCurrentServingNumber(response.currentServingNumber);
+      }
+
+      if (response.serviceName !== undefined) {
+        setServiceName(response.serviceName);
+      }
     }
 
     if (response.status === "empty") {
       setCurrentServingNumber(null);
+      setServiceName(null);
+      setHistory([]);
     }
   };
 
@@ -77,6 +85,10 @@ export default function CounterStatusScreen() {
       (response: any) => {
         if (response.status === "success") {
         } else if (response.status === "empty") {
+          setIsReady(true);
+          setCurrentServingNumber(null);
+          setHistory([]);
+          setServiceName(null);
         } else if (response.status === "update") {
           setIsReady(true);
           setCurrentServingNumber(response.currentServingNumber);
