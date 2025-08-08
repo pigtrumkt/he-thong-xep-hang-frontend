@@ -101,6 +101,7 @@ export default function CounterStatusPage() {
         "action:call",
         {
           counterId: counterIdSelected,
+          counterName: counterNameSelectedRef.current,
           serviceId: serviceIdSelected,
           action: "call",
         },
