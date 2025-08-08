@@ -59,6 +59,7 @@ export default function CounterStatusScreen() {
 
       if (response.serviceName !== undefined) {
         setServiceName(response.serviceName);
+        initDataSocket();
       }
 
       if (response.history) {
