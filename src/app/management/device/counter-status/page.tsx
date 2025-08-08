@@ -8,13 +8,6 @@ import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-type HistoryItem = {
-  id: number;
-  counter_name: string;
-  queue_number: number;
-  status: number;
-};
-
 export default function CounterStatusScreen() {
   const router = useRouter();
   const { popupMessage } = usePopup();
@@ -32,7 +25,7 @@ export default function CounterStatusScreen() {
   >(null);
   const [serviceName, setServiceName] = useState(null);
 
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   const mainRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async () => {
@@ -66,6 +59,20 @@ export default function CounterStatusScreen() {
 
       if (response.serviceName !== undefined) {
         setServiceName(response.serviceName);
+      }
+
+      if (response.history) {
+        setHistory((prev) => {
+          const incoming = Array.isArray(response.history)
+            ? response.history
+            : [response.history];
+
+          // thêm vào đầu mảng → item mới ở trước
+          const updated = [...incoming, ...prev];
+
+          // lấy 4 phần tử đầu tiên → mới nhất
+          return updated.slice(0, 4);
+        });
       }
     }
 
@@ -152,16 +159,16 @@ export default function CounterStatusScreen() {
   //     }
 
   //     //setCurrentNumber(next);
-  //     setHistory((prev) => {
-  //       const newItem: HistoryItem = {
-  //         counter: 3,
-  //         number: next - 1,
-  //         status: Math.random() < 0.8 ? "done" : "missed",
-  //         justAdded: true,
-  //       };
-  //       const updated = [...prev, newItem];
-  //       return updated.slice(-4); // giữ lại 4 dòng
-  //     });
+  // setHistory((prev) => {
+  //   const newItem: HistoryItem = {
+  //     counter: 3,
+  //     number: next - 1,
+  //     status: Math.random() < 0.8 ? "done" : "missed",
+  //     justAdded: true,
+  //   };
+  //   const updated = [...prev, newItem];
+  //   return updated.slice(-4); // giữ lại 4 dòng
+  // });
 
   //     // xoá hiệu ứng sau khi render
   //     setTimeout(() => {
@@ -208,7 +215,7 @@ export default function CounterStatusScreen() {
             Số đã gọi
           </h2>
           <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
-            {[...history].reverse().map((item, idx) => (
+            {[...history].map((item, idx) => (
               <div
                 key={item.id}
                 className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
