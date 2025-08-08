@@ -148,43 +148,6 @@ export default function CounterStatusScreen() {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const next = currentNumber + 1;
-
-  //     // hiệu ứng số chính
-  //     if (mainRef.current) {
-  //       mainRef.current.classList.remove("pulse-once");
-  //       void mainRef.current.offsetWidth;
-  //       mainRef.current.classList.add("pulse-once");
-  //     }
-
-  //     //setCurrentNumber(next);
-  // setHistory((prev) => {
-  //   const newItem: HistoryItem = {
-  //     counter: 3,
-  //     number: next - 1,
-  //     status: Math.random() < 0.8 ? "done" : "missed",
-  //     justAdded: true,
-  //   };
-  //   const updated = [...prev, newItem];
-  //   return updated.slice(-4); // giữ lại 4 dòng
-  // });
-
-  //     // xoá hiệu ứng sau khi render
-  //     setTimeout(() => {
-  //       setHistory((prev) =>
-  //         prev.map((item) => {
-  //           const { justAdded, ...rest } = item;
-  //           return rest;
-  //         })
-  //       );
-  //     }, 300);
-  //   }, 3000);
-
-  //   return () => clearInterval(interval);
-  // }, [currentNumber]);
-
   return isReady ? (
     <div className="flex flex-col h-screen font-sans text-gray-800 uppercase bg-blue-50">
       {/* HEADER */}
