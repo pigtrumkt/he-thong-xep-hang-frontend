@@ -151,7 +151,7 @@ export default function RatingScreen() {
 
   const handleSubmit = () => {
     if (selectedStars === 0) {
-      alert("Vui lòng chọn số sao.");
+      popupMessage({ description: "Bạn chưa đánh giá" });
       return;
     }
 
@@ -161,17 +161,23 @@ export default function RatingScreen() {
       thankYouRef.current.classList.add("zoom-in");
     }
 
-    setTimeout(() => {
-      if (ratingBoxRef.current) {
-        ratingBoxRef.current.classList.add("zoom-out");
-        setTimeout(() => {
-          if (ratingBoxRef.current) {
-            ratingBoxRef.current.style.display = "none";
-            ratingBoxRef.current.classList.remove("zoom-out");
-          }
-        }, 400);
-      }
-    }, 3000);
+    hideRatingModal();
+  };
+
+  const showRatingModal = () => {
+    setSubmitted(false);
+  };
+
+  const hideRatingModal = () => {
+    if (ratingBoxRef.current) {
+      ratingBoxRef.current.classList.add("zoom-out");
+      setTimeout(() => {
+        if (ratingBoxRef.current) {
+          ratingBoxRef.current.style.display = "none";
+          ratingBoxRef.current.classList.remove("zoom-out");
+        }
+      }, 400);
+    }
   };
 
   return isReady ? (
