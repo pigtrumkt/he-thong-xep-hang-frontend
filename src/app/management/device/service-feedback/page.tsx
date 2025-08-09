@@ -33,6 +33,7 @@ export default function RatingScreen() {
   const [staffGender, setStaffGender] = useState(null);
   const [StaffPosition, setStaffPosition] = useState(null);
   const [staffAvatarUrl, setStaffAvatarUrl] = useState(null);
+  const [statusTicket, setStatusTicket] = useState(null);
 
   const [selectedStars, setSelectedStars] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -66,20 +67,25 @@ export default function RatingScreen() {
   };
 
   const listingServer = (response: any) => {
-    if (response.status === "update") {
-      if (response.currentServingNumber !== undefined) {
-        setCurrentServingNumber(response.currentServingNumber);
-      }
+    if (response.status === "joined") {
+      initDataSocket();
+    }
 
-      if (response.serviceName !== undefined) {
-        setServiceName(response.serviceName);
-        initDataSocket();
-      }
+    if (response.status === "update") {
+      setTicketId(response.ticketId);
+      setCurrentServingNumber(response.currentServingNumber);
+      setStatusTicket(response.statusTicket);
     }
 
     if (response.status === "empty") {
+      setTicketId(null);
       setCurrentServingNumber(null);
       setServiceName(null);
+      setStaffName(null);
+      setStaffGender(null);
+      setStaffPosition(null);
+      setStaffAvatarUrl(null);
+      setStatusTicket(null);
     }
   };
 
@@ -92,6 +98,7 @@ export default function RatingScreen() {
       (response: any) => {
         if (response.status === "success") {
         } else if (response.status === "empty") {
+          showRatingModal();
           setIsReady(true);
           setTicketId(null);
           setCurrentServingNumber(null);
@@ -100,7 +107,9 @@ export default function RatingScreen() {
           setStaffGender(null);
           setStaffPosition(null);
           setStaffAvatarUrl(null);
+          setStatusTicket(null);
         } else if (response.status === "update") {
+          showRatingModal();
           setIsReady(true);
           setTicketId(response.ticketId);
           setCurrentServingNumber(response.currentServingNumber);
@@ -109,6 +118,7 @@ export default function RatingScreen() {
           setStaffName(response.staffName);
           setStaffPosition(response.staffPosition);
           setStaffAvatarUrl(response.staffAvatarUrl);
+          setStatusTicket(null);
         } else if (response.status === "error") {
           popupMessage({
             description: response?.message || "Đã xảy ra lỗi",
@@ -161,10 +171,15 @@ export default function RatingScreen() {
       thankYouRef.current.classList.add("zoom-in");
     }
 
-    hideRatingModal();
+    // hideRatingModal();
   };
 
   const showRatingModal = () => {
+    if (thankYouRef.current) {
+      thankYouRef.current.classList.add("invisible");
+      thankYouRef.current.classList.remove("zoom-in");
+    }
+
     setSubmitted(false);
   };
 
@@ -198,27 +213,26 @@ export default function RatingScreen() {
           ref={ratingBoxRef}
           className="h-[45rem] bg-white rounded-3xl shadow-xl border border-blue-200 overflow-hidden flex animate-zoom-in"
         >
-          {serviceName && (
-            <div>
-              <img
-                src={`${host}/accounts/avatar/${
-                  staffAvatarUrl
-                    ? `${staffAvatarUrl}?v=${Date.now()}`
-                    : staffGender === 0
-                    ? "avatar_default_female.png"
-                    : "avatar_default_male.png"
-                }`}
-                alt="Avatar"
-                className="object-cover w-32 h-32 mb-3 border-2 shadow-md cursor-pointer border-slate-400"
-                onClick={() => setShowAvatarPreview(true)}
-              />
-              <p>{staffName}</p>
-              <p>{StaffPosition}</p>
-            </div>
-          )}
-
           {/* Số thứ tự */}
-          <div className="w-[30rem] p-8 bg-blue-100 flex flex-col items-center justify-center border-b border-blue-100">
+          <div className="w-[32rem] p-8 bg-blue-100 flex flex-col items-center justify-center border-b border-blue-100">
+            {serviceName && (
+              <div className="flex flex-col items-center justify-center ">
+                <img
+                  src={`${host}/accounts/avatar/${
+                    staffAvatarUrl
+                      ? `${staffAvatarUrl}?v=${Date.now()}`
+                      : staffGender === 0
+                      ? "avatar_default_female.png"
+                      : "avatar_default_male.png"
+                  }`}
+                  alt="Avatar"
+                  className="object-cover w-32 h-32 mb-3 border-2 shadow-md cursor-pointer border-slate-400"
+                  onClick={() => setShowAvatarPreview(true)}
+                />
+                <p>{staffName}</p>
+                <p>{StaffPosition}</p>
+              </div>
+            )}
             <p className="text-[2.5rem] font-semibold text-blue-700 text-center">
               {currentServingNumber && "MỜI CÔNG DÂN CÓ SỐ"}
             </p>
