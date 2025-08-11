@@ -2,16 +2,11 @@
 
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { apiGet } from "@/lib/api";
+import { API_BASE, apiGet } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
-
-const host =
-  typeof window !== "undefined"
-    ? `${window.location.protocol}//${window.location.hostname}:3001`
-    : "";
 
 export default function RatingScreen() {
   const router = useRouter();
@@ -218,7 +213,7 @@ export default function RatingScreen() {
             {serviceName && (
               <div className="flex flex-col items-center justify-center ">
                 <img
-                  src={`${host}/accounts/avatar/${
+                  src={`${API_BASE}/accounts/avatar/${
                     staffAvatarUrl
                       ? `${staffAvatarUrl}?v=${Date.now()}`
                       : staffGender === 0
@@ -296,7 +291,7 @@ export default function RatingScreen() {
             className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
           >
             <img
-              src={`${host}/accounts/avatar/${
+              src={`${API_BASE}/accounts/avatar/${
                 staffAvatarUrl
                   ? `${staffAvatarUrl}?v=${Date.now()}`
                   : staffGender === 0

@@ -1,12 +1,12 @@
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_BASE_URL = (() => {
+export const SOCKET_BASE_URL = (() => {
+  const port = `${process.env.NEXT_PUBLIC_API_PORT}`;
   if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    return `${protocol}//${hostname}:3001`;
+    return `${window.location.protocol}//${window.location.hostname}:${port}`;
   }
 
-  return "";
+  return `http://localhost:${port}`; // dùng cho SSR
 })();
 
 let socket: Socket;

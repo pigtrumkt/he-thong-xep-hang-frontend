@@ -1,9 +1,10 @@
 export const API_BASE = (() => {
+  const port = `${process.env.NEXT_PUBLIC_API_PORT}`;
   if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    return `${protocol}//${hostname}:3001`;
+    return `${window.location.protocol}//${window.location.hostname}:${port}`;
   }
-  return "http://localhost:3001"; // fallback khi SSR (nếu cần)
+
+  return `http://localhost:${port}`; // dùng cho SSR
 })();
 
 export function apiGet(path: string) {

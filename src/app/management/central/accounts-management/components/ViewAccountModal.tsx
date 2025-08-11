@@ -1,5 +1,6 @@
 "use client";
 
+import { API_BASE } from "@/lib/api";
 import { useEffect, useState } from "react";
 
 interface ViewAccountModalProps {
@@ -75,16 +76,11 @@ export default function ViewAccountModal({
     setTimeout(() => setVisible(true), 10);
   }, [accountData]);
 
-  const host =
-    typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:3001`
-      : "";
-
   const avatarUrl = accountData?.avatar_url
-    ? `${host}/accounts/avatar/${accountData.avatar_url}?v=${Date.now()}`
+    ? `${API_BASE}/accounts/avatar/${accountData.avatar_url}?v=${Date.now()}`
     : accountData?.gender === 0
-    ? `${host}/accounts/avatar/avatar_default_female.png`
-    : `${host}/accounts/avatar/avatar_default_male.png`;
+    ? `${API_BASE}/accounts/avatar/avatar_default_female.png`
+    : `${API_BASE}/accounts/avatar/avatar_default_male.png`;
 
   return (
     <div

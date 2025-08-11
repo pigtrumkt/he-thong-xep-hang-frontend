@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import "../globals.css";
 import SidebarCentralMenu from "@/components/menus/SidebarCentralMenu";
 import { useGlobalParams } from "@/components/ClientWrapper";
-import { apiPost } from "@/lib/api";
+import { API_BASE, apiPost } from "@/lib/api";
 import PopupChangePassword from "@/components/popup/PopupChangePassword";
 import { useRouter } from "next/navigation";
 import SidebarAgencyMenu from "@/components/menus/SidebarAgencyMenu";
@@ -101,8 +101,7 @@ export default function ManagementLayout({
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
-    const hostTemp = `${window.location.protocol}//${window.location.hostname}:3001`;
-    setHost(hostTemp);
+    setHost(API_BASE);
 
     const cleanup1 = applyDropdownToggle();
     const cleanup2 = applyEventBtnLogout();

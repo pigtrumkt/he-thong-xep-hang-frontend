@@ -5,6 +5,7 @@ import ClientWrapper from "@/components/ClientWrapper";
 
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { API_BASE } from "@/lib/api";
 config.autoAddCss = false;
 
 export const metadata: Metadata = {
@@ -31,7 +32,7 @@ export default async function RootLayout({
   let user = {};
   if (token) {
     try {
-      const res = await fetch(`http://localhost:3001/accounts/me`, {
+      const res = await fetch(`${API_BASE}/accounts/me`, {
         headers: {
           Cookie: `authorization=${token}`,
         },

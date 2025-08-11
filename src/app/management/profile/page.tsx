@@ -45,11 +45,6 @@ export default function ProfilePage() {
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
-  const host =
-    typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:3001`
-      : "";
-
   useEffect(() => {
     const fetchData = async () => {
       const res = await apiGet("/accounts/me");
@@ -161,7 +156,7 @@ export default function ProfilePage() {
       <div className="p-8 mx-4 bg-white border border-blue-200 shadow-xl rounded-3xl">
         <div className="flex flex-col items-center mb-8">
           <img
-            src={`${host}/accounts/avatar/${
+            src={`${API_BASE}/accounts/avatar/${
               user.avatar_url
                 ? `${user.avatar_url}?v=${Date.now()}`
                 : gender === 0
@@ -371,7 +366,7 @@ export default function ProfilePage() {
           className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
         >
           <img
-            src={`${host}/accounts/avatar/${
+            src={`${API_BASE}/accounts/avatar/${
               user.avatar_url
                 ? `${user.avatar_url}?v=${Date.now()}`
                 : gender === 0
