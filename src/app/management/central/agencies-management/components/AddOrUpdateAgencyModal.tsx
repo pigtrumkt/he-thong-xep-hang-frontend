@@ -23,7 +23,8 @@ export default function AddOrUpdateAgencyModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
-    name: "",
+    name_1: "",
+    name_2: "",
     address: "",
     phone: "",
     email: "",
@@ -57,7 +58,8 @@ export default function AddOrUpdateAgencyModal({
         "",
       ];
       setForm({
-        name: initialData.name || "",
+        name_1: initialData.name_1 || "",
+        name_2: initialData.name_2 || "",
         address: initialData.address || "",
         phone: initialData.phone || "",
         email: initialData.email || "",
@@ -102,7 +104,8 @@ export default function AddOrUpdateAgencyModal({
       ticket_time_range = ""; // ✅ Clear if invalid
     }
     const payload = {
-      name: form.name.trim(),
+      name_1: form.name_1.trim(),
+      name_2: form.name_2.trim(),
       address: form.address.trim(),
       phone: form.phone.trim(),
       email: form.email?.trim() || "",
@@ -187,12 +190,21 @@ export default function AddOrUpdateAgencyModal({
                 Tên cơ quan <span className="text-red-400">*</span>
               </label>
               <input
-                name="name"
-                value={form.name}
+                name="name_1"
+                value={form.name_1}
                 onChange={handleChange}
                 className={inputClass}
+                placeholder="Dòng 1"
               />
-              {errorText("name")}
+              {errorText("name_1")}
+              <input
+                name="name_2"
+                value={form.name_2}
+                onChange={handleChange}
+                className={`${inputClass} mt-2`}
+                placeholder="Dòng 2"
+              />
+              {errorText("name_2")}
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700">

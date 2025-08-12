@@ -39,7 +39,8 @@ export default function AgenciesManagementPage() {
 
   const filtered = agencies.filter((a) => {
     const matchName =
-      a.name?.toLowerCase().includes(search.toLowerCase()) ||
+      a.name_1?.toLowerCase().includes(search.toLowerCase()) ||
+      a.name_2?.toLowerCase().includes(search.toLowerCase()) ||
       a.address?.toLowerCase().includes(search.toLowerCase()) ||
       a.phone?.toLowerCase().includes(search.toLowerCase()) ||
       a.email?.toLowerCase().includes(search.toLowerCase());
@@ -106,7 +107,15 @@ export default function AgenciesManagementPage() {
               <td className="px-4 py-3 font-semibold text-blue-800">
                 {idx + 1}
               </td>
-              <td className="px-4 py-3">{a.name}</td>
+              <td className="px-4 py-3">
+                {a.name_1}
+                {a.name_2 && (
+                  <>
+                    <br />
+                    {a.name_2}
+                  </>
+                )}
+              </td>
               <td className="px-4 py-3">{a.address}</td>
               <td className="px-4 py-3">{a.phone}</td>
               <td className="px-4 py-3">{a.email || "-"}</td>
@@ -214,7 +223,7 @@ export default function AgenciesManagementPage() {
                       onClick={() => {
                         popupConfirmRed({
                           title: "Xác nhận xoá cơ quan?",
-                          description: a.name,
+                          description: a.name_1,
                         }).then(async (confirmed) => {
                           if (!confirmed) return;
 
@@ -235,7 +244,7 @@ export default function AgenciesManagementPage() {
                           } else {
                             popupMessage({
                               title: `Xoá thất bại`,
-                              description: a.name,
+                              description: a.name_1,
                             });
                           }
                         });

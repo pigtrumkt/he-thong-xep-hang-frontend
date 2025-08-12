@@ -55,7 +55,20 @@ export default function AgencyDetailModal({
         </h2>
 
         <div className="space-y-5 text-sm text-gray-800">
-          <Field label="Tên cơ quan" value={agency.name} />
+          <div>
+            <label className="block mb-1 font-medium text-gray-700">
+              Tên cơ quan
+            </label>
+            <div className="px-3 py-2 break-words whitespace-pre-wrap bg-gray-100 rounded">
+              {agency.name_1}
+              {agency.name_2 && (
+                <>
+                  <br />
+                  {agency.name_2}
+                </>
+              )}
+            </div>
+          </div>
           <Field label="Địa chỉ" value={agency.address} />
           <Field label="Số điện thoại" value={agency.phone} />
           <Field label="Email" value={agency.email} />

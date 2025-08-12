@@ -115,7 +115,7 @@ export default function ManagementLayout({
   return (
     <>
       {/* Header */}
-      <header className="relative flex items-center justify-between w-full h-16 px-10 border-b border-blue-200 shadow-md bg-white/90 backdrop-blur z-100">
+      <header className="relative z-50 flex items-center justify-between w-full h-16 px-10 border-b border-blue-200 shadow-md bg-white/90 backdrop-blur">
         <div className="flex items-center gap-4 select-none">
           <div className="p-2 shadow-lg bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl">
             <svg
