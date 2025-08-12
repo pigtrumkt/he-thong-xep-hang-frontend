@@ -113,7 +113,7 @@ export default function ViewAccountModal({
             <img
               src={avatarUrl}
               alt="Avatar"
-              className="object-cover w-32 h-32 mb-3 border-2 shadow-md cursor-pointer border-slate-400"
+              className="object-cover w-32 h-32 mb-3 border-2 border-blue-300 shadow-md cursor-pointer"
               onClick={() => setShowAvatarPreview(true)}
             />
           </div>
