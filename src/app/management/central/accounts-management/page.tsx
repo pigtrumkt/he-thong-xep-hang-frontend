@@ -69,7 +69,7 @@ export default function AccountsManagementPage() {
       acc.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       acc.phone?.toLowerCase().includes(search.toLowerCase()) ||
       acc.position?.toLowerCase().includes(search.toLowerCase()) ||
-      acc.agency_name?.toLowerCase().includes(search.toLowerCase());
+      acc.agency_name_1?.toLowerCase().includes(search.toLowerCase());
 
     const matchStatus =
       statusFilter === "" ||
@@ -183,7 +183,7 @@ export default function AccountsManagementPage() {
                 </span>
               </td>
               <td className="px-4 py-2">{acc.position || "-"}</td>
-              <td className="px-4 py-2">{acc.agency_name || "-"}</td>
+              <td className="px-4 py-2">{acc.agency_name_1 || "-"}</td>
               <td className="px-4 py-2">
                 <div className="flex items-center gap-2">
                   <button

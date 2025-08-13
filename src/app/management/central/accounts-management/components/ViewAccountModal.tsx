@@ -140,8 +140,19 @@ export default function ViewAccountModal({
             />
           </div>
           {![1, 2].includes(accountData.role_id) && (
-            <div className="grid grid-cols-1">
-              <Field label="Cơ quan" value={accountData.agency_name} />
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
+                Cơ quan
+              </label>
+              <div className="px-3 py-2 break-words whitespace-pre-wrap bg-gray-100 rounded">
+                {accountData.agency_name_1}
+                {accountData.agency_name_2 && (
+                  <>
+                    <br />
+                    {accountData.agency_name_2}
+                  </>
+                )}
+              </div>
             </div>
           )}
 

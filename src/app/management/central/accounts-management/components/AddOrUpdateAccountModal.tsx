@@ -369,7 +369,7 @@ export default function AddOrUpdateAccountModal({
                   <option value="">-- Chọn cơ quan --</option>
                   {agencies.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name}
+                      {a.name_1}
                     </option>
                   ))}
                 </select>
