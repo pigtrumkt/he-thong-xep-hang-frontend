@@ -23,6 +23,8 @@ export default function AddOrUpdateAgencyModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
+    logo_file: null as File | null,
+    logo_preview: initialData?.logo_url || null,
     name_1: "",
     name_2: "",
     address: "",
@@ -58,6 +60,8 @@ export default function AddOrUpdateAgencyModal({
         "",
       ];
       setForm({
+        logo_file: null as File | null,
+        logo_preview: initialData?.logo_url || null,
         name_1: initialData.name_1 || "",
         name_2: initialData.name_2 || "",
         address: initialData.address || "",
@@ -183,6 +187,52 @@ export default function AddOrUpdateAgencyModal({
           onSubmit={handleSubmit}
           className="space-y-5 text-sm text-gray-800"
         >
+          <div className="flex justify-center">
+            <label className="cursor-pointer group">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (!file.type.startsWith("image/")) {
+                    popupMessage({
+                      description: "Vui lòng chọn tệp hình ảnh.",
+                    });
+                    return;
+                  }
+                  if (file.size > 2 * 1024 * 1024) {
+                    popupMessage({
+                      description: "Ảnh quá lớn, chọn ảnh dưới 2MB.",
+                    });
+                    return;
+                  }
+
+                  setForm((prev) => ({
+                    ...prev,
+                    logo_file: file,
+                    logo_preview: URL.createObjectURL(file),
+                  }));
+                }}
+              />
+
+              <div className="relative flex items-center justify-center h-40 overflow-hidden transition-all border border-gray-300 border-dashed rounded-lg bg-gray-50 hover:border-blue-400">
+                <img
+                  src={
+                    form.logo_preview || "/img/default_image.webp" // hoặc thay bằng đường dẫn ảnh mặc định bạn đã upload
+                  }
+                  alt="Logo cơ quan"
+                  className={`object-contain max-w-full max-h-full ${
+                    form.logo_preview ? "" : "opacity-20"
+                  }`}
+                />
+                <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white transition-opacity opacity-0 bg-black/20 group-hover:opacity-100">
+                  Nhấn để chọn logo
+                </div>
+              </div>
+            </label>
+          </div>
           {/* Tên + Địa chỉ */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
