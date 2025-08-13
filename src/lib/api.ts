@@ -20,10 +20,20 @@ async function apiRequest(method: "GET" | "POST", path: string, body?: any) {
   const timeout = setTimeout(() => controller.abort(), 10000); // 10 giây
 
   try {
+    const isFormData =
+      typeof FormData !== "undefined" && body instanceof FormData;
+
     const res = await fetch(`${API_BASE}${path}`, {
       method,
-      headers: body ? { "Content-Type": "application/json" } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
+      headers:
+        !isFormData && body
+          ? { "Content-Type": "application/json" }
+          : undefined,
+      body: body
+        ? isFormData
+          ? body // ✅ Gửi FormData thẳng, không stringify
+          : JSON.stringify(body)
+        : undefined,
       credentials: "include",
       signal: controller.signal,
     });

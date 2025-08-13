@@ -107,29 +107,49 @@ export default function AddOrUpdateAgencyModal({
     if (ticket_time_range.length < 11) {
       ticket_time_range = ""; // ✅ Clear if invalid
     }
-    const payload = {
-      name_1: form.name_1.trim(),
-      name_2: form.name_2.trim(),
-      address: form.address.trim(),
-      phone: form.phone.trim(),
-      email: form.email?.trim() || "",
-      screen_notice: form.screen_notice?.trim() || "",
-      allow_online_ticket: form.allow_online_ticket ? 1 : 0,
-      min_time_between_ticket_online: form.allow_online_ticket
-        ? Number(form.min_time_between_ticket_online || 0)
-        : undefined,
-      max_ticket_per_day_online: form.allow_online_ticket
-        ? Number(form.max_ticket_per_day_online || 0)
-        : undefined,
-      allowed_days_of_week: form.allowed_days_of_week.join(","),
-      ticket_time_range,
-    };
+
+    const formData = new FormData();
+
+    // Append tất cả field dạng text
+    formData.append("name_1", form.name_1.trim());
+    formData.append("name_2", form.name_2.trim());
+    formData.append("address", form.address.trim());
+    formData.append("phone", form.phone.trim());
+    formData.append("email", form.email?.trim() || "");
+    formData.append("screen_notice", form.screen_notice?.trim() || "");
+    formData.append(
+      "allow_online_ticket",
+      form.allow_online_ticket ? "1" : "0"
+    );
+    formData.append(
+      "min_time_between_ticket_online",
+      form.allow_online_ticket
+        ? String(form.min_time_between_ticket_online || 0)
+        : ""
+    );
+    formData.append(
+      "max_ticket_per_day_online",
+      form.allow_online_ticket
+        ? String(form.max_ticket_per_day_online || 0)
+        : ""
+    );
+    formData.append(
+      "allowed_days_of_week",
+      form.allowed_days_of_week.join(",")
+    );
+    formData.append("ticket_time_range", ticket_time_range);
+
+    // ✅ Nếu có logo_file → đính kèm
+    if (form.logo_file) {
+      formData.append("logo_file", form.logo_file);
+    }
 
     const endpoint = initialData
       ? `/agencies/${initialData.id}/update`
       : "/agencies/create";
 
-    const result = await apiPost(endpoint, payload);
+    const result = await apiPost(endpoint, formData);
+
     if (![201, 400].includes(result.status)) {
       handleApiError(result, popupMessage, router);
       return;
@@ -187,7 +207,8 @@ export default function AddOrUpdateAgencyModal({
           onSubmit={handleSubmit}
           className="space-y-5 text-sm text-gray-800"
         >
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center justify-center gap-2">
+            {/* Phần chọn ảnh */}
             <label className="cursor-pointer group">
               <input
                 type="file"
@@ -219,9 +240,7 @@ export default function AddOrUpdateAgencyModal({
 
               <div className="relative flex items-center justify-center h-40 overflow-hidden transition-all border border-gray-300 border-dashed rounded-lg bg-gray-50 hover:border-blue-400">
                 <img
-                  src={
-                    form.logo_preview || "/img/default_image.webp" // hoặc thay bằng đường dẫn ảnh mặc định bạn đã upload
-                  }
+                  src={form.logo_preview || "/img/default_image.webp"}
                   alt="Logo cơ quan"
                   className={`object-contain max-w-full max-h-full ${
                     form.logo_preview ? "" : "opacity-20"
@@ -232,6 +251,23 @@ export default function AddOrUpdateAgencyModal({
                 </div>
               </div>
             </label>
+
+            {/* Nút xoá ảnh */}
+            {form.logo_preview && (
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    logo_file: null,
+                    logo_preview: null,
+                  }))
+                }
+                className="px-3 py-1 text-sm font-medium text-red-600 transition border border-red-300 rounded-md hover:bg-red-100"
+              >
+                Xóa ảnh
+              </button>
+            )}
           </div>
           {/* Tên + Địa chỉ */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
