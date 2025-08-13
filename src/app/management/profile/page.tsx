@@ -353,7 +353,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={isSubmiting}
-              className="px-6 py-2 font-semibold text-white transition bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50"
+              className="px-6 py-2 font-semibold text-white transition bg-blue-700 shadow bg-gradient-to-r hover:bg-blue-900 rounded-xl disabled:opacity-50"
             >
               Cập nhật
             </button>

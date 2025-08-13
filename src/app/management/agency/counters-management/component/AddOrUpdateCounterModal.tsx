@@ -121,7 +121,7 @@ export default function AddOrUpdateCounterModal({
           <div className="pt-4 text-right">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition shadow rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+              className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition bg-blue-700 shadow bg-gradient-to-r hover:bg-blue-900 rounded-xl"
             >
               {initialData ? "Cập nhật" : "Lưu lại"}
             </button>
