@@ -1,7 +1,7 @@
 "use client";
 
 import { usePopup } from "@/components/popup/PopupContext";
-import { apiPost } from "@/lib/api";
+import { API_BASE, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -24,7 +24,7 @@ export default function AddOrUpdateAgencyModal({
 
   const [form, setForm] = useState({
     logo_file: null as File | null,
-    logo_preview: initialData?.logo_url || null,
+    logo_preview: null as string | null,
     name_1: "",
     name_2: "",
     address: "",
@@ -61,7 +61,9 @@ export default function AddOrUpdateAgencyModal({
       ];
       setForm({
         logo_file: null as File | null,
-        logo_preview: initialData?.logo_url || null,
+        logo_preview: initialData?.logo_url
+          ? `${API_BASE}/agencies/logos/${initialData.logo_url}`
+          : null,
         name_1: initialData.name_1 || "",
         name_2: initialData.name_2 || "",
         address: initialData.address || "",
@@ -142,6 +144,11 @@ export default function AddOrUpdateAgencyModal({
     // ✅ Nếu có logo_file → đính kèm
     if (form.logo_file) {
       formData.append("logo_file", form.logo_file);
+    }
+
+    // ✅ Nếu user đã xoá ảnh (trường hợp update)
+    if (initialData?.logo_url && !form.logo_preview && !form.logo_file) {
+      formData.append("removeLogo", "true");
     }
 
     const endpoint = initialData
