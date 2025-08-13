@@ -238,7 +238,7 @@ export default function AddOrUpdateAgencyModal({
                 }}
               />
 
-              <div className="relative flex items-center justify-center h-40 overflow-hidden transition-all border border-gray-300 border-dashed rounded-lg bg-gray-50 hover:border-blue-400">
+              <div className="relative flex items-center justify-center h-32 overflow-hidden transition-all border border-gray-300 border-dashed rounded-lg bg-gray-50 hover:border-blue-400">
                 <img
                   src={form.logo_preview || "/img/default_image.webp"}
                   alt="Logo cơ quan"

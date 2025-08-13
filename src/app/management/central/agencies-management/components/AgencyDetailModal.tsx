@@ -1,5 +1,6 @@
 "use client";
 
+import { API_BASE } from "@/lib/api";
 import { useEffect, useState } from "react";
 
 interface AgencyDetailModalProps {
@@ -55,6 +56,15 @@ export default function AgencyDetailModal({
         </h2>
 
         <div className="space-y-5 text-sm text-gray-800">
+          {agency.logo_url && (
+            <div className="flex justify-center mb-6">
+              <img
+                src={`${API_BASE}/agencies/logos/${agency.logo_url}`}
+                alt="Logo cơ quan"
+                className="object-contain h-32 max-w-full border border-gray-300 rounded-xl"
+              />
+            </div>
+          )}
           <div>
             <label className="block mb-1 font-medium text-gray-700">
               Tên cơ quan
