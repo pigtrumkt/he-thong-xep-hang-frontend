@@ -155,18 +155,22 @@ export default function CounterStatusScreen() {
   return isReady ? (
     <div className="flex flex-col h-screen font-sans text-gray-800 uppercase bg-blue-50">
       {/* HEADER */}
-      <header className="px-5 pt-2 pb-10 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-        {logoUrl && (
-          <div className="flex justify-center mb-6">
-            <img
-              src={`${API_BASE}/agencies/logos/${logoUrl}`}
-              alt="Logo cơ quan"
-              className="object-contain h-32 max-w-full border border-gray-300 rounded-xl"
-            />
+      <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
+        <div className="flex items-center gap-6 justify-left">
+          {logoUrl && (
+            <div className="flex-shrink-0">
+              <img
+                src={`${API_BASE}/agencies/logos/${logoUrl}`}
+                alt="Logo cơ quan"
+                className="object-contain h-42 "
+              />
+            </div>
+          )}
+          <div className="flex flex-col">
+            <p className="text-6xl font-bold leading-tight">{agencyName1}</p>
+            <p className="text-6xl font-bold leading-tight">{agencyName2}</p>
           </div>
-        )}
-        <h1 className="font-bold text-9xl leading-[1.4]">{agencyName1}</h1>
-        <p className="text-6xl">{agencyName2}</p>
+        </div>
       </header>
 
       {/* MAIN */}
