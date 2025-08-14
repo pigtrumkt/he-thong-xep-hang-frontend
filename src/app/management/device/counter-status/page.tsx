@@ -236,7 +236,7 @@ export default function CounterStatusScreen() {
 
       {/* FOOTER */}
       <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
-        <div className="absolute text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
+        <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
           {screenNotice}
         </div>
       </footer>
