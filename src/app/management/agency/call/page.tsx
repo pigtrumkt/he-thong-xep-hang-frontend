@@ -77,6 +77,8 @@ export default function CounterStatusPage() {
   };
 
   const handleConfirmSelected = () => {
+    socket.disconnect();
+
     // set name counter
     counterNameSelectedRef.current = counters.find(
       (c) => c.id === counterIdSelected
@@ -97,8 +99,6 @@ export default function CounterStatusPage() {
     // connect
     if (!socket.connected) {
       socket.connect();
-    } else {
-      initDataSocket();
     }
 
     // ghi nhớ lựa chọn
