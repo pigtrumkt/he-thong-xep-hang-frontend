@@ -31,6 +31,7 @@ export default function CounterStatusPage() {
   const [serviceTimer, setServiceTimer] = useState<string | null>(null);
   const [ticketId, setTicketId] = useState(null);
   const [calledAt, setCalledAt] = useState<Date | null>(null);
+  const [autoConnect, setAutoConnect] = useState(false);
 
   const { socket, globalParams } = useGlobalParams() as {
     socket: Socket;
@@ -49,7 +50,11 @@ export default function CounterStatusPage() {
   };
 
   const fetchData = async () => {
-    const counterRes = await apiGet("/counters/findActiveByAgency");
+    const [counterRes, serviceRes] = await Promise.all([
+      apiGet("/counters/findActiveByAgency"),
+      apiGet("/services/findGroupedActiveServicesInAgency"),
+    ]);
+
     if (![200, 400].includes(counterRes.status)) {
       handleApiError(counterRes, popupMessage, router);
       return;
@@ -59,9 +64,6 @@ export default function CounterStatusPage() {
       setCounters(counterRes.data);
     }
 
-    const serviceRes = await apiGet(
-      "/services/findGroupedActiveServicesInAgency"
-    );
     if (![200, 400].includes(serviceRes.status)) {
       handleApiError(serviceRes, popupMessage, router);
       return;
@@ -70,6 +72,8 @@ export default function CounterStatusPage() {
     if (serviceRes.status === 200 && serviceRes.data) {
       setServices(serviceRes.data);
     }
+
+    confirmRememberChoice(counterRes.data ?? [], serviceRes.data ?? []);
   };
 
   const handleConfirmSelected = () => {
@@ -96,7 +100,75 @@ export default function CounterStatusPage() {
     } else {
       initDataSocket();
     }
+
+    // ghi nhớ lựa chọn
+    rememberChoice();
   };
+
+  // ghi nhớ lựa chọn
+  const rememberChoice = () => {
+    const accountId = globalParams.user.id;
+    localStorage.setItem(
+      `call_selectedCounterId_${accountId}`,
+      counterIdSelected.toString()
+    );
+    localStorage.setItem(
+      `call_selectedServiceId_${accountId}`,
+      serviceIdSelected.toString()
+    );
+  };
+
+  const removeRememberChoice = () => {
+    const accountId = globalParams.user.id;
+    localStorage.removeItem(`call_selectedCounterId_${accountId}`);
+    localStorage.removeItem(`call_selectedServiceId_${accountId}`);
+  };
+
+  const confirmRememberChoice = (countersData: any[], servicesData: any[]) => {
+    let hasRemember = false;
+    const accountId = globalParams.user.id;
+    const rememberedCounterId = localStorage.getItem(
+      `call_selectedCounterId_${accountId}`
+    );
+    const rememberedServiceId = localStorage.getItem(
+      `call_selectedServiceId_${accountId}`
+    );
+
+    if (!rememberedCounterId && !rememberedServiceId) {
+    }
+
+    if (
+      rememberedCounterId &&
+      countersData.some((c) => c.id === Number(rememberedCounterId))
+    ) {
+      setCounterIdSelected(Number(rememberedCounterId));
+      hasRemember = true;
+    }
+
+    if (
+      rememberedServiceId &&
+      servicesData
+        .flatMap((g) => g.services)
+        .some((s) => s.id === Number(rememberedServiceId))
+    ) {
+      setServiceIdSelected(Number(rememberedServiceId));
+      hasRemember = hasRemember && true;
+    } else {
+      hasRemember = false;
+    }
+
+    setAutoConnect(hasRemember);
+  };
+
+  // autoconnect
+  useEffect(() => {
+    if (!autoConnect || !counterIdSelected || !serviceIdSelected) {
+      return;
+    }
+
+    setAutoConnect(false);
+    handleConfirmSelected();
+  }, [autoConnect]);
 
   const handleResSocket = (response: any) => {
     if (response.status === "success") {
@@ -259,6 +331,7 @@ export default function CounterStatusPage() {
         setWaitingAhead(null);
         setTotalServed(null);
         setCalledAt(null);
+        removeRememberChoice();
       }
     );
   };
@@ -337,6 +410,8 @@ export default function CounterStatusPage() {
     document.addEventListener("fullscreenchange", fullscreenHandler);
 
     window.addEventListener("resize", handleResize);
+
+    setTimeout(() => {}, 500);
 
     return () => {
       document.removeEventListener("fullscreenchange", fullscreenHandler);
