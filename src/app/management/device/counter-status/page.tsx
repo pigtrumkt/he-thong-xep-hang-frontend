@@ -2,7 +2,7 @@
 
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { apiGet } from "@/lib/api";
+import { API_BASE, apiGet } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
@@ -17,13 +17,15 @@ export default function CounterStatusScreen() {
   };
   const [counters, setCounters] = useState<any[]>([]);
   const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
-  const [counterNameSelected, setCounterNameSelected] = useState<any>(null);
+  const counterNameSelectedRef = useRef("");
   const [isReady, setIsReady] = useState<any>(false);
 
-  const [currentServingNumber, setCurrentServingNumber] = useState<
-    string | null
-  >(null);
-  const [serviceName, setServiceName] = useState(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [agencyName1, setAgencyName1] = useState<string | null>(null);
+  const [agencyName2, setAgencyName2] = useState<string | null>(null);
+  const [currentNumber, setCurrentNumber] = useState<string | null>(null);
+  const [statusTicket, setStatusTicket] = useState<number | null>(null);
+  const [screenNotice, setScreenNotice] = useState<string | null>(null);
 
   const [history, setHistory] = useState<any[]>([]);
   const mainRef = useRef<HTMLDivElement>(null);
@@ -40,28 +42,18 @@ export default function CounterStatusScreen() {
     }
   };
 
-  const onConnectError = () => {
-    popupMessage({
-      title: "Mất kết nối",
-      description: "Vui lòng thử lại sau.",
-    });
-  };
-
-  const onConnect = () => {
-    initDataSocket();
-  };
-
-  const listingServer = (response: any) => {
-    if (response.status === "update") {
-      if (response.currentServingNumber !== undefined) {
-        setCurrentServingNumber(response.currentServingNumber);
-      }
-
-      if (response.serviceName !== undefined) {
-        setServiceName(response.serviceName);
-        initDataSocket();
-      }
-
+  const handleResSocket = (response: any) => {
+    if (response.status === "success") {
+    } else if (response.status === "empty") {
+      setCurrentNumber(null);
+      setStatusTicket(null);
+    } else if (response.status === "update") {
+      if (response.logoUrl) setLogoUrl(response.logoUrl);
+      if (response.agencyName1) setAgencyName1(response.agencyName1);
+      if (response.agencyName2) setAgencyName2(response.agencyName2);
+      if (response.currentNumber) setCurrentNumber(response.currentNumber);
+      if (response.screenNotice) setScreenNotice(response.screenNotice);
+      if (response.statusTicket) setStatusTicket(response.statusTicket);
       if (response.history) {
         setHistory((prev) => {
           const incoming = Array.isArray(response.history)
@@ -75,66 +67,77 @@ export default function CounterStatusScreen() {
           return updated.slice(0, 4);
         });
       }
-    }
-
-    if (response.status === "empty") {
-      setCurrentServingNumber(null);
-      setServiceName(null);
-      setHistory([]);
+    } else if (response.status === "error") {
+      popupMessage({
+        description: response?.message || "Đã xảy ra lỗi",
+      });
+      return;
+    } else if (response.status === "logout") {
+      router.push("/login");
+    } else {
+      popupMessage({
+        title: "Lỗi không xác định",
+        description: response?.message,
+      });
     }
   };
 
-  const initDataSocket = () => {
+  const onConnectError = () => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
+  };
+
+  const onConnect = () => {
+    setIsReady(true);
+    joinListenSocket();
+  };
+
+  const onDisconnect = () => {
+    setIsReady(false);
+    setLogoUrl(null);
+    setAgencyName1(null);
+    setAgencyName2(null);
+    setCurrentNumber(null);
+    setHistory([]);
+    setScreenNotice(null);
+    setStatusTicket(null);
+  };
+
+  const listingServer = (response: any) => {
+    handleResSocket(response);
+  };
+
+  const joinListenSocket = () => {
     socket.emit(
       "join_counter_status_screen",
       {
         counterId: counterIdSelected,
       },
       (response: any) => {
-        if (response.status === "success") {
-        } else if (response.status === "empty") {
-          setIsReady(true);
-          setCurrentServingNumber(null);
-          setHistory([]);
-          setServiceName(null);
-        } else if (response.status === "update") {
-          setIsReady(true);
-          setCurrentServingNumber(response.currentServingNumber);
-          setHistory(response.history);
-          setServiceName(response.serviceName);
-        } else if (response.status === "error") {
-          popupMessage({
-            description: response?.message || "Đã xảy ra lỗi",
-          });
-          return;
-        } else if (response.status === "logout") {
-          router.push("/login");
-        } else {
-          popupMessage({
-            title: "Lỗi không xác định",
-            description: response?.message,
-          });
-        }
+        handleResSocket(response);
       }
     );
   };
 
   const handleConfirmSelected = () => {
+    socket.disconnect();
+
     // set name counter
-    setCounterNameSelected(
-      counters.find((c) => c.id === counterIdSelected)?.name
-    );
+    counterNameSelectedRef.current = counters.find(
+      (c) => c.id === counterIdSelected
+    )?.name;
 
     socket.removeAllListeners();
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
+    socket.on("disconnect", onDisconnect);
     socket.on("ListingServer", listingServer);
 
     // connect
     if (!socket.connected) {
       socket.connect();
-    } else {
-      initDataSocket();
     }
   };
 
@@ -143,6 +146,7 @@ export default function CounterStatusScreen() {
 
     return () => {
       if (socket) {
+        socket.disconnect();
         socket.removeAllListeners();
       }
     };
@@ -152,10 +156,17 @@ export default function CounterStatusScreen() {
     <div className="flex flex-col h-screen font-sans text-gray-800 uppercase bg-blue-50">
       {/* HEADER */}
       <header className="px-5 pt-2 pb-10 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-        <h1 className="font-bold text-9xl leading-[1.4]">
-          {counterNameSelected}
-        </h1>
-        <p className="text-6xl">{serviceName}</p>
+        {logoUrl && (
+          <div className="flex justify-center mb-6">
+            <img
+              src={`${API_BASE}/agencies/logos/${logoUrl}`}
+              alt="Logo cơ quan"
+              className="object-contain h-32 max-w-full border border-gray-300 rounded-xl"
+            />
+          </div>
+        )}
+        <h1 className="font-bold text-9xl leading-[1.4]">{agencyName1}</h1>
+        <p className="text-6xl">{agencyName2}</p>
       </header>
 
       {/* MAIN */}
@@ -163,13 +174,18 @@ export default function CounterStatusScreen() {
         {/* SỐ CHÍNH */}
         <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
           <div className="text-6xl font-semibold tracking-wide text-blue-800">
-            {currentServingNumber && "Mời công dân có số"}
+            {statusTicket === 2 && currentNumber ? "Mời công dân có số" : ""}
           </div>
           <div
             ref={mainRef}
             className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop"
           >
-            {currentServingNumber}
+            {statusTicket === 2 && currentNumber ? currentNumber : ""}
+          </div>
+          <div className="mt-6 text-6xl font-semibold tracking-wide text-red-600">
+            {statusTicket === 2 && currentNumber
+              ? `Đến ${counterNameSelectedRef.current}`
+              : ""}
           </div>
         </section>
 
@@ -217,8 +233,7 @@ export default function CounterStatusScreen() {
       {/* FOOTER */}
       <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
         <div className="absolute text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
-          Vui lòng chuẩn bị giấy tờ khi đến lượt. Xin cảm ơn quý công dân đã hợp
-          tác!
+          {screenNotice}
         </div>
       </footer>
 
