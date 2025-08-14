@@ -287,16 +287,12 @@ export default function CounterStatusPage() {
     scaleRef.current.style.transform = `scale(${scale})`;
   };
 
-  const handleExit = () => {
-    if (scaleRef.current && parentRef.current) {
+  const fullscreenHandler = () => {
+    if (document.fullscreenElement) handleResize();
+    else if (scaleRef.current && parentRef.current) {
       scaleRef.current.style.transform = "";
       parentRef.current.classList.remove("apply-full-screen-css");
     }
-  };
-
-  const fullscreenHandler = () => {
-    if (document.fullscreenElement) handleResize();
-    else handleExit();
   };
 
   useEffect(() => {
@@ -473,6 +469,10 @@ export default function CounterStatusPage() {
             <button
               className="absolute top-4 left-4 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-semibold border border-gray-200 shadow-sm active:scale-[0.98]"
               onClick={() => {
+                if (document.fullscreenElement) {
+                  document.exitFullscreen().catch((err) => {});
+                }
+
                 changeService();
               }}
             >
