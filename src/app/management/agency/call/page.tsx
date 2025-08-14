@@ -86,7 +86,6 @@ export default function CounterStatusPage() {
     socket.on("connect_error", onConnectError);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-
     socket.on("ListingServer", listingServer);
 
     // connect
@@ -312,8 +311,8 @@ export default function CounterStatusPage() {
       window.removeEventListener("resize", handleResize);
 
       if (socket) {
-        socket.removeAllListeners();
         socket.disconnect();
+        socket.removeAllListeners();
       }
     };
   }, []);
