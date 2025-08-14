@@ -230,9 +230,9 @@ export default function AddOrUpdateAgencyModal({
                     });
                     return;
                   }
-                  if (file.size > 2 * 1024 * 1024) {
+                  if (file.size > 4 * 1024 * 1024) {
                     popupMessage({
-                      description: "Ảnh quá lớn, chọn ảnh dưới 2MB.",
+                      description: "Ảnh quá lớn, chọn ảnh dưới 4MB.",
                     });
                     return;
                   }
