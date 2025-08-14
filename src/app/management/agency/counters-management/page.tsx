@@ -54,22 +54,22 @@ export default function CountersPage() {
         </>
       );
     }
-    if (counter.using_account_id) {
+    if (counter.occupiedBy) {
       return (
         <div className="flex items-center gap-3">
           <span className="inline-block w-3 h-3 bg-red-400 rounded-full" />
           <div className="text-slate-700 text-sm space-y-0.5">
             <div className="font-semibold text-red-600">Đang sử dụng</div>
             <div>
-              Người sử dụng:{" "}
+              Tài khoản:{" "}
               <span className="font-semibold text-blue-700">
-                {counter.using_account_name}
+                {counter.occupiedBy.accountFullname}
               </span>
             </div>
             <div>
               Dịch vụ:{" "}
               <span className="font-semibold text-blue-700">
-                {counter.using_service_name}
+                {counter.occupiedBy.serviceName}
               </span>
             </div>
           </div>

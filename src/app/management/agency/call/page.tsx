@@ -85,6 +85,8 @@ export default function CounterStatusPage() {
 
     socket.on("connect_error", onConnectError);
     socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
     socket.on("ListingServer", listingServer);
 
     // connect
@@ -236,6 +238,19 @@ export default function CounterStatusPage() {
   const onConnect = () => {
     setIsReady(true);
     initDataSocket();
+  };
+
+  const onDisconnect = () => {
+    setIsReady(false);
+    setCounterIdSelected(null);
+    setServiceIdSelected(null);
+    setServiceTimer(null);
+    setCurrentNumber(null);
+    setStatusTicket(null);
+    setTicketId(null);
+    setWaitingAhead(null);
+    setTotalServed(null);
+    setCalledAt(null);
   };
 
   const initDataSocket = () => {
