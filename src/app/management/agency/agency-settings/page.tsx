@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import feather from "feather-icons";
-import { apiGet, apiPost } from "@/lib/api";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,10 @@ import { PermissionEnum, RoleEnum } from "@/constants/Enum";
 
 interface AgencyForm {
   id: number;
-  name: string;
+  logo_file: null | File;
+  logo_preview: null | string;
+  name_1: string;
+  name_2: string;
   address: string;
   phone: string;
   email: string;
@@ -29,7 +32,10 @@ export default function AgencySettingsPage() {
   const { hasAccess } = useGlobalParams();
   const [form, setForm] = useState<AgencyForm>({
     id: 0,
-    name: "",
+    logo_file: null,
+    logo_preview: null,
+    name_1: "",
+    name_2: "",
     address: "",
     phone: "",
     email: "",
@@ -55,8 +61,11 @@ export default function AgencySettingsPage() {
   };
 
   useEffect(() => {
-    feather.replace();
     fetchAgencyData();
+  }, []);
+
+  useEffect(() => {
+    feather.replace();
   }, []);
 
   const fetchAgencyData = async () => {
@@ -66,7 +75,12 @@ export default function AgencySettingsPage() {
       const [start, end] = agency.ticket_time_range?.split("~") || ["", ""];
       setForm({
         id: agency.id,
-        name: agency.name || "",
+        logo_file: null,
+        logo_preview: agency?.logo_url
+          ? `${API_BASE}/agencies/logos/${agency.logo_url}`
+          : null,
+        name_1: agency.name_1 || "",
+        name_2: agency.name_2 || "",
         address: agency.address || "",
         phone: agency.phone || "",
         email: agency.email || "",
@@ -100,20 +114,46 @@ export default function AgencySettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      name: form.name.trim(),
-      address: form.address.trim(),
-      phone: form.phone.trim(),
-      email: form.email?.trim() || "",
-      screen_notice: form.screen_notice?.trim() || "",
-      allow_online_ticket: form.allow_online_ticket ? 1 : 0,
-      min_time_between_ticket_online: form.min_time_between_ticket_online,
-      max_ticket_per_day_online: form.max_ticket_per_day_online,
-      allowed_days_of_week: form.allowed_days_of_week.join(","),
-      ticket_time_range: `${form.ticket_time_start}~${form.ticket_time_end}`,
-    };
+    const formData = new FormData();
+    formData.append("name_1", form.name_1.trim());
+    formData.append("name_2", form.name_2.trim());
+    formData.append("address", form.address.trim());
+    formData.append("phone", form.phone.trim());
+    formData.append("email", form.email?.trim() || "");
+    formData.append("screen_notice", form.screen_notice?.trim() || "");
+    formData.append(
+      "allow_online_ticket",
+      form.allow_online_ticket ? "1" : "0"
+    );
+    formData.append(
+      "min_time_between_ticket_online",
+      String(form.min_time_between_ticket_online)
+    );
+    formData.append(
+      "max_ticket_per_day_online",
+      String(form.max_ticket_per_day_online)
+    );
+    formData.append(
+      "allowed_days_of_week",
+      form.allowed_days_of_week.join(",")
+    );
+    formData.append(
+      "ticket_time_range",
+      `${form.ticket_time_start}~${form.ticket_time_end}`
+    );
 
-    const res = await apiPost(`/agencies/${form.id}/update`, payload);
+    // Có file mới → gửi file
+    if (form.logo_file) {
+      formData.append("logo_file", form.logo_file);
+    }
+
+    // User xoá ảnh (không còn preview và cũng không chọn file mới) → báo server xoá
+    if (!form.logo_preview && !form.logo_file) {
+      formData.append("removeLogo", "true");
+    }
+
+    const res = await apiPost(`/agencies/${form.id}/update`, formData);
+
     if (![201, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       return;
@@ -173,14 +213,92 @@ export default function AgencySettingsPage() {
       <form className="p-8 space-y-8" onSubmit={handleSubmit}>
         <div className="grid gap-8 lg:grid-cols-2">
           <FormCard title="Thông tin cơ bản" icon="info">
-            <FormInput
-              label="Tên trụ sở"
-              icon="home"
-              value={form.name}
-              require={true}
-              errorText={errorText("name")}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
+            {/* Logo cơ quan */}
+            <div className="flex flex-col items-center gap-2 mb-4">
+              <label className="cursor-pointer group">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) {
+                      popupMessage({
+                        description: "Vui lòng chọn tệp hình ảnh.",
+                      });
+                      return;
+                    }
+                    if (file.size > 4 * 1024 * 1024) {
+                      popupMessage({
+                        description: "Ảnh quá lớn, chọn ảnh dưới 4MB.",
+                      });
+                      return;
+                    }
+
+                    setForm((prev) => ({
+                      ...prev,
+                      logo_file: file,
+                      logo_preview: URL.createObjectURL(file),
+                    }));
+                  }}
+                />
+
+                <div className="relative flex items-center justify-center w-32 h-32 overflow-hidden transition-all border border-gray-300 border-dashed rounded-lg bg-gray-50 hover:border-blue-400">
+                  <img
+                    src={form.logo_preview || "/img/default_image.webp"}
+                    alt="Logo cơ quan"
+                    className={`object-contain max-w-full max-h-full ${
+                      form.logo_preview ? "" : "opacity-20"
+                    }`}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white transition-opacity opacity-0 bg-black/20 group-hover:opacity-100">
+                    Nhấn để chọn logo
+                  </div>
+                </div>
+              </label>
+
+              {/* Nút xoá ảnh */}
+              {form.logo_preview && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      logo_file: null,
+                      logo_preview: null,
+                    }))
+                  }
+                  className="px-3 py-1 text-sm font-medium text-red-600 transition border border-red-300 rounded-md hover:bg-red-100"
+                >
+                  Xóa ảnh
+                </button>
+              )}
+            </div>
+            {/* Tên cơ quan */}
+            <div>
+              <label className="flex items-center gap-2 mb-2 font-medium text-slate-700">
+                <i data-feather="home" className="w-4 h-4 text-slate-500" />
+                Tên trụ sở <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.name_1}
+                required={true}
+                onChange={(e) => setForm({ ...form, name_1: e.target.value })}
+                placeholder="Dòng 1"
+                className={`w-full px-4 py-3 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none bg-white`}
+              />
+              {errorText("name_1")}
+              <input
+                type="text"
+                value={form.name_2}
+                onChange={(e) => setForm({ ...form, name_2: e.target.value })}
+                placeholder="Dòng 2"
+                className={`w-full px-4 py-3 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors outline-none mt-2 bg-white`}
+              />
+              {errorText("name_2")}
+            </div>
             <FormInput
               label="Địa chỉ"
               icon="map-pin"
@@ -350,7 +468,11 @@ export default function AgencySettingsPage() {
             <FormInput
               label="Link lấy số online"
               icon="link"
-              value={`${window.location.protocol}//${window.location.host}/take-number/${form.id}`}
+              value={
+                typeof window !== "undefined"
+                  ? `${window.location.protocol}//${window.location.host}/take-number/${form.id}`
+                  : ""
+              }
               readOnly
             />
           </FormCard>
