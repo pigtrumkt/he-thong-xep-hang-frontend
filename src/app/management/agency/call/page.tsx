@@ -95,6 +95,41 @@ export default function CounterStatusPage() {
     }
   };
 
+  const handleResSocket = (response: any) => {
+    if (response.status === "success") {
+    } else if (response.status === "empty") {
+    } else if (response.status === "update") {
+      if (response.currentNumber !== undefined)
+        setCurrentNumber(response.currentNumber);
+      if (response.statusTicket !== undefined) {
+        if ([3, 4].includes(response.statusTicket)) {
+          setCalledAt(null);
+        }
+        setStatusTicket(response.statusTicket);
+      }
+
+      if (response.ticketId !== undefined) setTicketId(response.ticketId);
+      if (response.calledAt !== undefined)
+        setCalledAt(new Date(response.calledAt));
+      if (response.totalServed !== undefined)
+        setTotalServed(response.totalServed);
+      if (response.waitingAhead !== undefined)
+        setWaitingAhead(response.waitingAhead);
+    } else if (response.status === "error") {
+      popupMessage({
+        description: response?.message || "Đã xảy ra lỗi",
+      });
+      return;
+    } else if (response.status === "logout") {
+      router.push("/login");
+    } else {
+      popupMessage({
+        title: "Lỗi không xác định",
+        description: response?.message,
+      });
+    }
+  };
+
   const handleCall = () => {
     if (statusTicket != 2 || currentNumber == null) {
       socket.emit(
@@ -103,31 +138,11 @@ export default function CounterStatusPage() {
           counterId: counterIdSelected,
           counterName: counterNameSelectedRef.current,
           serviceId: serviceIdSelected,
+          serviceName: serviceNameSelectedRef.current,
           action: "call",
         },
         (response: any) => {
-          if (response.status === "success") {
-          } else if (response.status === "empty") {
-          } else if (response.status === "update") {
-            setCurrentNumber(response.currentServingNumber);
-            setStatusTicket(response.statusTicket);
-            setTicketId(response.ticketId);
-            if (response.calledAt) {
-              setCalledAt(new Date(response.calledAt));
-            }
-          } else if (response.status === "error") {
-            popupMessage({
-              description: response?.message || "Đã xảy ra lỗi",
-            });
-            return;
-          } else if (response.status === "logout") {
-            router.push("/login");
-          } else {
-            popupMessage({
-              title: "Lỗi không xác định",
-              description: response?.message,
-            });
-          }
+          handleResSocket(response);
         }
       );
     } else {
@@ -135,28 +150,14 @@ export default function CounterStatusPage() {
         "action:call",
         {
           counterId: counterIdSelected,
-          serviceId: serviceIdSelected,
           counterName: counterNameSelectedRef.current,
-          currentServingNumber: currentNumber,
+          serviceId: serviceIdSelected,
+          serviceName: serviceNameSelectedRef.current,
+          currentNumber: currentNumber,
           action: "recall",
         },
         (response: any) => {
-          if (response.status === "success") {
-          } else if (response.status === "empty") {
-          } else if (response.status === "update") {
-          } else if (response.status === "error") {
-            popupMessage({
-              description: response?.message || "Đã xảy ra lỗi",
-            });
-            return;
-          } else if (response.status === "logout") {
-            router.push("/login");
-          } else {
-            popupMessage({
-              title: "Lỗi không xác định",
-              description: response?.message,
-            });
-          }
+          handleResSocket(response);
         }
       );
     }
@@ -167,29 +168,15 @@ export default function CounterStatusPage() {
       "action:call",
       {
         counterId: counterIdSelected,
+        counterName: counterNameSelectedRef.current,
         serviceId: serviceIdSelected,
+        serviceName: serviceNameSelectedRef.current,
         ticketId: ticketId,
         action: "done",
       },
       (response: any) => {
-        if (response.status === "success") {
-        } else if (response.status === "empty") {
-        } else if (response.status === "update") {
-          setStatusTicket(response.statusTicket);
-          setTotalServed(response.totalServed);
-          setCalledAt(null);
-        } else if (response.status === "error") {
-          popupMessage({
-            description: response?.message || "Đã xảy ra lỗi",
-          });
-          return;
-        } else if (response.status === "logout") {
-          router.push("/login");
-        } else {
-          popupMessage({
-            title: "Lỗi không xác định",
-            description: response?.message,
-          });
+        handleResSocket(response);
+        if (response.status === "update") {
         }
       }
     );
@@ -200,30 +187,14 @@ export default function CounterStatusPage() {
       "action:call",
       {
         counterId: counterIdSelected,
+        counterName: counterNameSelectedRef.current,
         serviceId: serviceIdSelected,
+        serviceName: serviceNameSelectedRef.current,
         ticketId: ticketId,
         action: "missed",
       },
       (response: any) => {
-        if (response.status === "success") {
-        } else if (response.status === "empty") {
-        } else if (response.status === "update") {
-          setStatusTicket(response.statusTicket);
-          setTotalServed(response.totalServed);
-          setCalledAt(null);
-        } else if (response.status === "error") {
-          popupMessage({
-            description: response?.message || "Đã xảy ra lỗi",
-          });
-          return;
-        } else if (response.status === "logout") {
-          router.push("/login");
-        } else {
-          popupMessage({
-            title: "Lỗi không xác định",
-            description: response?.message,
-          });
-        }
+        handleResSocket(response);
       }
     );
   };
@@ -263,6 +234,7 @@ export default function CounterStatusPage() {
   };
 
   const onConnect = () => {
+    setIsReady(true);
     initDataSocket();
   };
 
@@ -271,43 +243,18 @@ export default function CounterStatusPage() {
       "join_call_screen",
       {
         counterId: counterIdSelected,
+        counterName: counterNameSelectedRef.current,
         serviceId: serviceIdSelected,
         serviceName: serviceNameSelectedRef.current,
       },
       (response: any) => {
-        if (response.status === "success") {
-        } else if (response.status === "empty") {
-        } else if (response.status === "update") {
-          setIsReady(true);
-          setCurrentNumber(response.currentNumber);
-          setStatusTicket(response.statusTicket);
-          setTotalServed(response.totalServed);
-          setWaitingAhead(response.waitingAhead);
-          setTicketId(response.ticketId);
-          if (response.calledAt) {
-            setCalledAt(new Date(response.calledAt));
-          }
-        } else if (response.status === "error") {
-          popupMessage({
-            description: response?.message || "Đã xảy ra lỗi",
-          });
-          return;
-        } else if (response.status === "logout") {
-          router.push("/login");
-        } else {
-          popupMessage({
-            title: "Lỗi không xác định",
-            description: response?.message,
-          });
-        }
+        handleResSocket(response);
       }
     );
   };
 
   const listingServer = (res: any) => {
-    if (res.status === "update") {
-      setWaitingAhead(res.waitingAhead);
-    }
+    handleResSocket(res);
   };
 
   const handleResize = () => {
