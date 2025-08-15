@@ -203,7 +203,7 @@ export default function CounterStatusScreen() {
               <div
                 key={item.id}
                 className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
-                  idx === 0 ? "animate-zoom-in" : "animate-slide-down"
+                  idx === 0 ? "animate-zoom-in" : ""
                 }`}
               >
                 <div className="text-3xl text-blue-600">
