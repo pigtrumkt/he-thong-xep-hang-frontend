@@ -19,9 +19,7 @@ export default function RatingScreen() {
   const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
   const [counterNameSelected, setCounterNameSelected] = useState<any>(null);
   const [isReady, setIsReady] = useState<any>(false);
-  const [currentServingNumber, setCurrentServingNumber] = useState<
-    string | null
-  >(null);
+  const [currentNumber, setCurrentNumber] = useState<string | null>(null);
   const [serviceName, setServiceName] = useState(null);
   const [ticketId, setTicketId] = useState(null);
   const [staffName, setStaffName] = useState(null);
@@ -38,6 +36,10 @@ export default function RatingScreen() {
 
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const fetchData = async () => {
     const counterRes = await apiGet("/counters/findActiveByAgency");
     if (![200, 400].includes(counterRes.status)) {
@@ -50,88 +52,9 @@ export default function RatingScreen() {
     }
   };
 
-  const onConnectError = () => {
-    popupMessage({
-      title: "Mất kết nối",
-      description: "Vui lòng thử lại sau.",
-    });
-  };
-
-  const onConnect = () => {
-    initDataSocket();
-  };
-
-  const listingServer = (response: any) => {
-    if (response.status === "joined") {
-      initDataSocket();
-    }
-
-    if (response.status === "update") {
-      setTicketId(response.ticketId);
-      setCurrentServingNumber(response.currentServingNumber);
-      setStatusTicket(response.statusTicket);
-    }
-
-    if (response.status === "empty") {
-      setTicketId(null);
-      setCurrentServingNumber(null);
-      setServiceName(null);
-      setStaffName(null);
-      setStaffGender(null);
-      setStaffPosition(null);
-      setStaffAvatarUrl(null);
-      setStatusTicket(null);
-    }
-  };
-
-  const initDataSocket = () => {
-    socket.emit(
-      "join_feedback_screen",
-      {
-        counterId: counterIdSelected,
-      },
-      (response: any) => {
-        if (response.status === "success") {
-        } else if (response.status === "empty") {
-          showRatingModal();
-          setIsReady(true);
-          setTicketId(null);
-          setCurrentServingNumber(null);
-          setServiceName(null);
-          setStaffName(null);
-          setStaffGender(null);
-          setStaffPosition(null);
-          setStaffAvatarUrl(null);
-          setStatusTicket(null);
-        } else if (response.status === "update") {
-          showRatingModal();
-          setIsReady(true);
-          setTicketId(response.ticketId);
-          setCurrentServingNumber(response.currentServingNumber);
-          setServiceName(response.serviceName);
-          setStaffGender(response.gender);
-          setStaffName(response.staffName);
-          setStaffPosition(response.staffPosition);
-          setStaffAvatarUrl(response.staffAvatarUrl);
-          setStatusTicket(null);
-        } else if (response.status === "error") {
-          popupMessage({
-            description: response?.message || "Đã xảy ra lỗi",
-          });
-          return;
-        } else if (response.status === "logout") {
-          router.push("/login");
-        } else {
-          popupMessage({
-            title: "Lỗi không xác định",
-            description: response?.message,
-          });
-        }
-      }
-    );
-  };
-
   const handleConfirmSelected = () => {
+    socket.disconnect();
+
     // set name counter
     setCounterNameSelected(
       counters.find((c) => c.id === counterIdSelected)?.name
@@ -145,14 +68,86 @@ export default function RatingScreen() {
     // connect
     if (!socket.connected) {
       socket.connect();
-    } else {
-      initDataSocket();
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const onConnectError = () => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
+  };
+
+  const onConnect = () => {
+    setIsReady(true);
+    initDataSocket();
+  };
+
+  const listingServer = (response: any) => {
+    handleListenSocket(response);
+  };
+
+  const handleListenSocket = (response: any) => {
+    if (response.status === "empty") {
+      setTicketId(null);
+      setCurrentNumber(null);
+      setServiceName(null);
+      setStaffName(null);
+      setStaffGender(null);
+      setStaffPosition(null);
+      setStaffAvatarUrl(null);
+      setStatusTicket(null);
+    } else if (response.status === "update") {
+      if (response.staffName !== undefined) {
+        setStaffName(response.staffName);
+      }
+      if (response.staffGender !== undefined) {
+        setStaffGender(response.staffGender);
+      }
+      if (response.staffPosition !== undefined) {
+        setStaffPosition(response.staffPosition);
+      }
+      if (response.staffAvatarUrl !== undefined) {
+        setStaffAvatarUrl(response.staffAvatarUrl);
+      }
+      if (response.serviceName !== undefined) {
+        setServiceName(response.serviceName);
+      }
+      if (response.currentNumber !== undefined) {
+        setCurrentNumber(response.currentNumber);
+      }
+      if (response.statusTicket !== undefined) {
+        setStatusTicket(response.statusTicket);
+      }
+      if (response.ticketId !== undefined) {
+        setTicketId(response.ticketId);
+      }
+    } else if (response.status === "error") {
+      popupMessage({
+        description: response?.message || "Đã xảy ra lỗi",
+      });
+      return;
+    } else if (response.status === "logout") {
+      router.push("/login");
+    } else {
+      popupMessage({
+        title: "Lỗi không xác định",
+        description: response?.message,
+      });
+    }
+  };
+
+  const initDataSocket = () => {
+    socket.emit(
+      "join_feedback_screen",
+      {
+        counterId: counterIdSelected,
+      },
+      (response: any) => {
+        handleListenSocket(response);
+      }
+    );
+  };
 
   const handleSubmit = () => {
     if (selectedStars === 0) {
@@ -229,10 +224,10 @@ export default function RatingScreen() {
               </div>
             )}
             <p className="text-[2.5rem] font-semibold text-blue-700 text-center">
-              {currentServingNumber && "MỜI CÔNG DÂN CÓ SỐ"}
+              {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
             </p>
             <div className="text-[10rem] text-blue-800 font-extrabold tracking-widest leading-[10rem] zoom-loop">
-              {currentServingNumber}
+              {currentNumber}
             </div>
           </div>
           {/* Đánh giá */}
