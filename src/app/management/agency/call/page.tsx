@@ -350,8 +350,6 @@ export default function CounterStatusPage() {
 
   const onDisconnect = () => {
     setIsReady(false);
-    setCounterIdSelected(null);
-    setServiceIdSelected(null);
     setServiceTimer(null);
     setCurrentNumber(null);
     setStatusTicket(null);
