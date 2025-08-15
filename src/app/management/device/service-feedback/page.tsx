@@ -155,10 +155,7 @@ export default function RatingScreen() {
     }
 
     setSubmitted(true);
-    if (thankYouRef.current) {
-      thankYouRef.current.classList.remove("invisible");
-      thankYouRef.current.classList.add("zoom-in");
-    }
+    setTicketId(null);
   };
 
   return isReady ? (
