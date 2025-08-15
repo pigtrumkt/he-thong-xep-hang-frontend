@@ -248,6 +248,7 @@ export default function CounterStatusScreen() {
           touch-action: manipulation;
           overscroll-behavior: none;
         }
+
         * {
           user-select: none;
           -webkit-user-select: none;
@@ -273,18 +274,6 @@ export default function CounterStatusScreen() {
           }
         }
 
-        @keyframes pulseOnce {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
         @keyframes zoomIn {
           0% {
             transform: scale(0.8);
@@ -296,29 +285,12 @@ export default function CounterStatusScreen() {
           }
         }
 
-        @keyframes slideDown {
-          0% {
-            transform: translateY(-20%);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
-
         .zoom-loop {
           animation: zoomLoop 1.8s ease-in-out infinite;
         }
 
-        .pulse-once {
-          animation: pulseOnce 0.6s ease;
-        }
-
         .animate-zoom-in {
           animation: zoomIn 0.3s ease-out;
-        }
-
-        .animate-slide-down {
-          animation: slideDown 0.25s ease-out;
         }
 
         .animate-scrollText {
