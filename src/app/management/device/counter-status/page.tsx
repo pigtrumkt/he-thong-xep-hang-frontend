@@ -30,6 +30,7 @@ export default function CounterStatusScreen() {
 
   const [history, setHistory] = useState<any[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [autoConnect, setAutoConnect] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async () => {
@@ -192,6 +193,38 @@ export default function CounterStatusScreen() {
     const accountId = globalParams.user.id;
     localStorage.removeItem(`counter_screen_selectedCounterId_${accountId}`);
   };
+
+  useEffect(() => {
+    if (!counters || counters.length === 0) {
+      return;
+    }
+
+    const accountId = globalParams.user.id;
+    const rememberedCounterId = localStorage.getItem(
+      `counter_screen_selectedCounterId_${accountId}`
+    );
+
+    if (!rememberedCounterId) {
+      return;
+    }
+
+    if (
+      rememberedCounterId &&
+      counters.some((c) => c.id === Number(rememberedCounterId))
+    ) {
+      setCounterIdSelected(Number(rememberedCounterId));
+      setAutoConnect(true);
+    }
+  }, [counters]);
+
+  useEffect(() => {
+    if (!autoConnect) {
+      return;
+    }
+
+    setAutoConnect(false);
+    handleConfirmSelected();
+  }, [autoConnect]);
 
   return isReady ? (
     <div
