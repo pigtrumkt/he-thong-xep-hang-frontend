@@ -29,6 +29,7 @@ export default function CounterStatusScreen() {
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
 
   const [history, setHistory] = useState<any[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async () => {
@@ -140,6 +141,8 @@ export default function CounterStatusScreen() {
     if (!socket.connected) {
       socket.connect();
     }
+
+    rememberChoice();
   };
 
   useEffect(() => {
@@ -157,10 +160,37 @@ export default function CounterStatusScreen() {
     const target = parentRef.current;
     if (!target) return;
     if (!document.fullscreenElement) {
+      setIsFullscreen(true);
       target.requestFullscreen?.();
     } else {
+      setIsFullscreen(false);
       document.exitFullscreen?.();
     }
+  };
+
+  const handleBack = () => {
+    if (socket) {
+      socket.disconnect();
+      socket.removeAllListeners();
+    }
+
+    setIsReady(false);
+    setCounterIdSelected(null);
+    removeRememberChoice();
+  };
+
+  // ghi nhớ lựa chọn
+  const rememberChoice = () => {
+    const accountId = globalParams.user.id;
+    localStorage.setItem(
+      `counter_screen_selectedCounterId_${accountId}`,
+      counterIdSelected.toString()
+    );
+  };
+
+  const removeRememberChoice = () => {
+    const accountId = globalParams.user.id;
+    localStorage.removeItem(`counter_screen_selectedCounterId_${accountId}`);
   };
 
   return isReady ? (
@@ -184,7 +214,30 @@ export default function CounterStatusScreen() {
           <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
         </svg>
       </button>
-
+      {/* BACK BUTTON */}
+      {!isFullscreen && (
+        <button
+          onClick={handleBack}
+          title="Quay lại"
+          className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-16 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 6l-6 6 6 6"
+            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
+          </svg>
+        </button>
+      )}
       {/* HEADER */}
       <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
         <div className="flex items-center gap-6 justify-left">
@@ -203,7 +256,6 @@ export default function CounterStatusScreen() {
           </div>
         </div>
       </header>
-
       {/* MAIN */}
       <main className="flex flex-1 overflow-hidden">
         {/* SỐ CHÍNH */}
@@ -264,14 +316,12 @@ export default function CounterStatusScreen() {
           </div>
         </aside>
       </main>
-
       {/* FOOTER */}
       <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
         <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
           {screenNotice}
         </div>
       </footer>
-
       {/* STYLES */}
       <style jsx global>{`
         html {
