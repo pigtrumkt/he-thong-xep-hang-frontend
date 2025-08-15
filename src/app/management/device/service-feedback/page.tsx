@@ -31,7 +31,6 @@ export default function RatingScreen() {
   const [selectedStars, setSelectedStars] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const ratingBoxRef = useRef<HTMLDivElement>(null);
   const thankYouRef = useRef<HTMLParagraphElement>(null);
 
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
@@ -160,53 +159,28 @@ export default function RatingScreen() {
       thankYouRef.current.classList.remove("invisible");
       thankYouRef.current.classList.add("zoom-in");
     }
-
-    // hideRatingModal();
-  };
-
-  const showRatingModal = () => {
-    if (thankYouRef.current) {
-      thankYouRef.current.classList.add("invisible");
-      thankYouRef.current.classList.remove("zoom-in");
-    }
-
-    setSubmitted(false);
-  };
-
-  const hideRatingModal = () => {
-    if (ratingBoxRef.current) {
-      ratingBoxRef.current.classList.add("zoom-out");
-      setTimeout(() => {
-        if (ratingBoxRef.current) {
-          ratingBoxRef.current.style.display = "none";
-          ratingBoxRef.current.classList.remove("zoom-out");
-        }
-      }, 400);
-    }
   };
 
   return isReady ? (
-    <div className="flex flex-col items-center justify-start min-h-screen text-gray-800 bg-gradient-to-br from-sky-50 to-white">
+    <div className="w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-white">
       {/* Header */}
-      <header className="w-full px-5 pt-2 pb-10 tracking-wide text-center text-white bg-gradient-to-br from-blue-700 to-blue-500">
-        <h1 className="font-bold text-9xl leading-[1.4] uppercase">
-          {counterNameSelected}
-        </h1>
-        <p className="transition-opacity duration-300 opacity-100 text-7xl">
-          {serviceName}
-        </p>
-      </header>
-
-      {/* Main content */}
-      <main className="flex items-center justify-center flex-1 w-full p-8">
-        <div
-          ref={ratingBoxRef}
-          className="h-[45rem] bg-white rounded-3xl shadow-xl border border-blue-200 overflow-hidden flex animate-zoom-in"
-        >
-          {/* Số thứ tự */}
-          <div className="w-[32rem] p-8 bg-blue-100 flex flex-col items-center justify-center border-b border-blue-100">
-            {serviceName && (
-              <div className="flex flex-col items-center justify-center ">
+      <header className="px-8 py-10 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
+        <div className="flex items-center justify-between ">
+          <div>
+            <h1 className="text-6xl font-bold uppercase ">
+              {counterNameSelected}
+            </h1>
+            <p className="mt-1 text-3xl uppercase leading-12 opacity-90 ">
+              {serviceName}
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="flex items-center">
+              <div className="mr-4">
+                <h3 className="text-4xl">{staffName}</h3>
+                <p className="text-2xl">{StaffPosition}</p>
+              </div>
+              <div>
                 <img
                   src={`${API_BASE}/accounts/avatar/${
                     staffAvatarUrl
@@ -216,104 +190,119 @@ export default function RatingScreen() {
                       : "avatar_default_male.png"
                   }`}
                   alt="Avatar"
-                  className="object-cover w-32 h-32 mb-3 border-2 border-blue-300 shadow-md cursor-pointer"
+                  className="object-cover w-24 h-24 bg-white cursor-pointer"
                   onClick={() => setShowAvatarPreview(true)}
                 />
-                <p>{staffName}</p>
-                <p>{StaffPosition}</p>
               </div>
-            )}
-            <p className="text-[2.5rem] font-semibold text-blue-700 text-center">
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex w-full h-full">
+        {/* Left Panel - Staff Info */}
+        <div className="flex flex-col justify-center border-r-4 border-blue-200 w-4/10 bg-blue-50">
+          <div className="-mt-32 text-center">
+            <p className="text-[3rem] font-semibold text-blue-700 ">
               {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
             </p>
-            <div className="text-[10rem] text-blue-800 font-extrabold tracking-widest leading-[10rem] zoom-loop">
+            <div className="text-[12rem] text-blue-800 font-extrabold tracking-widest zoom-loop leading-50">
               {currentNumber}
             </div>
           </div>
-          {/* Đánh giá */}
-          <div className="w-[60rem] p-8 flex flex-col items-center justify-center bg-white">
-            <h2 className="text-6xl font-bold text-center text-blue-700">
-              ĐÁNH GIÁ DỊCH VỤ
-            </h2>
-            <p className="text-[1.6rem] text-gray-600 pt-10">
-              Bạn có hài lòng với chất lượng dịch vụ không?
-            </p>
+        </div>
 
-            <div className="flex pb-8 mt-4 gap-x-4 text-7xl">
-              {[1, 2, 3, 4, 5].map((val) => (
+        {/* Right Panel - Rating */}
+        <div className="relative flex-1 bg-white">
+          <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto -mt-16">
+            <div className="mb-8 text-center">
+              <h2 className="mb-4 text-5xl font-bold text-blue-800">
+                ĐÁNH GIÁ DỊCH VỤ
+              </h2>
+              <div className="w-32 h-1 mx-auto bg-blue-500 rounded-full"></div>
+              <p className="mt-6 text-2xl text-blue-600">
+                Bạn có hài lòng với chất lượng dịch vụ?
+              </p>
+            </div>
+
+            {/* Stars */}
+            <div className="flex gap-4 mb-8">
+              {[1, 2, 3, 4, 5].map((star) => (
                 <button
-                  key={val}
-                  className={`transition ${
-                    selectedStars >= val ? "text-yellow-400" : "text-gray-300"
+                  key={star}
+                  className={`text-8xl transition-all transform hover:scale-110 ${
+                    selectedStars >= star
+                      ? "text-yellow-400 drop-shadow-lg"
+                      : "text-gray-300 hover:text-yellow-200"
                   }`}
-                  onClick={() => {
-                    setSelectedStars(val);
-                  }}
+                  onClick={() => setSelectedStars(star)}
+                  disabled={submitted}
                 >
                   ★
                 </button>
               ))}
             </div>
 
+            {/* Feedback */}
             <textarea
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Bạn có góp ý thêm không? (Không bắt buộc)"
-              className="w-full rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900 text-[1.5rem] focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
-              rows={3}
+              placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
+              className="w-full h-32 max-w-2xl p-4 text-lg text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               disabled={submitted}
             />
 
+            {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              disabled={submitted}
-              className="w-full my-4 bg-blue-600 text-white py-4 rounded-xl font-bold text-[1.5rem] hover:opacity-90 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={submitted || selectedStars === 0}
+              className={`mt-8 px-12 py-4 text-xl font-bold rounded-2xl transition-all transform ${
+                selectedStars > 0 && !submitted
+                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
-              Gửi phản hồi
+              Gửi đánh giá
             </button>
-
             <p
-              ref={thankYouRef}
-              className="invisible text-blue-700 text-xl font-semibold text-center text-[2rem] mt-2"
+              className={`text-blue-700 text-xl font-semibold text-center text-[2rem] mt-10 ${
+                submitted ? "" : "invisible"
+              }`}
             >
               🎉 Cảm ơn bạn đã phản hồi!
             </p>
           </div>
         </div>
-        {showAvatarPreview && (
-          <div
-            onClick={() => setShowAvatarPreview(false)}
-            className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
+      </div>
+      {showAvatarPreview && (
+        <div
+          onClick={() => setShowAvatarPreview(false)}
+          className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
+        >
+          <img
+            src={`${API_BASE}/accounts/avatar/${
+              staffAvatarUrl
+                ? `${staffAvatarUrl}?v=${Date.now()}`
+                : staffGender === 0
+                ? "avatar_default_female.png"
+                : "avatar_default_male.png"
+            }`}
+            alt="Avatar full"
+            className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowAvatarPreview(false);
+            }}
+            className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
           >
-            <img
-              src={`${API_BASE}/accounts/avatar/${
-                staffAvatarUrl
-                  ? `${staffAvatarUrl}?v=${Date.now()}`
-                  : staffGender === 0
-                  ? "avatar_default_female.png"
-                  : "avatar_default_male.png"
-              }`}
-              alt="Avatar full"
-              className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
-            />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowAvatarPreview(false);
-              }}
-              className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
-            >
-              ×
-            </button>
-          </div>
-        )}
-      </main>
-
+            ×
+          </button>
+        </div>
+      )}
       <style jsx global>{`
-        html {
-          font-size: 1.2vmin;
-        }
-
         * {
           user-select: none;
           -webkit-user-select: none;
@@ -321,68 +310,10 @@ export default function RatingScreen() {
           -webkit-touch-callout: none;
         }
 
-        @keyframes zoomIn {
-          0% {
-            transform: scale(0.9);
-            opacity: 0;
+        @media (orientation: landscape) and (max-height: 768px) {
+          html {
+            font-size: 14px;
           }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-
-        @keyframes zoomOutFade {
-          0% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(0.9);
-            opacity: 0;
-          }
-        }
-
-        @keyframes bounce {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.2);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        @keyframes zoomLoop {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.01);
-          }
-        }
-
-        .animate-zoom-in {
-          animation: zoomIn 0.3s ease-out;
-        }
-
-        .zoom-in {
-          animation: zoomIn 0.3s ease-out;
-        }
-
-        .zoom-out {
-          animation: zoomOutFade 0.3s ease-out forwards;
-        }
-
-        .zoom-loop {
-          animation: zoomLoop 1.8s ease-in-out infinite;
-        }
-
-        .animate-press {
-          animation: bounce 0.25s ease;
         }
       `}</style>
     </div>
