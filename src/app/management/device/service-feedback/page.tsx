@@ -2,13 +2,15 @@
 
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiGet } from "@/lib/api";
+import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
 export default function RatingScreen() {
+  const parentRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { popupMessage } = usePopup();
   const { socket, globalParams } = useGlobalParams() as {
@@ -31,12 +33,24 @@ export default function RatingScreen() {
   const [selectedStars, setSelectedStars] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const thankYouRef = useRef<HTMLParagraphElement>(null);
 
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [autoConnect, setAutoConnect] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const popupRef = useRef<PopupManagerRef>(null);
+
   useEffect(() => {
     fetchData();
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+        socket.removeAllListeners();
+      }
+    };
   }, []);
 
   const fetchData = async () => {
@@ -68,10 +82,12 @@ export default function RatingScreen() {
     if (!socket.connected) {
       socket.connect();
     }
+
+    rememberChoice();
   };
 
   const onConnectError = () => {
-    popupMessage({
+    popupRef.current?.showMessage({
       title: "Mất kết nối",
       description: "Vui lòng thử lại sau.",
     });
@@ -122,14 +138,14 @@ export default function RatingScreen() {
         setTicketId(response.ticketId);
       }
     } else if (response.status === "error") {
-      popupMessage({
+      popupRef.current?.showMessage({
         description: response?.message || "Đã xảy ra lỗi",
       });
       return;
     } else if (response.status === "logout") {
       router.push("/login");
     } else {
-      popupMessage({
+      popupRef.current?.showMessage({
         title: "Lỗi không xác định",
         description: response?.message,
       });
@@ -150,7 +166,7 @@ export default function RatingScreen() {
 
   const handleSubmit = () => {
     if (selectedStars === 0) {
-      popupMessage({ description: "Bạn chưa đánh giá" });
+      popupRef.current?.showMessage({ description: "Bạn chưa đánh giá" });
       return;
     }
 
@@ -158,8 +174,122 @@ export default function RatingScreen() {
     setTicketId(null);
   };
 
+  const toggleFullscreen = async () => {
+    const target = parentRef.current;
+    if (!target) return;
+    if (!document.fullscreenElement) {
+      setIsFullscreen(true);
+      target.requestFullscreen?.();
+    } else {
+      setPasswordInput("");
+      setShowPasswordModal(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (socket) {
+      socket.disconnect();
+      socket.removeAllListeners();
+    }
+
+    setIsReady(false);
+    setCounterIdSelected(null);
+    removeRememberChoice();
+  };
+
+  // ghi nhớ lựa chọn
+  const rememberChoice = () => {
+    const accountId = globalParams.user.id;
+    localStorage.setItem(
+      `feedback_screen_selectedCounterId_${accountId}`,
+      counterIdSelected.toString()
+    );
+  };
+
+  const removeRememberChoice = () => {
+    const accountId = globalParams.user.id;
+    localStorage.removeItem(`feedback_screen_selectedCounterId_${accountId}`);
+  };
+
+  useEffect(() => {
+    if (!counters || counters.length === 0) {
+      return;
+    }
+
+    const accountId = globalParams.user.id;
+    const rememberedCounterId = localStorage.getItem(
+      `feedback_screen_selectedCounterId_${accountId}`
+    );
+
+    if (!rememberedCounterId) {
+      return;
+    }
+
+    if (
+      rememberedCounterId &&
+      counters.some((c) => c.id === Number(rememberedCounterId))
+    ) {
+      setCounterIdSelected(Number(rememberedCounterId));
+      setAutoConnect(true);
+    }
+  }, [counters]);
+
+  useEffect(() => {
+    if (!autoConnect) {
+      return;
+    }
+
+    setAutoConnect(false);
+    handleConfirmSelected();
+  }, [autoConnect]);
+
   return isReady ? (
-    <div className="w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-white">
+    <div
+      ref={parentRef}
+      className="relative w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-white"
+    >
+      {/* FULLSCREEN BUTTON */}
+      <button
+        onClick={toggleFullscreen}
+        title="Toàn màn hình"
+        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-10 top-1 right-1 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
+        </svg>
+      </button>
+
+      {/* BACK BUTTON */}
+      {!isFullscreen && (
+        <button
+          onClick={handleBack}
+          title="Quay lại"
+          className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-10 top-1 right-13 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 6l-6 6 6 6"
+            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
+          </svg>
+        </button>
+      )}
+
       {/* Header */}
       <header className="px-8 py-10 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
         <div className="flex items-center justify-between ">
@@ -297,6 +427,54 @@ export default function RatingScreen() {
           >
             ×
           </button>
+        </div>
+      )}
+      <PopupManager ref={popupRef} />
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+          <div className="relative bg-white p-8 rounded-2xl shadow-2xl w-[90%] max-w-[30rem]">
+            {/* Nút đóng */}
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              className="absolute text-2xl text-gray-400 top-3 right-4 hover:text-red-500"
+            >
+              ×
+            </button>
+
+            <h2 className="mb-6 text-2xl font-bold text-center text-blue-800">
+              Xác thực mật khẩu
+            </h2>
+
+            <input
+              type="password"
+              placeholder="Nhập mật khẩu"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={async () => {
+                  const res = await apiPost("/auth/kiosk-verify", {
+                    password: passwordInput,
+                  });
+                  if (res.status === 200) {
+                    setIsFullscreen(false);
+                    document.exitFullscreen?.();
+                  } else {
+                    popupRef.current?.showMessage({
+                      description: "Sai mật khẩu",
+                    });
+                  }
+                  setShowPasswordModal(false);
+                }}
+                className="px-6 py-2 text-lg font-semibold text-white transition bg-blue-600 rounded-xl hover:bg-blue-700"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <style jsx global>{`
