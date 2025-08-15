@@ -4,17 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
+import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
 
 export default function Page() {
   const router = useRouter();
   const parentRef = useRef<HTMLDivElement | null>(null);
 
+  const popupRef = useRef<PopupManagerRef>(null);
   const [services, setServices] = useState<{ id: number; name: string }[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [ticketData, setTicketData] = useState<any>(null);
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
 
   const [popupMessageData, setPopupMessageData] = useState<{
     title?: string;
@@ -92,20 +97,21 @@ export default function Page() {
         printTicket();
       }, 500);
     } catch (err: any) {
-      showMessage({
+      popupRef.current?.showMessage({
         title: "LẤY SỐ THẤT BẠI",
         description: err.message,
       });
     }
   }
 
-  const toggleFullscreen = () => {
+  const toggleFullscreen = async () => {
     const target = parentRef.current;
     if (!target) return;
     if (!document.fullscreenElement) {
       target.requestFullscreen?.();
     } else {
-      document.exitFullscreen?.();
+      setPasswordInput("");
+      setShowPasswordModal(true);
     }
   };
 
@@ -289,6 +295,53 @@ export default function Page() {
             >
               OK
             </button>
+          </div>
+        </div>
+      )}
+      <PopupManager ref={popupRef} />
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+          <div className="relative bg-white p-8 rounded-2xl shadow-2xl w-[90%] max-w-[30rem]">
+            {/* Nút đóng */}
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              className="absolute text-2xl text-gray-400 top-3 right-4 hover:text-red-500"
+            >
+              ×
+            </button>
+
+            <h2 className="mb-6 text-2xl font-bold text-center text-blue-800">
+              Xác thực mật khẩu
+            </h2>
+
+            <input
+              type="password"
+              placeholder="Nhập mật khẩu"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={async () => {
+                  const res = await apiPost("/auth/kiosk-verify", {
+                    password: passwordInput,
+                  });
+                  if (res.status === 200) {
+                    document.exitFullscreen?.();
+                  } else {
+                    popupRef.current?.showMessage({
+                      description: "Sai mật khẩu",
+                    });
+                  }
+                  setShowPasswordModal(false);
+                }}
+                className="px-6 py-2 text-lg font-semibold text-white transition bg-blue-600 rounded-xl hover:bg-blue-700"
+              >
+                Xác nhận
+              </button>
+            </div>
           </div>
         </div>
       )}
