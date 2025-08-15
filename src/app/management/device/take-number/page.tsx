@@ -122,7 +122,7 @@ export default function Page() {
       <button
         onClick={toggleFullscreen}
         title="Toàn màn hình"
-        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-40 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
       >
         <svg
           className="w-6 h-6"

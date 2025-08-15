@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function CounterStatusScreen() {
+  const parentRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { popupMessage } = usePopup();
   const { socket, globalParams } = useGlobalParams() as {
@@ -152,8 +153,38 @@ export default function CounterStatusScreen() {
     };
   }, []);
 
+  const toggleFullscreen = () => {
+    const target = parentRef.current;
+    if (!target) return;
+    if (!document.fullscreenElement) {
+      target.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
   return isReady ? (
-    <div className="flex flex-col h-screen font-sans text-gray-800 uppercase bg-blue-50">
+    <div
+      ref={parentRef}
+      className="relative flex flex-col w-full h-full uppercase "
+    >
+      {/* FULLSCREEN BUTTON */}
+      <button
+        onClick={toggleFullscreen}
+        title="Toàn màn hình"
+        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
+        </svg>
+      </button>
+
       {/* HEADER */}
       <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
         <div className="flex items-center gap-6 justify-left">
@@ -162,7 +193,7 @@ export default function CounterStatusScreen() {
               <img
                 src={`${API_BASE}/agencies/logos/${logoUrl}`}
                 alt="Logo cơ quan"
-                className="object-contain h-42 "
+                className="object-contain h-40"
               />
             </div>
           )}
