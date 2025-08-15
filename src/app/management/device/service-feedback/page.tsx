@@ -164,14 +164,26 @@ export default function RatingScreen() {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedStars === 0) {
       popupRef.current?.showMessage({ description: "Bạn chưa đánh giá" });
       return;
     }
 
-    setSubmitted(true);
-    setTicketId(null);
+    const res = await apiPost("/tickets/rating", {
+      ticketId,
+      rating: selectedStars,
+      comment: feedback.trim(),
+    });
+
+    if (res.status === 201) {
+      setSubmitted(true);
+      setTicketId(null);
+    } else {
+      popupRef.current?.showMessage({
+        description: "Mất kết nối",
+      });
+    }
   };
 
   const toggleFullscreen = async () => {
