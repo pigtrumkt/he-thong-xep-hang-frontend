@@ -7,15 +7,6 @@ export default function ImagesAdvertisementComponent({
 }: {
   mode: number;
 }) {
-  const mockImages = useMemo(
-    () => [
-      "https://picsum.photos/800/450?random=1",
-      "https://picsum.photos/800/450?random=2",
-      "https://picsum.photos/800/450?random=3",
-    ],
-    []
-  );
-
   const [objectFit, setObjectFit] = useState<string>("cover");
   const [slideDuration, setSlideDuration] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,7 +21,7 @@ export default function ImagesAdvertisementComponent({
 
     const urls = files.map((f) => URL.createObjectURL(f));
     // Thêm vào đầu danh sách để thấy ngay
-    setUploadedImages((prev) => [...urls, ...prev]);
+    setUploadedImages((prev) => [...prev, ...urls]);
 
     // Chuyển ngay preview tới ảnh vừa thêm đầu tiên
     setCurrentIndex(0);
@@ -55,11 +46,6 @@ export default function ImagesAdvertisementComponent({
     setCurrentIndex(0);
   };
 
-  const displayImages = useMemo(
-    () => [...uploadedImages, ...mockImages],
-    [uploadedImages, mockImages]
-  );
-
   // Map object-fit -> class
   const objectFitClass =
     (
@@ -80,16 +66,14 @@ export default function ImagesAdvertisementComponent({
 
   // Auto slideshow
   useEffect(() => {
-    if (mode === 1) {
-      const total = uploadedImages.length + mockImages.length;
-      if (total > 1) {
-        const timer = setInterval(() => {
-          setCurrentIndex((prev) => (prev + 1) % total);
-        }, slideDuration * 1000);
-        return () => clearInterval(timer);
-      }
+    const total = uploadedImages.length;
+    if (total > 1) {
+      const timer = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % total);
+      }, slideDuration * 1000);
+      return () => clearInterval(timer);
     }
-  }, [mode, slideDuration, uploadedImages.length, mockImages.length]);
+  }, [slideDuration, uploadedImages.length]);
   return (
     <>
       {/* các input ẩn để chọn file */}
@@ -120,18 +104,17 @@ export default function ImagesAdvertisementComponent({
           </h3>
 
           <div className="relative w-full overflow-hidden border-2 border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
-            {displayImages.length ? (
+            {uploadedImages.length > 0 ? (
               <>
                 <img
-                  src={displayImages[currentIndex]}
+                  src={uploadedImages[currentIndex]}
                   alt="Preview"
                   className={`w-full h-full transition-all duration-500 ${objectFitClass}`}
                 />
-                {/* Progress bar */}
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="p-2 rounded-full bg-black/30 backdrop-blur-sm">
                     <div className="flex gap-1">
-                      {displayImages.map((_, idx) => (
+                      {uploadedImages.map((_, idx) => (
                         <div
                           key={idx}
                           className={`h-1 rounded-full transition-all duration-300 ${
@@ -275,32 +258,6 @@ export default function ImagesAdvertisementComponent({
                     >
                       ×
                     </button>
-                  </div>
-                );
-              })}
-
-              {/* Mock images (đứng sau) */}
-              {mockImages.map((url, idx) => {
-                const globalIndex = uploadedImages.length + idx; // sau uploaded
-                return (
-                  <div
-                    key={`mock-${idx}`}
-                    className={`relative group rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 cursor-pointer ${
-                      globalIndex === currentIndex
-                        ? "border-blue-500 shadow-lg shadow-blue-500/25"
-                        : "border-blue-200 hover:border-blue-400"
-                    }`}
-                    onClick={() => {
-                      setCurrentIndex(globalIndex);
-                    }}
-                    style={{ width: 96, height: 96 }}
-                    title={`Mẫu ${idx + 1}`}
-                  >
-                    <img
-                      src={url}
-                      alt={`Mẫu ${idx + 1}`}
-                      className={`w-full h-full ${objectFitClass} bg-gray-100`}
-                    />
                   </div>
                 );
               })}
