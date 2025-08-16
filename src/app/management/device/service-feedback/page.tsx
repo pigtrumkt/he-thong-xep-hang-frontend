@@ -323,7 +323,7 @@ export default function RatingScreen() {
                 <img
                   src={`${API_BASE}/accounts/avatar/${
                     staffAvatarUrl
-                      ? `${staffAvatarUrl}?v=${Date.now()}`
+                      ? `${staffAvatarUrl}`
                       : staffGender === 0
                       ? "avatar_default_female.png"
                       : "avatar_default_male.png"
@@ -422,7 +422,7 @@ export default function RatingScreen() {
           <img
             src={`${API_BASE}/accounts/avatar/${
               staffAvatarUrl
-                ? `${staffAvatarUrl}?v=${Date.now()}`
+                ? `${staffAvatarUrl}`
                 : staffGender === 0
                 ? "avatar_default_female.png"
                 : "avatar_default_male.png"

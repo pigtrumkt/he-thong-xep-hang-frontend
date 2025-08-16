@@ -77,7 +77,7 @@ export default function ViewAccountModal({
   }, [accountData]);
 
   const avatarUrl = accountData?.avatar_url
-    ? `${API_BASE}/accounts/avatar/${accountData.avatar_url}?v=${Date.now()}`
+    ? `${API_BASE}/accounts/avatar/${accountData.avatar_url}`
     : accountData?.gender === 0
     ? `${API_BASE}/accounts/avatar/avatar_default_female.png`
     : `${API_BASE}/accounts/avatar/avatar_default_male.png`;

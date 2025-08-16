@@ -147,7 +147,7 @@ export default function ManagementLayout({
               <img
                 src={`${host}/accounts/avatar/${
                   globalParams.user.avatar_url
-                    ? `${globalParams.user.avatar_url}?v=${Date.now()}`
+                    ? `${globalParams.user.avatar_url}`
                     : globalParams.user.gender === 0
                     ? "avatar_default_female.png"
                     : "avatar_default_male.png"

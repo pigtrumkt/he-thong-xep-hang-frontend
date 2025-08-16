@@ -158,7 +158,7 @@ export default function ProfilePage() {
           <img
             src={`${API_BASE}/accounts/avatar/${
               user.avatar_url
-                ? `${user.avatar_url}?v=${Date.now()}`
+                ? `${user.avatar_url}`
                 : gender === 0
                 ? "avatar_default_female.png"
                 : "avatar_default_male.png"
@@ -368,7 +368,7 @@ export default function ProfilePage() {
           <img
             src={`${API_BASE}/accounts/avatar/${
               user.avatar_url
-                ? `${user.avatar_url}?v=${Date.now()}`
+                ? `${user.avatar_url}`
                 : gender === 0
                 ? "avatar_default_female.png"
                 : "avatar_default_male.png"
