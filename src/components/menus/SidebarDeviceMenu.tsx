@@ -4,7 +4,7 @@ import { RoleEnum } from "@/constants/Enum";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useGlobalParams } from "../ClientWrapper";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePopup } from "../popup/PopupContext";
 import { Socket } from "socket.io-client";
 
@@ -22,6 +22,25 @@ export default function SidebarDeviceMenu() {
   const [rate, setRate] = useState<number>(1);
   const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(false);
 
+  const voice = (message: string) => {
+    if (!message) return;
+
+    const chosenVoice =
+      voices?.find((v) => v.voiceURI === selectedVoice) || null;
+
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = "vi-VN";
+    utterance.volume = 1;
+    utterance.rate = rate || 1;
+    utterance.voice = chosenVoice;
+    speechSynthesis.speak(utterance);
+  };
+
+  const voiceRef = useRef(voice);
+  useEffect(() => {
+    voiceRef.current = voice;
+  }, [voice]);
+
   useEffect(() => {
     if (!socketSound) return;
 
@@ -35,7 +54,7 @@ export default function SidebarDeviceMenu() {
 
       socketSound.on("connect", onConnect);
       socketSound.on("connect_error", onConnectError);
-      socketSound.on("ListingServer", listingServer);
+      socketSound.on("ListingServer", (res) => voiceRef.current(res.message));
       if (!socketSound.connected) {
         socketSound.connect();
       }
@@ -66,22 +85,6 @@ export default function SidebarDeviceMenu() {
     localStorage.setItem("voice-rate", String(e.target.value));
   };
 
-  const voice = (message: string) => {
-    if (!message) {
-      return;
-    }
-
-    const chosenVoice =
-      voices?.find((v) => v.voiceURI === selectedVoice) || null;
-
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = "vi-VN";
-    utterance.volume = 1;
-    utterance.rate = rate || 1;
-    utterance.voice = chosenVoice;
-    speechSynthesis.speak(utterance);
-  };
-
   const initDataSocket = () => {
     socketSound.emit("join_sound", {}, (response: any) => {});
   };
@@ -95,10 +98,6 @@ export default function SidebarDeviceMenu() {
       title: "Mất kết nối",
       description: "Vui lòng thử lại sau.",
     });
-  };
-
-  const listingServer = (response: any) => {
-    voice(response.message);
   };
 
   const handleSound = async () => {
