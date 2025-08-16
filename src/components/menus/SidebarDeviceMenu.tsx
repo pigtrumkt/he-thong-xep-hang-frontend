@@ -7,6 +7,7 @@ import { useGlobalParams } from "../ClientWrapper";
 import { useEffect, useState } from "react";
 import { usePopup } from "../popup/PopupContext";
 import { Socket } from "socket.io-client";
+
 export default function SidebarDeviceMenu() {
   const { popupMessage } = usePopup();
   const { socketSound, globalParams } = useGlobalParams() as {
@@ -16,31 +17,68 @@ export default function SidebarDeviceMenu() {
   const pathname = usePathname();
   const { hasAccess } = useGlobalParams();
   const { popupConfirm } = usePopup();
-
+  const [voices, setVoices] = useState<any[] | null>(null);
+  const [selectedVoice, setSelectedVoice] = useState<string>("");
+  const [rate, setRate] = useState<number>(1);
   const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    localStorage.setItem("audio-enabled", String(isAudioEnabled));
-  }, [isAudioEnabled]);
+    if (!socketSound) return;
+
+    setSelectedVoice(localStorage.getItem("voice-uri") || "");
+    setRate(Number(localStorage.getItem("voice-rate") ?? 1));
+    setIsAudioEnabled(localStorage.getItem("audio-enabled") === "true");
+
+    if (localStorage.getItem("audio-enabled") === "true") {
+      socketSound.removeAllListeners();
+      socketSound.disconnect();
+
+      socketSound.on("connect", onConnect);
+      socketSound.on("connect_error", onConnectError);
+      socketSound.on("ListingServer", listingServer);
+      if (!socketSound.connected) {
+        socketSound.connect();
+      }
+    }
+  }, [socketSound]);
+
+  useEffect(() => {
+    const handleVoicesChanged = () => {
+      setVoices(
+        speechSynthesis.getVoices().filter((v) => /(vi|vn)/i.test(v.lang || ""))
+      );
+    };
+
+    speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+
+    return () => {
+      speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+    };
+  }, []);
+
+  const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedVoice(e.target.value);
+    localStorage.setItem("voice-uri", e.target.value);
+  };
+
+  const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRate(Number(e.target.value));
+    localStorage.setItem("voice-rate", String(e.target.value));
+  };
 
   const voice = (message: string) => {
     if (!message) {
       return;
     }
 
-    const voices = speechSynthesis.getVoices();
-    const listVoice = voices.filter((v) => v.lang === "vi-VN");
+    const chosenVoice =
+      voices?.find((v) => v.voiceURI === selectedVoice) || null;
 
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = "vi-VN";
     utterance.volume = 1;
-    utterance.rate = 0.9;
-    utterance.voice =
-      listVoice.length == 2
-        ? listVoice[1]
-        : listVoice.length > 0
-        ? listVoice[0]
-        : null;
+    utterance.rate = rate || 1;
+    utterance.voice = chosenVoice;
     speechSynthesis.speak(utterance);
   };
 
@@ -72,7 +110,7 @@ export default function SidebarDeviceMenu() {
     if (!confirm) {
       return;
     }
-
+    localStorage.setItem("audio-enabled", String(nextValue));
     socketSound.removeAllListeners();
     socketSound.disconnect();
 
@@ -179,13 +217,13 @@ export default function SidebarDeviceMenu() {
         <div className="flex items-center mb-2">
           <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
           <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
-            Âm thanh
+            Phát âm thanh
           </span>
         </div>
         <ul className="flex flex-col gap-1 font-semibold text-white select-none">
+          {/* Bật/Tắt âm thanh - KHÔNG đổi phần này của bạn */}
           <li className="relative overflow-hidden transition-all duration-300 ease-out border group rounded-xl bg-gradient-to-r from-slate-800/50 to-slate-700/30 backdrop-blur-sm border-slate-600/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20">
             <label className="flex items-center px-4 py-4 transition-all duration-300 cursor-pointer hover:bg-gradient-to-r hover:from-blue-600/10 hover:to-purple-600/10">
-              {/* Custom Checkbox */}
               <div className="relative">
                 <input
                   type="checkbox"
@@ -195,7 +233,6 @@ export default function SidebarDeviceMenu() {
                 />
               </div>
 
-              {/* Text with Icon */}
               <div className="flex items-center gap-3">
                 <div
                   className={`p-2 rounded-lg transition-all duration-300 ${
@@ -204,6 +241,7 @@ export default function SidebarDeviceMenu() {
                       : "bg-slate-600/30 text-slate-400 group-hover:text-slate-300"
                   }`}
                 >
+                  {/* icon loa */}
                   <svg
                     className="w-5 h-5"
                     fill="currentColor"
@@ -228,7 +266,6 @@ export default function SidebarDeviceMenu() {
                 </span>
               </div>
 
-              {/* Status Indicator */}
               <div className="flex items-center gap-2 ml-auto">
                 <div
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -248,6 +285,90 @@ export default function SidebarDeviceMenu() {
                 </span>
               </div>
             </label>
+          </li>
+
+          {/* Dropdown chọn giọng */}
+          <li className="relative overflow-hidden transition-all duration-300 ease-out border rounded-xl bg-gradient-to-r from-slate-800/50 to-slate-700/30 backdrop-blur-sm border-slate-600/30">
+            <div className={`flex flex-col gap-4 px-4 py-4`}>
+              {/* Chọn giọng đọc */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-slate-600/30 text-slate-300">
+                  {/* icon user-voice */}
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 14a5 5 0 005-5V7a5 5 0 10-10 0v2a5 5 0 005 5zm-7 6a7 7 0 0114 0v1H5v-1z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <label className="block mb-1 text-sm text-slate-300">
+                    Chọn giọng đọc
+                  </label>
+                  <select
+                    value={selectedVoice}
+                    onChange={handleVoiceChange}
+                    className="w-full px-1 py-1 border rounded-lg outline-none text-slate-100 bg-slate-800/60 border-slate-600/40 focus:ring-2 focus:ring-blue-500/60 text-[1rem]"
+                  >
+                    {voices?.length === 0 && (
+                      <option value="">Đang tìm kiếm...</option>
+                    )}
+                    {voices?.map((v, i) => (
+                      <option key={v.voiceURI} value={v.voiceURI}>
+                        {`Giọng ${i + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Slider tốc độ đọc */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-slate-600/30 text-slate-300">
+                  {/* icon speed */}
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 3a9 9 0 00-9 9h2a7 7 0 1111.9 5.1l1.4 1.4A9 9 0 0012 3zm0 6a1 1 0 00-1 1v4l3 3 1.4-1.4-2.4-2.4V10a1 1 0 00-1-1z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <label className="block mb-1 text-sm text-slate-300">
+                    Tốc độ đọc:{" "}
+                    <span className="font-medium text-slate-200">
+                      {rate.toFixed(2)}x
+                    </span>
+                  </label>
+                  <input
+                    type="range"
+                    min={0.5}
+                    max={2}
+                    step={0.05}
+                    value={rate}
+                    onChange={handleRateChange}
+                    className="w-full accent-blue-500"
+                  />
+                  <div className="flex justify-between mt-1 text-xs text-slate-400">
+                    <span>0.5x</span>
+                    <span>1.0x</span>
+                    <span>2.0x</span>
+                  </div>
+                </div>
+              </div>
+              {/* Nút phát thử */}
+              <button
+                type="button"
+                onClick={() =>
+                  voice("Mời công dân có số, 1...2...3 ,đến quầy số 1")
+                }
+                className="px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                Phát thử
+              </button>
+            </div>
           </li>
         </ul>
       </div>
