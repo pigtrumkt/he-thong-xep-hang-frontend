@@ -27,7 +27,10 @@ export default function SidebarAgencyMenu() {
   });
   const showAdvertisementManagement = hasAccess({
     allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
-    allowedPermissions: [PermissionEnum.ADVERTISEMENT_MANAGEMENT],
+    allowedPermissions: [
+      PermissionEnum.COUNTER_SCREEN_ADVERTISEMENT_MANAGEMENT,
+      PermissionEnum.FEEDBACK_SCREEN_ADVERTISEMENT_MANAGEMENT,
+    ],
   });
   const showGroupManagement = hasAccess({
     allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
@@ -81,16 +84,23 @@ export default function SidebarAgencyMenu() {
         </ul>
       </div>
       {/* Quảng cáo */}
-      {showAdvertisementManagement && (
-        <div>
+
+      <div>
+        {showAdvertisementManagement && (
           <div className="flex items-center mb-2">
             <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
             <span className="text-[0.8rem] font-bold text-blue-200 uppercase tracking-wider">
               Quảng cáo
             </span>
           </div>
-
-          <ul className="flex flex-col gap-1 font-semibold text-white">
+        )}
+        <ul className="flex flex-col gap-1 font-semibold text-white">
+          {hasAccess({
+            allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+            allowedPermissions: [
+              PermissionEnum.COUNTER_SCREEN_ADVERTISEMENT_MANAGEMENT,
+            ],
+          }) && (
             <li>
               <Link
                 href="/management/agency/counters-screen-advertisement-management"
@@ -116,6 +126,13 @@ export default function SidebarAgencyMenu() {
                 Màn hình quầy
               </Link>
             </li>
+          )}
+          {hasAccess({
+            allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+            allowedPermissions: [
+              PermissionEnum.FEEDBACK_SCREEN_ADVERTISEMENT_MANAGEMENT,
+            ],
+          }) && (
             <li>
               <Link
                 href="/management/agency/feedback-screen-advertisement-management"
@@ -140,9 +157,10 @@ export default function SidebarAgencyMenu() {
                 Màn hình đánh giá
               </Link>
             </li>
-          </ul>
-        </div>
-      )}
+          )}
+        </ul>
+      </div>
+
       {/* Quản lý */}
       <div>
         {showGroupManagement && (

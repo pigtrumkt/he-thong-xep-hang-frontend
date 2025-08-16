@@ -20,6 +20,13 @@ const permissionGroups = [
     children: [{ id: 130, label: "Gọi" }],
   },
   {
+    label: "Quảng cáo",
+    children: [
+      { id: 180, label: "Màn hình quầy" },
+      { id: 181, label: "Màn hình đánh giá" },
+    ],
+  },
+  {
     label: "Quầy",
     children: [
       { id: 140, label: "Xem quầy" },
