@@ -117,7 +117,7 @@ export default function SidebarDeviceMenu() {
     if (nextValue) {
       socketSound.on("connect", onConnect);
       socketSound.on("connect_error", onConnectError);
-      socketSound.on("ListingServer", listingServer);
+      socketSound.on("ListingServer", (res) => voiceRef.current(res.message));
       if (!socketSound.connected) {
         socketSound.connect();
       }
@@ -184,7 +184,7 @@ export default function SidebarDeviceMenu() {
                   <path d="M16 3v4M8 3v4" />
                 </svg>
               </span>
-              Màn hình tại quầy
+              Màn hình quầy
             </Link>
           </li>
           <li>

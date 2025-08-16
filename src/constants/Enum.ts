@@ -54,4 +54,7 @@ export enum PermissionEnum {
   // Cài đặt (Cơ quan)
   SETTINGS_VIEW = 170,
   SETTINGS_UPDATE = 171,
+
+  // Quản lý quảng cáo
+  ADVERTISEMENT_MANAGEMENT = 180,
 }
