@@ -301,9 +301,6 @@ export default function ImagesAdvertisementComponent({
                       alt={`Mẫu ${idx + 1}`}
                       className={`w-full h-full ${objectFitClass} bg-gray-100`}
                     />
-                    <div className="absolute px-2 py-1 text-xs text-white bg-blue-500 rounded bottom-1 right-1">
-                      {idx + 1}
-                    </div>
                   </div>
                 );
               })}
