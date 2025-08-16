@@ -211,7 +211,7 @@ export default function ImagesAdvertisementComponent() {
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="px-3 py-2 text-xs font-semibold border border-blue-400 rounded-lg hover:bg-slate-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300"
+                  className="px-3 py-2 text-xs font-semibold text-red-400 border border-red-400 rounded-lg hover:bg-red-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300"
                   aria-label="Xóa tất cả"
                 >
                   Xóa tất cả
@@ -242,14 +242,13 @@ export default function ImagesAdvertisementComponent() {
                       alt={`Uploaded ${idx + 1}`}
                       className={`w-full h-full ${objectFitClass} bg-gray-100`}
                     />
-                    {/* nút xoá nhanh */}
                     <button
                       type="button"
                       onClick={(ev) => {
                         ev.stopPropagation();
                         removeUploadedImage(idx);
                       }}
-                      className="absolute px-1.5 py-0.5 text-xs font-bold text-white transition bg-red-500 rounded top-1 right-1 hover:bg-red-600"
+                      className="absolute flex items-center justify-center w-6 h-6 text-sm font-bold text-white transition bg-red-500 rounded-full top-1 right-1 hover:bg-red-600"
                       aria-label="Xoá ảnh"
                     >
                       ×
