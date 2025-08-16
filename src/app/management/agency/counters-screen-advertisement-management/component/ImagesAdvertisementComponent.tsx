@@ -9,8 +9,8 @@ export default function ImagesAdvertisementComponent() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const dragOverIndexRef = useRef<number | null>(null);
   const createdUrlsRef = useRef<string[]>([]);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const handlePickImageFiles = () => imageInputRef.current?.click();
 
@@ -71,10 +71,11 @@ export default function ImagesAdvertisementComponent() {
 
   const handleDragStart = (index: number) => {
     setDragIndex(index);
+    document.body.style.cursor = "grabbing";
   };
 
   const handleDragEnter = (index: number) => {
-    dragOverIndexRef.current = index;
+    setDragOverIndex(index);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -82,28 +83,27 @@ export default function ImagesAdvertisementComponent() {
   };
 
   const handleDrop = () => {
+    const targetIndex = dragOverIndex;
+    setDragIndex(null);
+    setDragOverIndex(null);
+
     if (
       dragIndex !== null &&
-      dragOverIndexRef.current !== null &&
-      dragIndex !== dragOverIndexRef.current
+      targetIndex !== null &&
+      dragIndex !== targetIndex
     ) {
       setUploadedImages((prev) => {
-        const next = reorder(
-          prev,
-          dragIndex,
-          dragOverIndexRef.current as number
-        );
+        const next = reorder(prev, dragIndex, targetIndex);
         return next;
       });
-      setCurrentIndex(dragOverIndexRef.current as number);
+      setCurrentIndex(targetIndex);
     }
-    setDragIndex(null);
-    dragOverIndexRef.current = null;
   };
 
   const handleDragEnd = () => {
     setDragIndex(null);
-    dragOverIndexRef.current = null;
+    setDragOverIndex(null);
+    document.body.style.cursor = "default";
   };
 
   // Auto slideshow
@@ -122,6 +122,12 @@ export default function ImagesAdvertisementComponent() {
       createdUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
     };
   }, []);
+
+  useEffect(() => {
+    if (uploadedImages.length && currentIndex >= uploadedImages.length) {
+      setCurrentIndex(uploadedImages.length - 1);
+    }
+  }, [uploadedImages]);
 
   return (
     <>
@@ -292,7 +298,7 @@ export default function ImagesAdvertisementComponent() {
     }
     ${dragIndex === idx ? "opacity-50 ring-2 ring-blue-300" : ""}
     ${
-      dragOverIndexRef.current === idx && dragIndex !== idx
+      dragOverIndex === idx && dragIndex !== idx
         ? "outline-2 outline-dashed outline-blue-400"
         : ""
     }
