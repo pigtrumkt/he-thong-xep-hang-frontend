@@ -290,7 +290,7 @@ export default function ImagesAdvertisementComponent() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onDragEnd={handleDragEnd}
-                    className={`select-none relative group rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 cursor-move
+                    className={`select-none relative group rounded-xl overflow-hidden border-2 hover:scale-105 cursor-move
     ${
       globalIndex === currentIndex
         ? "border-blue-500 shadow-lg shadow-blue-500/25"
@@ -299,7 +299,7 @@ export default function ImagesAdvertisementComponent() {
     ${dragIndex === idx ? "opacity-50 ring-2 ring-blue-300" : ""}
     ${
       dragOverIndex === idx && dragIndex !== idx
-        ? "outline-2 outline-dashed outline-blue-400"
+        ? "outline-3 outline-dashed outline-blue-400"
         : ""
     }
   `}
