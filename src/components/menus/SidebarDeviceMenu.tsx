@@ -311,7 +311,7 @@ export default function SidebarDeviceMenu() {
                     className="w-full px-1 py-1 border rounded-lg outline-none text-slate-100 bg-slate-800/60 border-slate-600/40 focus:ring-2 focus:ring-blue-500/60 text-[1rem]"
                   >
                     {voices?.length === 0 && (
-                      <option value="">Đang tìm kiếm...</option>
+                      <option value="">(Không có)</option>
                     )}
                     {voices?.map((v, i) => (
                       <option key={v.voiceURI} value={v.voiceURI}>
