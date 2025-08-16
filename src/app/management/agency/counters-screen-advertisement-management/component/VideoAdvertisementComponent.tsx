@@ -66,7 +66,7 @@ export default function VideoAdvertisementComponent() {
             Xem trước
           </h3>
 
-          <div className="relative w-full overflow-hidden border-2 border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="relative w-full overflow-hidden border-blue-200 shadow-inner border-1 aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
             {uploadedVideo ? (
               <video
                 src={uploadedVideo}
@@ -137,7 +137,7 @@ export default function VideoAdvertisementComponent() {
             <select
               value={objectFit}
               onChange={(e) => setObjectFit(e.target.value)}
-              className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border-2 border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border-blue-200 border-1 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             >
               <option value="contain">Contain - Hiện toàn bộ</option>
               <option value="cover">Cover - Phủ đầy khung</option>
