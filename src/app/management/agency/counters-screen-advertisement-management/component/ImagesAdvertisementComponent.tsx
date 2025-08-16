@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function ImagesAdvertisementComponent() {
   const [objectFit, setObjectFit] = useState<string>("cover");
@@ -8,6 +8,9 @@ export default function ImagesAdvertisementComponent() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const dragOverIndexRef = useRef<number | null>(null);
+  const createdUrlsRef = useRef<string[]>([]);
 
   const handlePickImageFiles = () => imageInputRef.current?.click();
 
@@ -16,13 +19,12 @@ export default function ImagesAdvertisementComponent() {
     if (!files.length) return;
 
     const urls = files.map((f) => URL.createObjectURL(f));
-    // Thêm vào đầu danh sách để thấy ngay
-    setUploadedImages((prev) => [...prev, ...urls]);
-
-    // Chuyển ngay preview tới ảnh vừa thêm đầu tiên
-    setCurrentIndex(0);
-
-    // reset input để lần sau chọn lại cùng file vẫn trigger onChange
+    createdUrlsRef.current.push(...urls);
+    setUploadedImages((prev) => {
+      const next = [...prev, ...urls];
+      setCurrentIndex(next.length - 1); // chuyển preview tới ảnh cuối
+      return next;
+    });
     e.target.value = "";
   };
 
@@ -30,7 +32,12 @@ export default function ImagesAdvertisementComponent() {
     setUploadedImages((prev) => {
       const copy = [...prev];
       const [removed] = copy.splice(idx, 1);
-      if (removed) URL.revokeObjectURL(removed);
+      if (removed) {
+        URL.revokeObjectURL(removed);
+        createdUrlsRef.current = createdUrlsRef.current.filter(
+          (u) => u !== removed
+        );
+      }
       return copy;
     });
     setCurrentIndex(0);
@@ -40,6 +47,7 @@ export default function ImagesAdvertisementComponent() {
     uploadedImages.forEach((u) => URL.revokeObjectURL(u));
     setUploadedImages([]);
     setCurrentIndex(0);
+    createdUrlsRef.current = [];
   };
 
   // Map object-fit -> class
@@ -54,11 +62,49 @@ export default function ImagesAdvertisementComponent() {
       } as const
     )[objectFit] || "object-cover";
 
-  useEffect(() => {
-    return () => {
-      uploadedImages.forEach((u) => URL.revokeObjectURL(u));
-    };
-  }, [uploadedImages]);
+  const reorder = (arr: string[], from: number, to: number) => {
+    const copy = [...arr];
+    const [item] = copy.splice(from, 1);
+    copy.splice(to, 0, item);
+    return copy;
+  };
+
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragEnter = (index: number) => {
+    dragOverIndexRef.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // cho phép drop
+  };
+
+  const handleDrop = () => {
+    if (
+      dragIndex !== null &&
+      dragOverIndexRef.current !== null &&
+      dragIndex !== dragOverIndexRef.current
+    ) {
+      setUploadedImages((prev) => {
+        const next = reorder(
+          prev,
+          dragIndex,
+          dragOverIndexRef.current as number
+        );
+        return next;
+      });
+      setCurrentIndex(dragOverIndexRef.current as number);
+    }
+    setDragIndex(null);
+    dragOverIndexRef.current = null;
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    dragOverIndexRef.current = null;
+  };
 
   // Auto slideshow
   useEffect(() => {
@@ -70,6 +116,13 @@ export default function ImagesAdvertisementComponent() {
       return () => clearInterval(timer);
     }
   }, [slideDuration, uploadedImages.length]);
+
+  useEffect(() => {
+    return () => {
+      createdUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, []);
+
   return (
     <>
       {/* các input ẩn để chọn file */}
@@ -99,7 +152,7 @@ export default function ImagesAdvertisementComponent() {
             Xem trước
           </h3>
 
-          <div className="relative w-full overflow-hidden border-blue-200 shadow-inner border-1 aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="relative w-full overflow-hidden border border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
             {uploadedImages.length > 0 ? (
               <>
                 <img
@@ -158,7 +211,7 @@ export default function ImagesAdvertisementComponent() {
               <select
                 value={objectFit}
                 onChange={(e) => setObjectFit(e.target.value)}
-                className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border-blue-200 border-1 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               >
                 <option value="contain">Contain - Hiện toàn bộ</option>
                 <option value="cover">Cover - Phủ đầy khung</option>
@@ -180,7 +233,7 @@ export default function ImagesAdvertisementComponent() {
                   onChange={(e) =>
                     setSlideDuration(Math.max(1, Number(e.target.value)))
                   }
-                  className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border-blue-200 border-1 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                 />
               </div>
             </div>
@@ -226,17 +279,30 @@ export default function ImagesAdvertisementComponent() {
                 return (
                   <div
                     key={`uploaded-${idx}`}
-                    className={`relative group rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 cursor-pointer ${
-                      globalIndex === currentIndex
-                        ? "border-blue-500 shadow-lg shadow-blue-500/25"
-                        : "border-blue-200 hover:border-blue-400"
-                    }`}
-                    onClick={() => {
-                      setCurrentIndex(globalIndex);
-                    }}
+                    draggable
+                    onDragStart={() => handleDragStart(idx)}
+                    onDragEnter={() => handleDragEnter(idx)}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onDragEnd={handleDragEnd}
+                    className={`relative group rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 cursor-move
+    ${
+      globalIndex === currentIndex
+        ? "border-blue-500 shadow-lg shadow-blue-500/25"
+        : "border-blue-200 hover:border-blue-400"
+    }
+    ${dragIndex === idx ? "opacity-50 ring-2 ring-blue-300" : ""}
+    ${
+      dragOverIndexRef.current === idx && dragIndex !== idx
+        ? "outline outline-2 outline-dashed outline-blue-400"
+        : ""
+    }
+  `}
+                    onClick={() => setCurrentIndex(globalIndex)}
                     style={{ width: 96, height: 96 }}
                     title={`Ảnh đã tải lên ${idx + 1}`}
                   >
+                    {/* ...img & nút xoá của bạn giữ nguyên... */}
                     <img
                       src={url}
                       alt={`Uploaded ${idx + 1}`}

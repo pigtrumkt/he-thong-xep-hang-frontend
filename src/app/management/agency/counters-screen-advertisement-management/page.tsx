@@ -33,7 +33,7 @@ export default function CountersScreenAdvertisementManagementPage() {
             {/* No Ads */}
             <button
               onClick={() => handleChangeMode(0)}
-              className={`group relative overflow-hidden rounded-xl p-4 text-left border-1 transform ${
+              className={`group relative overflow-hidden rounded-xl p-4 text-left border transform ${
                 mode === 0
                   ? "bg-gradient-to-br bg-blue-500 to-indigo-600 border-blue-400 text-white shadow-xl"
                   : "bg-white/80 border-blue-300 hover:border-blue-600 text-gray-700"
@@ -65,7 +65,7 @@ export default function CountersScreenAdvertisementManagementPage() {
             {/* Image */}
             <button
               onClick={() => handleChangeMode(1)}
-              className={`group relative overflow-hidden rounded-xl p-4 text-left border-1  transform ${
+              className={`group relative overflow-hidden rounded-xl p-4 text-left border transform ${
                 mode === 1
                   ? "bg-gradient-to-br bg-blue-500 to-indigo-600 border-blue-400 text-white shadow-xl"
                   : "bg-white/80 border-blue-300 hover:border-blue-400 text-gray-700"
@@ -98,7 +98,7 @@ export default function CountersScreenAdvertisementManagementPage() {
             {/* Video */}
             <button
               onClick={() => handleChangeMode(2)}
-              className={`group relative overflow-hidden rounded-xl p-4 text-left border-1 transform ${
+              className={`group relative overflow-hidden rounded-xl p-4 text-left border transform ${
                 mode === 2
                   ? "bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-400 text-white shadow-xl"
                   : "bg-white/80 border-blue-300 hover:border-blue-400 text-gray-700"
