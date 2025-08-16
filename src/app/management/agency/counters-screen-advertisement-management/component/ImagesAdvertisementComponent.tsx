@@ -273,7 +273,6 @@ export default function ImagesAdvertisementComponent() {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              {/* Uploaded images (đứng trước) */}
               {uploadedImages.map((url, idx) => {
                 const globalIndex = idx; // uploaded trước
                 return (
@@ -285,7 +284,7 @@ export default function ImagesAdvertisementComponent() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onDragEnd={handleDragEnd}
-                    className={`relative group rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 cursor-move
+                    className={`select-none relative group rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 cursor-move
     ${
       globalIndex === currentIndex
         ? "border-blue-500 shadow-lg shadow-blue-500/25"
@@ -294,7 +293,7 @@ export default function ImagesAdvertisementComponent() {
     ${dragIndex === idx ? "opacity-50 ring-2 ring-blue-300" : ""}
     ${
       dragOverIndexRef.current === idx && dragIndex !== idx
-        ? "outline outline-2 outline-dashed outline-blue-400"
+        ? "outline-2 outline-dashed outline-blue-400"
         : ""
     }
   `}
@@ -307,6 +306,7 @@ export default function ImagesAdvertisementComponent() {
                       src={url}
                       alt={`Uploaded ${idx + 1}`}
                       className={`w-full h-full ${objectFitClass} bg-gray-100`}
+                      draggable={false}
                     />
                     <button
                       type="button"
@@ -327,7 +327,7 @@ export default function ImagesAdvertisementComponent() {
               <button
                 type="button"
                 onClick={handlePickImageFiles}
-                className="flex items-center justify-center transition-all duration-200 border-2 border-blue-300 border-dashed rounded-xl hover:border-blue-500 hover:bg-blue-50"
+                className="flex items-center justify-center transition-all duration-200 border-2 border-blue-300 border-dashed select-none rounded-xl hover:border-blue-500 hover:bg-blue-50"
                 style={{ width: 96, height: 96 }}
                 title="Tải lên ảnh"
               >
