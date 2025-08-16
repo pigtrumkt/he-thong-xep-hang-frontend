@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export default function ImagesAdvertisementComponent({
-  mode,
-}: {
-  mode: number;
-}) {
+export default function ImagesAdvertisementComponent() {
   const [objectFit, setObjectFit] = useState<string>("cover");
   const [slideDuration, setSlideDuration] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);

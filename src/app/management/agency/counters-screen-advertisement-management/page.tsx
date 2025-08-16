@@ -134,14 +134,10 @@ export default function CountersScreenAdvertisementManagementPage() {
           {/* Uploads + Preview */}
           {mode === 0 && <NoAdvertisementComponent></NoAdvertisementComponent>}
           {mode === 1 && (
-            <ImagesAdvertisementComponent
-              mode={mode}
-            ></ImagesAdvertisementComponent>
+            <ImagesAdvertisementComponent></ImagesAdvertisementComponent>
           )}
           {mode === 2 && (
-            <VideoAdvertisementComponent
-              mode={mode}
-            ></VideoAdvertisementComponent>
+            <VideoAdvertisementComponent></VideoAdvertisementComponent>
           )}
 
           {/* Action Buttons */}
