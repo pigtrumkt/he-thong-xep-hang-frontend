@@ -2,46 +2,36 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function VideoAdvertisementComponent({
-  mode,
-}: {
-  mode: number;
-}) {
-  const [objectFit, setObjectFit] = useState<string>("cover");
+export default function VideoAdvertisementComponent() {
+  const [objectFit, setObjectFit] = useState("cover");
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
   const handlePickVideoFile = () => videoInputRef.current?.click();
 
   const onVideoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = (e.target.files || [])[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const url = URL.createObjectURL(file);
     if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
     setUploadedVideo(url);
-
-    setCurrentIndex(0);
     e.target.value = "";
   };
 
   const clearAll = () => {
     if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
     setUploadedVideo(null);
-    setCurrentIndex(0);
   };
 
-  // Map object-fit -> class
   const objectFitClass =
-    (
-      {
-        contain: "object-contain",
-        cover: "object-cover",
-        fill: "object-fill",
-        none: "object-none",
-        "scale-down": "object-scale-down",
-      } as const
-    )[objectFit] || "object-cover";
+    {
+      contain: "object-contain",
+      cover: "object-cover",
+      fill: "object-fill",
+      none: "object-none",
+      "scale-down": "object-scale-down",
+    }[objectFit] || "object-cover";
 
   useEffect(() => {
     return () => {
@@ -77,18 +67,34 @@ export default function VideoAdvertisementComponent({
           </h3>
 
           <div className="relative w-full overflow-hidden border-2 border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
-            <video
-              key={uploadedVideo}
-              src={uploadedVideo || ""}
-              className={`w-full h-full ${objectFitClass} bg-black`}
-              autoPlay
-              loop
-              muted
-              controls
-            />
+            {uploadedVideo ? (
+              <video
+                src={uploadedVideo}
+                className={`w-full h-full ${objectFitClass} bg-black`}
+                autoPlay
+                loop
+                muted
+                controls
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center w-full h-full text-blue-500">
+                <svg
+                  className="w-12 h-12 mb-2"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M23 7l-7 5 7 5V7z" />
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                </svg>
+                <p className="text-sm font-medium text-center">
+                  Chưa có video được chọn
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Quick actions for video */}
           <div className="flex flex-wrap items-center justify-end gap-3 mt-4">
             <button
               onClick={handlePickVideoFile}
@@ -96,27 +102,26 @@ export default function VideoAdvertisementComponent({
             >
               + Chọn video
             </button>
-            <button
-              type="button"
-              onClick={clearAll}
-              className="px-3 py-2 text-xs font-semibold border border-blue-400 rounded-lg hover:bg-slate-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300"
-              aria-label="Xóa tất cả"
-            >
-              Xóa
-            </button>
+            {uploadedVideo && (
+              <button
+                onClick={clearAll}
+                className="px-3 py-2 text-xs font-semibold border border-blue-400 rounded-lg hover:bg-slate-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300"
+              >
+                Xóa
+              </button>
+            )}
           </div>
         </div>
 
+        {/* Settings */}
         <div>
-          {/*  Settings */}
           <h4 className="flex items-center gap-2 mb-4 font-bold text-blue-700 text-md">
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5 text-blue-700"
+              className="w-5 h-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth={2}
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
