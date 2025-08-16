@@ -2,9 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const mockVideo =
-  "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4";
-
 export default function VideoAdvertisementComponent({
   mode,
 }: {
@@ -81,8 +78,8 @@ export default function VideoAdvertisementComponent({
 
           <div className="relative w-full overflow-hidden border-2 border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
             <video
-              key={uploadedVideo || mockVideo}
-              src={uploadedVideo || mockVideo}
+              key={uploadedVideo}
+              src={uploadedVideo || ""}
               className={`w-full h-full ${objectFitClass} bg-black`}
               autoPlay
               loop
