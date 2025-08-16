@@ -91,7 +91,7 @@ export default function CountersScreenAdvertisementManagementPage() {
                     <circle cx="8.5" cy="8.5" r="1.5" />
                   </svg>
                 </div>
-                <div className="mb-1 text-xl font-bold">Slideshow Ảnh</div>
+                <div className="mb-1 text-xl font-bold">Hình ảnh</div>
               </div>
             </button>
 
