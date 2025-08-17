@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function VideoAdvertisementComponent() {
+export default function VideoAdvertisementComponent({
+  setLoading,
+  setUploadProgress,
+  onHandlesRef,
+}: {
+  setLoading: (val: boolean) => void;
+  setUploadProgress: (val: number | null) => void;
+  onHandlesRef: any;
+}) {
   const [objectFit, setObjectFit] = useState("cover");
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);

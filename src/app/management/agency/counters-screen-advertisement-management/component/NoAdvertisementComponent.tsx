@@ -1,6 +1,44 @@
 "use client";
 
-export default function NoAdvertisementComponent() {
+import { usePopup } from "@/components/popup/PopupContext";
+import { apiPost } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function NoAdvertisementComponent({
+  onHandlesRef,
+}: {
+  onHandlesRef: any;
+}) {
+  const router = useRouter();
+  const { popupMessage } = usePopup();
+
+  const handleSubmit = async () => {
+    const res = await apiPost("/advertising/counter-status/disable", {});
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      popupMessage({
+        description: "Lưu thành công",
+      });
+    } else {
+      popupMessage({
+        description: "Lưu thất bại",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (onHandlesRef) onHandlesRef.current = { handleSubmit };
+    return () => {
+      if (onHandlesRef) onHandlesRef.current = null;
+    };
+  }, []);
+
   return (
     <div className="py-16 text-center">
       <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full shadow-lg bg-gradient-to-br from-gray-100 to-gray-200">

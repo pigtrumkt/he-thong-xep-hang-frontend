@@ -1,27 +1,24 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import NoAdvertisementComponent from "./component/NoAdvertisementComponent";
 import ImagesAdvertisementComponent from "./component/ImagesAdvertisementComponent";
 import VideoAdvertisementComponent from "./component/VideoAdvertisementComponent";
 type Mode = 0 | 1 | 2;
 
+type Handles = {
+  handleSubmit: () => void;
+};
+
 export default function CountersScreenAdvertisementManagementPage() {
+  const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [mode, setMode] = useState<Mode>(0);
+  const handlesRef = useRef<Handles>(null);
 
   // Handlers
   const handleChangeMode = (newMode: Mode) => {
     setMode(newMode);
-  };
-
-  const handleSubmit = () => {
-    if (mode === 0) {
-      alert("✅ Đã tắt quảng cáo thành công!");
-    } else {
-      alert(
-        `✅ Đã lưu quảng cáo ${mode === 1 ? "slideshow" : "video"} thành công!`
-      );
-    }
   };
 
   return (
@@ -132,18 +129,26 @@ export default function CountersScreenAdvertisementManagementPage() {
       <div className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 pt-8 mx-4 mt-4 lg:min-w-[55rem]">
         <div className="relative z-10 mx-auto">
           {/* Uploads + Preview */}
-          {mode === 0 && <NoAdvertisementComponent></NoAdvertisementComponent>}
+          {mode === 0 && <NoAdvertisementComponent onHandlesRef={handlesRef} />}
           {mode === 1 && (
-            <ImagesAdvertisementComponent></ImagesAdvertisementComponent>
+            <ImagesAdvertisementComponent
+              setLoading={setLoading}
+              setUploadProgress={setUploadProgress}
+              onHandlesRef={handlesRef}
+            />
           )}
           {mode === 2 && (
-            <VideoAdvertisementComponent></VideoAdvertisementComponent>
+            <VideoAdvertisementComponent
+              setLoading={setLoading}
+              setUploadProgress={setUploadProgress}
+              onHandlesRef={handlesRef}
+            />
           )}
 
           {/* Action Buttons */}
           <div className="flex flex-col justify-end gap-6 pt-6 mt-8 border-t sm:flex-row border-slate-300">
             <button
-              onClick={handleSubmit}
+              onClick={() => handlesRef.current?.handleSubmit()}
               className="px-6 py-3 font-medium text-white transition-colors bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700"
             >
               Lưu cài đặt
@@ -151,6 +156,19 @@ export default function CountersScreenAdvertisementManagementPage() {
           </div>
         </div>
       </div>
+      {/* loading */}
+      {uploadProgress !== null && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white bg-black/40 backdrop-blur-sm">
+          <p className="mb-2 text-xl font-semibold">Đang tải lên...</p>
+          <div className="w-2/3 h-4 overflow-hidden bg-white rounded-full">
+            <div
+              className="h-full transition-all duration-300 bg-blue-500"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <p className="mt-2 text-sm font-medium">{uploadProgress}%</p>
+        </div>
+      )}
     </>
   );
 }

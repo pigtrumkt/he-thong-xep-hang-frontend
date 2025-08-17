@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function ImagesAdvertisementComponent() {
+export default function ImagesAdvertisementComponent({
+  setLoading,
+  setUploadProgress,
+  onHandlesRef,
+}: {
+  setLoading: (val: boolean) => void;
+  setUploadProgress: (val: number | null) => void;
+  onHandlesRef: any;
+}) {
   const [objectFit, setObjectFit] = useState<string>("cover");
   const [slideDuration, setSlideDuration] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
