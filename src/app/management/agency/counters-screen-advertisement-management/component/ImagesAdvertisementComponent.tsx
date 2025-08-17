@@ -76,6 +76,13 @@ export default function ImagesAdvertisementComponent({
 
         return;
       }
+
+      if (files[i].size > 20 * 1024 * 1024) {
+        popupMessage({
+          description: `File ${files[i].name} vượt quá 20MB.`,
+        });
+        return;
+      }
     }
 
     const renamedFiles = files.map((file) => {
