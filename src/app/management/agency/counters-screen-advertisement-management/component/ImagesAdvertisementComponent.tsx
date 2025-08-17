@@ -1,5 +1,7 @@
 "use client";
 
+import { usePopup } from "@/components/popup/PopupContext";
+import { apiPost } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
 
 export default function ImagesAdvertisementComponent({
@@ -11,6 +13,7 @@ export default function ImagesAdvertisementComponent({
   setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
 }) {
+  const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState<string>("cover");
   const [slideDuration, setSlideDuration] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -26,6 +29,25 @@ export default function ImagesAdvertisementComponent({
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
+    for (let i = 0; i < files.length; i++) {
+      const isImage = files[i].type.startsWith("image/");
+      if (!isImage) {
+        popupMessage({
+          description: `File không hợp lệ: ${files[i].name}`,
+        });
+
+        return;
+      }
+
+      if (files[i].name.includes(",")) {
+        popupMessage({
+          description: `Tên file không được chứa dấu phẩy: ${files[i].name}`,
+        });
+
+        return;
+      }
+    }
+
     const urls = files.map((f) => URL.createObjectURL(f));
     createdUrlsRef.current.push(...urls);
     setUploadedImages((prev) => {
@@ -33,6 +55,7 @@ export default function ImagesAdvertisementComponent({
       setCurrentIndex(next.length - 1); // chuyển preview tới ảnh cuối
       return next;
     });
+
     e.target.value = "";
   };
 
@@ -114,6 +137,59 @@ export default function ImagesAdvertisementComponent({
     document.body.style.cursor = "default";
   };
 
+  const handleSubmit = async () => {
+    if (uploadedImages.length === 0) {
+      popupMessage({
+        title: "Chưa có ảnh",
+        description: "Vui lòng chọn ít nhất một ảnh để tải lên.",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const input = imageInputRef.current;
+      const formData = new FormData();
+
+      // ✅ Lấy danh sách file từ input hiện tại (nếu còn)
+      if (input && input.files && input.files.length > 0) {
+        Array.from(input.files).forEach((file) => {
+          formData.append("files", file); // backend cần nhận dạng là mảng
+        });
+      } else {
+        popupMessage({
+          title: "Không tìm thấy ảnh gốc",
+          description: "Bạn cần chọn lại ảnh trước khi gửi.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      formData.append("slideDuration", String(slideDuration));
+      formData.append("objectFit", objectFit);
+
+      const filenames = uploadedImages.map((url) => {
+        const parts = url.split("/");
+        return parts[parts.length - 1]; // chỉ lấy tên file
+      });
+
+      // formData.append("filenames", json.parse);
+
+      const res = await apiPost("/advertising/counter-screen/images", formData);
+
+      if (res.status === 201) {
+        popupMessage({ description: "Cập nhật thành công" });
+      } else {
+        popupMessage({ description: "Cập nhật thất bại" });
+      }
+    } catch (err) {
+      popupMessage({ description: "Lỗi mạng hoặc máy chủ không phản hồi." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Auto slideshow
   useEffect(() => {
     const total = uploadedImages.length;
@@ -136,6 +212,13 @@ export default function ImagesAdvertisementComponent({
       setCurrentIndex(uploadedImages.length - 1);
     }
   }, [uploadedImages]);
+
+  useEffect(() => {
+    if (onHandlesRef) onHandlesRef.current = { handleSubmit };
+    return () => {
+      if (onHandlesRef) onHandlesRef.current = null;
+    };
+  }, [handleSubmit]);
 
   return (
     <>

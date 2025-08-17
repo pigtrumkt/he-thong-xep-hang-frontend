@@ -23,11 +23,11 @@ export default function NoAdvertisementComponent({
 
     if (res.status === 201) {
       popupMessage({
-        description: "Lưu thành công",
+        description: "Cập nhật thành công",
       });
     } else {
       popupMessage({
-        description: "Lưu thất bại",
+        description: "Cập nhật thất bại",
       });
     }
   };
