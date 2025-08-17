@@ -70,7 +70,7 @@ export default function VideoAdvertisementComponent({
 
       if (res.status === 201) {
         if (videoPreview) URL.revokeObjectURL(videoPreview);
-        setVideoPreview(null); // hoặc set lại với file mới nếu backend trả ra tên mới
+        setVideoPreview(null);
         setFile(null);
         onSuccessSubmit?.();
         popupMessage({ description: "Cập nhật thành công" });

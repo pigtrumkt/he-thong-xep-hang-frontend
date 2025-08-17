@@ -232,6 +232,12 @@ export default function ImagesAdvertisementComponent({
       }
 
       if (res.status === 201) {
+        imagesPreview.forEach((u) => URL.revokeObjectURL(u));
+        setImagesPreview([]);
+        uploadedNewFilesRef.current = [];
+        setImagesFilename([]);
+        setCurrentIndex(0);
+
         onSuccessSubmit?.();
         popupMessage({ description: "Cập nhật thành công" });
       } else {
