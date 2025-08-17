@@ -1,7 +1,7 @@
 "use client";
 
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiGet, apiPost } from "@/lib/api";
+import { API_BASE, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
