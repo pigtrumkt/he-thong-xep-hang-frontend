@@ -470,7 +470,7 @@ export default function AgencySettingsPage() {
               icon="link"
               value={
                 typeof window !== "undefined"
-                  ? `${window.location.protocol}//${window.location.host}/take-number/${form.id}`
+                  ? `${window.location.protocol}//${window.location.host}/take-number-mobile/${form.id}`
                   : ""
               }
               readOnly

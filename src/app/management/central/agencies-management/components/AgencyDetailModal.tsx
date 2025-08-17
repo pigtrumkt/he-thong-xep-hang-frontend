@@ -163,14 +163,14 @@ export default function AgencyDetailModal({
             </label>
             <div className="px-3 py-2 text-blue-700 break-all bg-gray-100 rounded">
               <a
-                href={`/take-number/${agency.id}`}
+                href={`/take-number-mobile/${agency.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
               >
                 {typeof window !== "undefined"
-                  ? `${window.location.origin}/take-number/${agency.id}`
-                  : `/take-number/${agency.id}`}
+                  ? `${window.location.origin}/take-number-mobile/${agency.id}`
+                  : `/take-number-mobile/${agency.id}`}
               </a>
             </div>
           </div>
