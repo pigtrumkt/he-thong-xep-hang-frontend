@@ -241,11 +241,11 @@ export default function VideoAdvertisementComponent({
               onChange={(e) => setObjectFit(e.target.value)}
               className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             >
-              <option value="0">Contain - Hiện toàn bộ</option>
-              <option value="1">Cover - Phủ đầy khung</option>
-              <option value="2">Fill - Kéo giãn đầy khung</option>
-              <option value="3">None - Kích thước gốc</option>
-              <option value="4">Scale Down - Tự động co lại</option>
+              <option value="0">Hiện toàn bộ</option>
+              <option value="1">Phủ đầy khung</option>
+              <option value="2">Kéo giãn đầy khung</option>
+              <option value="3">Kích thước gốc</option>
+              <option value="4">Tự động co lại</option>
             </select>
           </div>
         </div>
