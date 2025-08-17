@@ -28,31 +28,31 @@ export default function CountersScreenAdvertisementManagementPage() {
     filename: string;
   } | null>(null);
 
+  const fetchInitialConfig = async () => {
+    const res = await apiGet("/advertising/getCounterScreenAdvertising");
+    if (res.status === 200) {
+      const data = res.data;
+      setMode(data.counter_status_screen_type);
+
+      // Hình ảnh
+      setImageInitialConfig({
+        slideDuration: data.counter_status_screen_images_duration ?? 5,
+        objectFit: data.counter_status_screen_images_object_fit ?? 1,
+        filenames: (data.counter_status_screen_images_url || "")
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter(Boolean),
+      });
+
+      // Video
+      setVideoInitialConfig({
+        objectFit: data.counter_status_screen_video_object_fit ?? 1,
+        filename: data.counter_status_screen_video_url,
+      });
+    }
+  };
+
   useEffect(() => {
-    const fetchInitialConfig = async () => {
-      const res = await apiGet("/advertising/getCounterScreenAdvertising");
-      if (res.status === 200) {
-        const data = res.data;
-        setMode(data.counter_status_screen_type);
-
-        // Hình ảnh
-        setImageInitialConfig({
-          slideDuration: data.counter_status_screen_images_duration ?? 5,
-          objectFit: data.counter_status_screen_images_object_fit ?? 1,
-          filenames: (data.counter_status_screen_images_url || "")
-            .split(",")
-            .map((s: string) => s.trim())
-            .filter(Boolean),
-        });
-
-        // Video
-        setVideoInitialConfig({
-          objectFit: data.counter_status_screen_video_object_fit ?? 1,
-          filename: data.counter_status_screen_video_url,
-        });
-      }
-    };
-
     fetchInitialConfig();
   }, []);
 
@@ -169,13 +169,19 @@ export default function CountersScreenAdvertisementManagementPage() {
       <div className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 pt-8 mx-4 mt-4 lg:min-w-[55rem]">
         <div className="relative z-10 mx-auto">
           {/* Uploads + Preview */}
-          {mode === 0 && <NoAdvertisementComponent onHandlesRef={handlesRef} />}
+          {mode === 0 && (
+            <NoAdvertisementComponent
+              onHandlesRef={handlesRef}
+              onSuccessSubmit={fetchInitialConfig}
+            />
+          )}
           {mode === 1 && (
             <ImagesAdvertisementComponent
               setLoading={setLoading}
               setUploadProgress={setUploadProgress}
               onHandlesRef={handlesRef}
               initialConfig={imageInitialConfig}
+              onSuccessSubmit={fetchInitialConfig}
             />
           )}
           {mode === 2 && (
@@ -184,6 +190,7 @@ export default function CountersScreenAdvertisementManagementPage() {
               setUploadProgress={setUploadProgress}
               onHandlesRef={handlesRef}
               initialConfig={videoInitialConfig}
+              onSuccessSubmit={fetchInitialConfig}
             />
           )}
 

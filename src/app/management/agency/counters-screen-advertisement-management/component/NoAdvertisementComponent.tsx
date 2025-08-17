@@ -8,8 +8,10 @@ import { useEffect } from "react";
 
 export default function NoAdvertisementComponent({
   onHandlesRef,
+  onSuccessSubmit,
 }: {
   onHandlesRef: any;
+  onSuccessSubmit?: () => void;
 }) {
   const router = useRouter();
   const { popupMessage } = usePopup();
@@ -22,6 +24,7 @@ export default function NoAdvertisementComponent({
     }
 
     if (res.status === 201) {
+      onSuccessSubmit?.();
       popupMessage({
         description: "Cập nhật thành công",
       });

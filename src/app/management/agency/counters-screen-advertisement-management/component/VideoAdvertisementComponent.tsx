@@ -9,6 +9,7 @@ export default function VideoAdvertisementComponent({
   setUploadProgress,
   onHandlesRef,
   initialConfig,
+  onSuccessSubmit,
 }: {
   setLoading: (val: boolean) => void;
   setUploadProgress: (val: number | null) => void;
@@ -17,18 +18,29 @@ export default function VideoAdvertisementComponent({
     objectFit: number;
     filename: string;
   } | null;
+  onSuccessSubmit?: () => void;
 }) {
   const router = useRouter();
   const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState("cover");
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
-  const videoInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadedVideoFileRef = useRef<HTMLInputElement | null>(null);
+  const [filename, setFilename] = useState<string | null>(null);
 
-  const handlePickVideoFile = () => videoInputRef.current?.click();
+  const handlePickVideoFile = () => uploadedVideoFileRef.current?.click();
 
   const onVideoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Giới hạn dung lượng 1GB
+    if (file.size > 1024 * 1024 * 1024) {
+      popupMessage({
+        description: "Dung lượng vượt quá 1GB",
+      });
+
+      return;
+    }
 
     const url = URL.createObjectURL(file);
     if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
@@ -41,25 +53,28 @@ export default function VideoAdvertisementComponent({
     setUploadedVideo(null);
   };
 
+  // Map object-fit -> class
   const objectFitClass =
-    {
-      contain: "object-contain",
-      cover: "object-cover",
-      fill: "object-fill",
-      none: "object-none",
-      "scale-down": "object-scale-down",
-    }[objectFit] || "object-cover";
+    (
+      {
+        "0": "object-contain",
+        "1": "object-cover",
+        "2": "object-fill",
+        "3": "object-none",
+        "4": "object-scale-down",
+      } as const
+    )[objectFit] || "object-cover";
 
   useEffect(() => {
     return () => {
       if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
     };
-  }, [uploadedVideo]);
+  }, []);
 
   return (
     <>
       <input
-        ref={videoInputRef}
+        ref={uploadedVideoFileRef}
         type="file"
         accept="video/*"
         onChange={onVideoSelected}
@@ -156,11 +171,11 @@ export default function VideoAdvertisementComponent({
               onChange={(e) => setObjectFit(e.target.value)}
               className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             >
-              <option value="contain">Contain - Hiện toàn bộ</option>
-              <option value="cover">Cover - Phủ đầy khung</option>
-              <option value="fill">Fill - Kéo giãn đầy khung</option>
-              <option value="none">None - Kích thước gốc</option>
-              <option value="scale-down">Scale Down - Tự động co lại</option>
+              <option value="0">Contain - Hiện toàn bộ</option>
+              <option value="1">Cover - Phủ đầy khung</option>
+              <option value="2">Fill - Kéo giãn đầy khung</option>
+              <option value="3">None - Kích thước gốc</option>
+              <option value="4">Scale Down - Tự động co lại</option>
             </select>
           </div>
         </div>

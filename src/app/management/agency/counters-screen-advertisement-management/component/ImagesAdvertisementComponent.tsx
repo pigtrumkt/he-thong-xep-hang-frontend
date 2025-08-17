@@ -11,6 +11,7 @@ export default function ImagesAdvertisementComponent({
   setUploadProgress,
   onHandlesRef,
   initialConfig,
+  onSuccessSubmit,
 }: {
   setLoading: (val: boolean) => void;
   setUploadProgress: (val: number | null) => void;
@@ -20,6 +21,7 @@ export default function ImagesAdvertisementComponent({
     objectFit: number;
     filenames: string[];
   } | null;
+  onSuccessSubmit?: () => void;
 }) {
   const router = useRouter();
   const { popupMessage } = usePopup();
@@ -229,6 +231,7 @@ export default function ImagesAdvertisementComponent({
       }
 
       if (res.status === 201) {
+        onSuccessSubmit?.();
         popupMessage({ description: "Cập nhật thành công" });
       } else {
         popupMessage({ description: "Cập nhật thất bại" });
@@ -263,6 +266,12 @@ export default function ImagesAdvertisementComponent({
       if (onHandlesRef) onHandlesRef.current = null;
     };
   }, [handleSubmit]);
+
+  useEffect(() => {
+    return () => {
+      imagesPreview.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, []);
 
   return (
     <>
