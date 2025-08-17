@@ -73,18 +73,29 @@ export default function ImagesAdvertisementComponent({
   };
 
   const removeUploadedImage = (idx: number) => {
+    const removedUrl = uploadedImages[idx];
+
+    if (removedUrl) {
+      // ✅ Revoke object URL
+      URL.revokeObjectURL(removedUrl);
+
+      // ✅ Xoá URL khỏi ref
+      createdUrlsRef.current = createdUrlsRef.current.filter(
+        (u) => u !== removedUrl
+      );
+
+      // ✅ Xoá đúng File tương ứng (theo vị trí ảnh hiện tại)
+      uploadedFilesRef.current.splice(idx, 1);
+    }
+
+    // ✅ Xoá ảnh khỏi danh sách
     setUploadedImages((prev) => {
-      const copy = [...prev];
-      const [removed] = copy.splice(idx, 1);
-      if (removed) {
-        URL.revokeObjectURL(removed);
-        createdUrlsRef.current = createdUrlsRef.current.filter(
-          (u) => u !== removed
-        );
-        uploadedFilesRef.current.splice(idx, 1);
-      }
-      return copy;
+      const next = [...prev];
+      next.splice(idx, 1);
+      return next;
     });
+
+    // ✅ Reset preview
     setCurrentIndex(0);
   };
 
