@@ -12,8 +12,6 @@ type Handles = {
 };
 
 export default function CountersScreenAdvertisementManagementPage() {
-  const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [mode, setMode] = useState<Mode>(0);
   const handlesRef = useRef<Handles>(null);
 
@@ -201,19 +199,6 @@ export default function CountersScreenAdvertisementManagementPage() {
           </div>
         </div>
       </div>
-      {/* loading */}
-      {uploadProgress !== null && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white bg-black/40 backdrop-blur-sm">
-          <p className="mb-2 text-xl font-semibold">Đang tải lên...</p>
-          <div className="w-2/3 h-4 overflow-hidden bg-white rounded-full">
-            <div
-              className="h-full transition-all duration-300 bg-blue-500"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </div>
-          <p className="mt-2 text-sm font-medium">{uploadProgress}%</p>
-        </div>
-      )}
     </>
   );
 }

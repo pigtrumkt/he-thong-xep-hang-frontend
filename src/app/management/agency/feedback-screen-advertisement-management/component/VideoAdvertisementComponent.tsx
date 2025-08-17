@@ -59,7 +59,7 @@ export default function VideoAdvertisementComponent({
 
       showLoading(0, "Đang tải lên...");
       const res = await apiUploadWithProgress(
-        "/advertising/counter-screen/video",
+        "/advertising/feedback-screen/video",
         formData,
         (percent) => setProgress(percent)
       );
