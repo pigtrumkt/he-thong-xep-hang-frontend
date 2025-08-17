@@ -10,7 +10,13 @@ import {
 import { useRouter } from "next/navigation";
 import { PopupProvider } from "./popup/PopupContext";
 import { getSocket, getSocketSound } from "@/lib/socket";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
+
+type LoadingState = {
+  visible: boolean;
+  progress: number | null;
+  message?: string;
+};
 
 const UserContext = createContext<any>(null);
 
@@ -39,6 +45,24 @@ export default function ClientWrapper({
   const [globalParams, setGlobalParams] = useState(value ?? null);
   const [socket, setSocket] = useState<Socket>();
   const [socketSound, setSocketSound] = useState<Socket>();
+
+  // ✅ Loading toàn cục
+  const [loading, setLoading] = useState<LoadingState>({
+    visible: false,
+    progress: null,
+    message: "",
+  });
+
+  const showLoading = (
+    progress: number | null = null,
+    message = "Đang xử lý..."
+  ) => setLoading({ visible: true, progress, message });
+
+  const hideLoading = () =>
+    setLoading({ visible: false, progress: null, message: "" });
+
+  const setProgress = (progress: number) =>
+    setLoading((prev) => ({ ...prev, progress }));
 
   const hasAccess = (config: AccessConfig): boolean => {
     if (!globalParams.user && !globalParams.user.id) {
@@ -116,7 +140,17 @@ export default function ClientWrapper({
 
   return (
     <UserContext.Provider
-      value={{ globalParams, setGlobalParams, hasAccess, socket, socketSound }}
+      value={{
+        globalParams,
+        setGlobalParams,
+        hasAccess,
+        socket,
+        socketSound,
+        loading,
+        showLoading,
+        hideLoading,
+        setProgress,
+      }}
     >
       <PopupProvider>{children}</PopupProvider>
     </UserContext.Provider>

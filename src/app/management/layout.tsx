@@ -95,7 +95,7 @@ export default function ManagementLayout({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { globalParams } = useGlobalParams();
+  const { globalParams, loading } = useGlobalParams();
   const [host, setHost] = useState("");
 
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -234,6 +234,16 @@ export default function ManagementLayout({
         </aside>
         <main className="w-full h-[calc(100vh-4rem)] overflow-y-auto transition-all bg-blue-100">
           {children}
+          {loading.visible && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center select-none bg-white/80 backdrop-blur-sm">
+              <div className="border-blue-500 rounded-full border-6 w-15 h-15 border-t-transparent animate-spin" />
+              <div className="mt-3 text-[1.2rem] font-medium text-blue-700">
+                {loading.progress !== null
+                  ? `${loading.message} ${Math.round(loading.progress)}%`
+                  : loading.message}
+              </div>
+            </div>
+          )}
         </main>
       </div>
 

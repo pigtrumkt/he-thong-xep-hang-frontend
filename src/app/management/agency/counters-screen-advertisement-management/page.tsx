@@ -177,8 +177,6 @@ export default function CountersScreenAdvertisementManagementPage() {
           )}
           {mode === 1 && (
             <ImagesAdvertisementComponent
-              setLoading={setLoading}
-              setUploadProgress={setUploadProgress}
               onHandlesRef={handlesRef}
               initialConfig={imageInitialConfig}
               onSuccessSubmit={fetchInitialConfig}
@@ -186,8 +184,6 @@ export default function CountersScreenAdvertisementManagementPage() {
           )}
           {mode === 2 && (
             <VideoAdvertisementComponent
-              setLoading={setLoading}
-              setUploadProgress={setUploadProgress}
               onHandlesRef={handlesRef}
               initialConfig={videoInitialConfig}
               onSuccessSubmit={fetchInitialConfig}
