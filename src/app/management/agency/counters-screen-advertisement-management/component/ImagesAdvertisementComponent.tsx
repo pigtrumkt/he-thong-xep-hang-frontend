@@ -2,6 +2,8 @@
 
 import { usePopup } from "@/components/popup/PopupContext";
 import { apiPost } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function ImagesAdvertisementComponent({
@@ -13,8 +15,9 @@ export default function ImagesAdvertisementComponent({
   setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
 }) {
+  const router = useRouter();
   const { popupMessage } = usePopup();
-  const [objectFit, setObjectFit] = useState<string>("cover");
+  const [objectFit, setObjectFit] = useState<string>("1");
   const [slideDuration, setSlideDuration] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
@@ -22,9 +25,11 @@ export default function ImagesAdvertisementComponent({
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const createdUrlsRef = useRef<string[]>([]);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const uploadedFilesRef = useRef<File[]>([]);
 
   const handlePickImageFiles = () => imageInputRef.current?.click();
 
+  let filenameIndex = useRef(0);
   const onImagesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -48,7 +53,15 @@ export default function ImagesAdvertisementComponent({
       }
     }
 
-    const urls = files.map((f) => URL.createObjectURL(f));
+    const renamedFiles = files.map((file) => {
+      const ext = file.name.substring(file.name.lastIndexOf("."));
+      const newName = `image-${filenameIndex.current++}${ext}`;
+      return new File([file], newName, { type: file.type });
+    });
+
+    uploadedFilesRef.current.push(...renamedFiles);
+
+    const urls = renamedFiles.map((f) => URL.createObjectURL(f));
     createdUrlsRef.current.push(...urls);
     setUploadedImages((prev) => {
       const next = [...prev, ...urls];
@@ -85,11 +98,11 @@ export default function ImagesAdvertisementComponent({
   const objectFitClass =
     (
       {
-        contain: "object-contain",
-        cover: "object-cover",
-        fill: "object-fill",
-        none: "object-none",
-        "scale-down": "object-scale-down",
+        "0": "object-contain",
+        "1": "object-cover",
+        "2": "object-fill",
+        "3": "object-none",
+        "4": "object-scale-down",
       } as const
     )[objectFit] || "object-cover";
 
@@ -138,23 +151,14 @@ export default function ImagesAdvertisementComponent({
   };
 
   const handleSubmit = async () => {
-    if (uploadedImages.length === 0) {
-      popupMessage({
-        title: "Chưa có ảnh",
-        description: "Vui lòng chọn ít nhất một ảnh để tải lên.",
-      });
-      return;
-    }
-
     try {
       setLoading(true);
 
-      const input = imageInputRef.current;
+      const files = uploadedFilesRef.current;
       const formData = new FormData();
 
-      // ✅ Lấy danh sách file từ input hiện tại (nếu còn)
-      if (input && input.files && input.files.length > 0) {
-        Array.from(input.files).forEach((file) => {
+      if (files && files.length > 0) {
+        Array.from(files).forEach((file) => {
           formData.append("files", file); // backend cần nhận dạng là mảng
         });
       } else {
@@ -166,17 +170,17 @@ export default function ImagesAdvertisementComponent({
         return;
       }
 
+      // Tên ảnh gốc (dùng để map lại trong NestJS service)
+      const filenames = Array.from(files).map((file) => file.name);
+      formData.append("filenames", JSON.stringify(filenames));
+
       formData.append("slideDuration", String(slideDuration));
       formData.append("objectFit", objectFit);
 
-      const filenames = uploadedImages.map((url) => {
-        const parts = url.split("/");
-        return parts[parts.length - 1]; // chỉ lấy tên file
-      });
-
-      // formData.append("filenames", json.parse);
-
       const res = await apiPost("/advertising/counter-screen/images", formData);
+      if (![201, 400].includes(res.status)) {
+        handleApiError(res, popupMessage, router);
+      }
 
       if (res.status === 201) {
         popupMessage({ description: "Cập nhật thành công" });
@@ -226,7 +230,7 @@ export default function ImagesAdvertisementComponent({
       <input
         ref={imageInputRef}
         type="file"
-        accept="image/*"
+        accept=".png,.jpg,.jpeg,.webp"
         multiple
         onChange={onImagesSelected}
         className="hidden"
@@ -310,11 +314,11 @@ export default function ImagesAdvertisementComponent({
                 onChange={(e) => setObjectFit(e.target.value)}
                 className="w-full px-4 py-3 font-medium text-gray-700 transition-all duration-200 bg-white border border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               >
-                <option value="contain">Contain - Hiện toàn bộ</option>
-                <option value="cover">Cover - Phủ đầy khung</option>
-                <option value="fill">Fill - Kéo giãn đầy khung</option>
-                <option value="none">None - Kích thước gốc</option>
-                <option value="scale-down">Scale Down - Tự động co lại</option>
+                <option value="0">Contain - Hiện toàn bộ</option>
+                <option value="1">Cover - Phủ đầy khung</option>
+                <option value="2">Fill - Kéo giãn đầy khung</option>
+                <option value="3">None - Kích thước gốc</option>
+                <option value="4">Scale Down - Tự động co lại</option>
               </select>
             </div>
             <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePopup } from "@/components/popup/PopupContext";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function VideoAdvertisementComponent({
@@ -12,6 +13,7 @@ export default function VideoAdvertisementComponent({
   setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
 }) {
+  const router = useRouter();
   const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState("cover");
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
