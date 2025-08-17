@@ -239,6 +239,8 @@ export default function RatingScreen() {
       setStaffPosition(null);
       setStaffAvatarUrl(null);
       setStatusTicket(null);
+      setSelectedStars(0);
+      setFeedback("");
       showAds();
     } else if (response.status === "update") {
       if (response.staffName !== undefined) {
@@ -258,6 +260,9 @@ export default function RatingScreen() {
       }
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
+        setSelectedStars(0);
+        setFeedback("");
+        setSubmitted(false);
         hideAds();
       }
       if (response.statusTicket !== undefined) {
@@ -265,6 +270,7 @@ export default function RatingScreen() {
         if (response.statusTicket === null) {
           showAds();
         }
+
         if ([3, 4].includes(response.statusTicket)) {
           showAds(30000);
         }
