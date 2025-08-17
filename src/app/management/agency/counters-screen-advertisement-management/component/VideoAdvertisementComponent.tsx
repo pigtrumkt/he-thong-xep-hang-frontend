@@ -1,6 +1,8 @@
 "use client";
 
 import { usePopup } from "@/components/popup/PopupContext";
+import { API_BASE, apiPost } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -23,11 +25,61 @@ export default function VideoAdvertisementComponent({
   const router = useRouter();
   const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState("cover");
-  const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [filename, setFilename] = useState<string>("");
+
   const uploadedVideoFileRef = useRef<HTMLInputElement | null>(null);
-  const [filename, setFilename] = useState<string | null>(null);
 
   const handlePickVideoFile = () => uploadedVideoFileRef.current?.click();
+
+  // init load
+  useEffect(() => {
+    if (initialConfig) {
+      setObjectFit(String(initialConfig.objectFit));
+
+      if (initialConfig.filename) {
+        // 👉 Tạo URL từ ảnh đã upload (không thêm vào uploadedFilesRef)
+        const baseUrl = `${API_BASE}/advertising/videos/`;
+        const urls = `${baseUrl}${initialConfig.filename}`;
+        setVideoPreview(urls);
+        setFilename(initialConfig.filename);
+      }
+    }
+  }, [initialConfig]);
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+
+      if (file) {
+        formData.append("file", file);
+      }
+
+      formData.append("filename", filename);
+      formData.append("objectFit", objectFit);
+
+      const res = await apiPost("/advertising/counter-screen/video", formData);
+      if (![201, 400].includes(res.status)) {
+        handleApiError(res, popupMessage, router);
+      }
+
+      if (res.status === 201) {
+        if (videoPreview) URL.revokeObjectURL(videoPreview);
+        setVideoPreview(null); // hoặc set lại với file mới nếu backend trả ra tên mới
+        setFile(null);
+        onSuccessSubmit?.();
+        popupMessage({ description: "Cập nhật thành công" });
+      } else {
+        popupMessage({ description: "Cập nhật thất bại" });
+      }
+    } catch (err) {
+      popupMessage({ description: "Lỗi mạng hoặc máy chủ không phản hồi." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onVideoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,15 +94,23 @@ export default function VideoAdvertisementComponent({
       return;
     }
 
+    setFile(file);
+    setFilename(file.name);
+
+    // dọn file tạm trước đó
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+
     const url = URL.createObjectURL(file);
-    if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
-    setUploadedVideo(url);
+    setVideoPreview(url);
+
     e.target.value = "";
   };
 
   const clearAll = () => {
-    if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
-    setUploadedVideo(null);
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+    setVideoPreview(null);
+    setFilename("");
+    setFile(null);
   };
 
   // Map object-fit -> class
@@ -66,8 +126,15 @@ export default function VideoAdvertisementComponent({
     )[objectFit] || "object-cover";
 
   useEffect(() => {
+    if (onHandlesRef) onHandlesRef.current = { handleSubmit };
     return () => {
-      if (uploadedVideo) URL.revokeObjectURL(uploadedVideo);
+      if (onHandlesRef) onHandlesRef.current = null;
+    };
+  }, [handleSubmit]);
+
+  useEffect(() => {
+    return () => {
+      if (videoPreview) URL.revokeObjectURL(videoPreview);
     };
   }, []);
 
@@ -99,9 +166,9 @@ export default function VideoAdvertisementComponent({
           </h3>
 
           <div className="relative w-full overflow-hidden border border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
-            {uploadedVideo ? (
+            {videoPreview ? (
               <video
-                src={uploadedVideo}
+                src={videoPreview}
                 className={`w-full h-full ${objectFitClass} bg-black`}
                 autoPlay
                 loop
@@ -134,7 +201,7 @@ export default function VideoAdvertisementComponent({
             >
               + Chọn video
             </button>
-            {uploadedVideo && (
+            {videoPreview && (
               <button
                 onClick={clearAll}
                 className="px-3 py-2 text-xs font-semibold border border-blue-400 rounded-lg hover:bg-slate-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300"
