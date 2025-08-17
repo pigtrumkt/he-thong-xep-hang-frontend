@@ -8,10 +8,15 @@ export default function VideoAdvertisementComponent({
   setLoading,
   setUploadProgress,
   onHandlesRef,
+  initialConfig,
 }: {
   setLoading: (val: boolean) => void;
   setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
+  initialConfig: {
+    objectFit: number;
+    filename: string;
+  } | null;
 }) {
   const router = useRouter();
   const { popupMessage } = usePopup();

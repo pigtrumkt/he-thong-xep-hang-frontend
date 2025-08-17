@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import NoAdvertisementComponent from "./component/NoAdvertisementComponent";
 import ImagesAdvertisementComponent from "./component/ImagesAdvertisementComponent";
 import VideoAdvertisementComponent from "./component/VideoAdvertisementComponent";
+import { apiGet } from "@/lib/api";
 type Mode = 0 | 1 | 2;
 
 type Handles = {
@@ -15,6 +16,45 @@ export default function CountersScreenAdvertisementManagementPage() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [mode, setMode] = useState<Mode>(0);
   const handlesRef = useRef<Handles>(null);
+
+  const [imageInitialConfig, setImageInitialConfig] = useState<{
+    slideDuration: number;
+    objectFit: number;
+    filenames: string[];
+  } | null>(null);
+
+  const [videoInitialConfig, setVideoInitialConfig] = useState<{
+    objectFit: number;
+    filename: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchInitialConfig = async () => {
+      const res = await apiGet("/advertising/getCounterScreenAdvertising");
+      if (res.status === 200) {
+        const data = res.data;
+        setMode(data.counter_status_screen_type);
+
+        // Hình ảnh
+        setImageInitialConfig({
+          slideDuration: data.counter_status_screen_images_duration ?? 5,
+          objectFit: data.counter_status_screen_images_object_fit ?? 1,
+          filenames: (data.counter_status_screen_images_url || "")
+            .split(",")
+            .map((s: string) => s.trim())
+            .filter(Boolean),
+        });
+
+        // Video
+        setVideoInitialConfig({
+          objectFit: data.counter_status_screen_video_object_fit ?? 1,
+          filename: data.counter_status_screen_video_url,
+        });
+      }
+    };
+
+    fetchInitialConfig();
+  }, []);
 
   // Handlers
   const handleChangeMode = (newMode: Mode) => {
@@ -135,6 +175,7 @@ export default function CountersScreenAdvertisementManagementPage() {
               setLoading={setLoading}
               setUploadProgress={setUploadProgress}
               onHandlesRef={handlesRef}
+              initialConfig={imageInitialConfig}
             />
           )}
           {mode === 2 && (
@@ -142,6 +183,7 @@ export default function CountersScreenAdvertisementManagementPage() {
               setLoading={setLoading}
               setUploadProgress={setUploadProgress}
               onHandlesRef={handlesRef}
+              initialConfig={videoInitialConfig}
             />
           )}
 

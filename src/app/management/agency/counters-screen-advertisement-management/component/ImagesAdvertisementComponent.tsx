@@ -1,7 +1,7 @@
 "use client";
 
 import { usePopup } from "@/components/popup/PopupContext";
-import { apiPost } from "@/lib/api";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -10,26 +10,51 @@ export default function ImagesAdvertisementComponent({
   setLoading,
   setUploadProgress,
   onHandlesRef,
+  initialConfig,
 }: {
   setLoading: (val: boolean) => void;
   setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
+  initialConfig: {
+    slideDuration: number;
+    objectFit: number;
+    filenames: string[];
+  } | null;
 }) {
   const router = useRouter();
   const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState<string>("1");
   const [slideDuration, setSlideDuration] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const createdUrlsRef = useRef<string[]>([]);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const uploadedFilesRef = useRef<File[]>([]);
-
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const handlePickImageFiles = () => imageInputRef.current?.click();
 
+  const uploadedNewFilesRef = useRef<File[]>([]); // những file mới upload
+  const [imagesPreview, setImagesPreview] = useState<string[]>([]); // link hiển thị cho thẻ img
+  const [imagesFilename, setImagesFilename] = useState<string[]>([]); // lưu tên file để đưa lên server
+
   let filenameIndex = useRef(0);
+
+  // init load
+  useEffect(() => {
+    if (initialConfig) {
+      // 👉 set lại slideDuration và objectFit
+      setSlideDuration(initialConfig.slideDuration);
+      setObjectFit(String(initialConfig.objectFit));
+
+      // 👉 Tạo URL từ ảnh đã upload (không thêm vào uploadedFilesRef)
+      const baseUrl = `${API_BASE}/advertising/images/`;
+      const urls = initialConfig.filenames.map((name) => `${baseUrl}${name}`);
+      setImagesPreview(urls);
+      setImagesFilename(initialConfig.filenames);
+
+      // 👉 Reset current index
+      setCurrentIndex(0);
+    }
+  }, [initialConfig]);
+
   const onImagesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -59,11 +84,13 @@ export default function ImagesAdvertisementComponent({
       return new File([file], newName, { type: file.type });
     });
 
-    uploadedFilesRef.current.push(...renamedFiles);
+    uploadedNewFilesRef.current.push(...renamedFiles);
+
+    const newFilenames = renamedFiles.map((file) => file.name);
+    setImagesFilename((prev) => [...prev, ...newFilenames]);
 
     const urls = renamedFiles.map((f) => URL.createObjectURL(f));
-    createdUrlsRef.current.push(...urls);
-    setUploadedImages((prev) => {
+    setImagesPreview((prev) => {
       const next = [...prev, ...urls];
       setCurrentIndex(next.length - 1); // chuyển preview tới ảnh cuối
       return next;
@@ -73,23 +100,25 @@ export default function ImagesAdvertisementComponent({
   };
 
   const removeUploadedImage = (idx: number) => {
-    const removedUrl = uploadedImages[idx];
+    const removedUrl = imagesPreview[idx];
 
     if (removedUrl) {
       // ✅ Revoke object URL
       URL.revokeObjectURL(removedUrl);
 
-      // ✅ Xoá URL khỏi ref
-      createdUrlsRef.current = createdUrlsRef.current.filter(
-        (u) => u !== removedUrl
-      );
-
       // ✅ Xoá đúng File tương ứng (theo vị trí ảnh hiện tại)
-      uploadedFilesRef.current.splice(idx, 1);
+      uploadedNewFilesRef.current.splice(idx, 1);
     }
 
+    // ✅ Xoá filename khỏi danh sách
+    setImagesFilename((prev) => {
+      const next = [...prev];
+      next.splice(idx, 1);
+      return next;
+    });
+
     // ✅ Xoá ảnh khỏi danh sách
-    setUploadedImages((prev) => {
+    setImagesPreview((prev) => {
       const next = [...prev];
       next.splice(idx, 1);
       return next;
@@ -100,11 +129,11 @@ export default function ImagesAdvertisementComponent({
   };
 
   const clearAll = () => {
-    uploadedImages.forEach((u) => URL.revokeObjectURL(u));
-    setUploadedImages([]);
+    imagesPreview.forEach((u) => URL.revokeObjectURL(u));
+    setImagesPreview([]);
+    uploadedNewFilesRef.current = [];
+    setImagesFilename([]);
     setCurrentIndex(0);
-    createdUrlsRef.current = [];
-    uploadedFilesRef.current = [];
   };
 
   // Map object-fit -> class
@@ -145,12 +174,14 @@ export default function ImagesAdvertisementComponent({
       dragOverIndex !== null &&
       dragIndex !== dragOverIndex
     ) {
-      setUploadedImages((prev) => reorder(prev, dragIndex, dragOverIndex));
-      uploadedFilesRef.current = reorder(
-        uploadedFilesRef.current,
+      setImagesPreview((prev) => reorder(prev, dragIndex, dragOverIndex));
+      uploadedNewFilesRef.current = reorder(
+        uploadedNewFilesRef.current,
         dragIndex,
         dragOverIndex
-      ); // ✅ reorder files
+      );
+
+      setImagesFilename((prev) => reorder(prev, dragIndex, dragOverIndex));
       setCurrentIndex(dragOverIndex);
     }
 
@@ -169,25 +200,18 @@ export default function ImagesAdvertisementComponent({
     try {
       setLoading(true);
 
-      const files = uploadedFilesRef.current;
       const formData = new FormData();
 
+      // gửi file mới up
+      const files = uploadedNewFilesRef.current;
       if (files && files.length > 0) {
         Array.from(files).forEach((file) => {
-          formData.append("files", file); // backend cần nhận dạng là mảng
+          formData.append("files", file);
         });
-      } else {
-        popupMessage({
-          title: "Không tìm thấy ảnh gốc",
-          description: "Bạn cần chọn lại ảnh trước khi gửi.",
-        });
-        setLoading(false);
-        return;
       }
 
       // Tên ảnh gốc (dùng để map lại trong NestJS service)
-      const filenames = Array.from(files).map((file) => file.name);
-      formData.append("filenames", JSON.stringify(filenames));
+      formData.append("filenames", JSON.stringify(imagesFilename));
 
       formData.append("slideDuration", String(slideDuration));
       formData.append("objectFit", objectFit);
@@ -211,26 +235,20 @@ export default function ImagesAdvertisementComponent({
 
   // Auto slideshow
   useEffect(() => {
-    const total = uploadedImages.length;
+    const total = imagesPreview.length;
     if (total > 1) {
       const timer = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % total);
       }, slideDuration * 1000);
       return () => clearInterval(timer);
     }
-  }, [slideDuration, uploadedImages.length]);
+  }, [slideDuration, imagesPreview.length]);
 
   useEffect(() => {
-    return () => {
-      createdUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-    };
-  }, []);
-
-  useEffect(() => {
-    if (uploadedImages.length && currentIndex >= uploadedImages.length) {
-      setCurrentIndex(uploadedImages.length - 1);
+    if (imagesPreview.length && currentIndex >= imagesPreview.length) {
+      setCurrentIndex(imagesPreview.length - 1);
     }
-  }, [uploadedImages]);
+  }, [imagesPreview]);
 
   useEffect(() => {
     if (onHandlesRef) onHandlesRef.current = { handleSubmit };
@@ -269,17 +287,17 @@ export default function ImagesAdvertisementComponent({
           </h3>
 
           <div className="relative w-full overflow-hidden border border-blue-200 shadow-inner aspect-video rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
-            {uploadedImages.length > 0 ? (
+            {imagesPreview.length > 0 ? (
               <>
                 <img
-                  src={uploadedImages[currentIndex]}
+                  src={imagesPreview[currentIndex]}
                   alt="Preview"
                   className={`w-full h-full transition-all duration-500 ${objectFitClass}`}
                 />
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="p-2 rounded-full bg-black/30 backdrop-blur-sm">
                     <div className="flex gap-1">
-                      {uploadedImages.map((_, idx) => (
+                      {imagesPreview.map((_, idx) => (
                         <div
                           key={idx}
                           className={`h-1 rounded-full transition-all duration-300 ${
@@ -389,7 +407,7 @@ export default function ImagesAdvertisementComponent({
             </div>
 
             <div className="flex flex-wrap gap-4">
-              {uploadedImages.map((url, idx) => {
+              {imagesPreview.map((url, idx) => {
                 const globalIndex = idx; // uploaded trước
                 return (
                   <div
@@ -440,26 +458,28 @@ export default function ImagesAdvertisementComponent({
               })}
 
               {/* Ô cuối cùng: nút tải lên */}
-              <button
-                type="button"
-                onClick={handlePickImageFiles}
-                className="flex items-center justify-center transition-all duration-200 border-2 border-blue-300 border-dashed select-none rounded-xl hover:border-blue-500 hover:bg-blue-50"
-                style={{ width: 96, height: 96 }}
-                title="Tải lên ảnh"
-              >
-                <div className="flex flex-col items-center justify-center gap-1 text-blue-600">
-                  <svg
-                    className="w-6 h-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  <span className="text-xs font-semibold">Tải lên</span>
-                </div>
-              </button>
+              {imagesPreview.length < 30 && (
+                <button
+                  type="button"
+                  onClick={handlePickImageFiles}
+                  className="flex items-center justify-center transition-all duration-200 border-2 border-blue-300 border-dashed select-none rounded-xl hover:border-blue-500 hover:bg-blue-50"
+                  style={{ width: 96, height: 96 }}
+                  title="Tải lên ảnh"
+                >
+                  <div className="flex flex-col items-center justify-center gap-1 text-blue-600">
+                    <svg
+                      className="w-6 h-6"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    <span className="text-xs font-semibold">Tải lên</span>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
         </div>
