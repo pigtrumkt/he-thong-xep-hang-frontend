@@ -60,7 +60,11 @@ export default function VideoAdvertisementComponent({
       formData.append("filename", filename);
       formData.append("objectFit", objectFit);
 
-      const res = await apiPost("/advertising/counter-screen/video", formData);
+      const res = await apiPost(
+        "/advertising/counter-screen/video",
+        formData,
+        true
+      );
       if (![201, 400].includes(res.status)) {
         handleApiError(res, popupMessage, router);
       }

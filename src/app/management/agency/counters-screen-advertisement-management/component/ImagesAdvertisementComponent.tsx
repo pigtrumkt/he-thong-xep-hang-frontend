@@ -225,7 +225,11 @@ export default function ImagesAdvertisementComponent({
       formData.append("slideDuration", String(slideDuration));
       formData.append("objectFit", objectFit);
 
-      const res = await apiPost("/advertising/counter-screen/images", formData);
+      const res = await apiPost(
+        "/advertising/counter-screen/images",
+        formData,
+        true
+      );
       if (![201, 400].includes(res.status)) {
         handleApiError(res, popupMessage, router);
       }

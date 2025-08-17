@@ -11,13 +11,20 @@ export function apiGet(path: string) {
   return apiRequest("GET", path);
 }
 
-export function apiPost(path: string, body: any) {
-  return apiRequest("POST", path, body);
+export function apiPost(path: string, body: any, noTimeout = false) {
+  return apiRequest("POST", path, body, noTimeout);
 }
 
-async function apiRequest(method: "GET" | "POST", path: string, body?: any) {
+async function apiRequest(
+  method: "GET" | "POST",
+  path: string,
+  body?: any,
+  noTimeout = false
+) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000); // 10 giây
+  const timeout = !noTimeout
+    ? setTimeout(() => controller.abort(), 10000) // chỉ timeout nếu không bỏ qua
+    : null;
 
   try {
     const isFormData =
@@ -29,16 +36,12 @@ async function apiRequest(method: "GET" | "POST", path: string, body?: any) {
         !isFormData && body
           ? { "Content-Type": "application/json" }
           : undefined,
-      body: body
-        ? isFormData
-          ? body // ✅ Gửi FormData thẳng, không stringify
-          : JSON.stringify(body)
-        : undefined,
+      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
       credentials: "include",
       signal: controller.signal,
     });
 
-    clearTimeout(timeout);
+    if (timeout) clearTimeout(timeout);
 
     const contentType = res.headers.get("content-type");
     const json = contentType?.includes("application/json")
@@ -50,7 +53,7 @@ async function apiRequest(method: "GET" | "POST", path: string, body?: any) {
       data: json || null,
     };
   } catch (error) {
-    clearTimeout(timeout);
+    if (timeout) clearTimeout(timeout);
     return { status: 0, data: null };
   }
 }
