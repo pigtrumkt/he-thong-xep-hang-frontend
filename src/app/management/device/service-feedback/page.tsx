@@ -9,6 +9,80 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
+type AdsData = {
+  type?: number; // 0:none, 1:images, 2:video
+  videoUrl?: string; // link 1 video
+  videoObjectFit?: number; // 0: object-contain, 1: object-cover, 2: object-fill, 3: object-none, 4: object-scale-down
+  imagesUrl?: string[]; // link nhiều img
+  imagesDuration?: number; // thời gian chuyển ảnh
+  imagesObjectFit?: number; // 0: object-contain, 1: object-cover, 2: object-fill, 3: object-none, 4: object-scale-down
+};
+
+const objectFitClassFromNumber = (n?: number) => {
+  const map: Record<number, string> = {
+    0: "object-contain",
+    1: "object-cover",
+    2: "object-fill",
+    3: "object-none",
+    4: "object-scale-down",
+  };
+  return map[n ?? 1] || "object-cover";
+};
+
+function AdsDisplay({ ads }: { ads?: AdsData }) {
+  const [idx, setIdx] = useState(0);
+
+  // Slideshow cho images
+  useEffect(() => {
+    if (!ads || ads.type !== 1 || !ads.imagesUrl || ads.imagesUrl.length === 0)
+      return;
+    const durMs = Math.max(1000, (ads.imagesDuration ?? 5) * 1000);
+    const t = setTimeout(
+      () => setIdx((i) => (i + 1) % ads.imagesUrl!.length),
+      durMs
+    );
+    return () => clearTimeout(t);
+  }, [ads, idx]);
+
+  if (!ads || ads.type === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-full text-blue-500">
+        Chưa có nội dung quảng cáo
+      </div>
+    );
+  }
+
+  // VIDEO
+  if (ads.type === 2 && ads.videoUrl) {
+    const fit = objectFitClassFromNumber(ads.videoObjectFit);
+    return (
+      <video
+        src={ads.videoUrl}
+        className={`w-full h-full ${fit} bg-black`}
+        autoPlay
+        loop
+        muted
+        controls={false}
+      />
+    );
+  }
+
+  // IMAGES
+  if (ads.type === 1 && ads.imagesUrl && ads.imagesUrl.length) {
+    const cur = ads.imagesUrl[idx] || ads.imagesUrl[0];
+    const fit = objectFitClassFromNumber(ads.imagesObjectFit);
+    return (
+      <img
+        src={cur}
+        className={`w-full h-full ${fit} bg-black`}
+        alt="Quảng cáo"
+      />
+    );
+  }
+
+  return null;
+}
+
 export default function RatingScreen() {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
@@ -42,8 +116,61 @@ export default function RatingScreen() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const popupRef = useRef<PopupManagerRef>(null);
 
+  const [adsData, setAdsData] = useState<AdsData>();
+  const [isShowAds, setShowAds] = useState<boolean>(false);
+  const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showAds = (delay = 0) => {
+    if (!adsData || adsData.type === 0) {
+      return;
+    }
+
+    if (delay === 0) {
+      setShowAds(true);
+    } else {
+      if (delayAdsRef.current) clearTimeout(delayAdsRef.current);
+      delayAdsRef.current = setTimeout(() => {
+        setShowAds(true);
+      }, delay);
+    }
+  };
+
+  const hideAds = (delay = 0) => {
+    if (delayAdsRef.current) clearTimeout(delayAdsRef.current);
+    setShowAds(false);
+  };
+
+  const fetchAds = async () => {
+    const res = await apiGet("/advertising/getFeedbackScreenAdvertising");
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 200) {
+      const baseImageUrl = `${API_BASE}/advertising/images/`;
+      const baseVideoUrl = `${API_BASE}/advertising/videos/`;
+
+      setAdsData({
+        type: res.data.feedback_screen_type,
+        videoUrl: res.data.feedback_screen_video_url
+          ? `${baseVideoUrl}${res.data.feedback_screen_video_url}`
+          : undefined,
+        videoObjectFit: res.data.feedback_screen_video_object_fit,
+        imagesUrl: res.data.feedback_screen_images_url
+          ? res.data.feedback_screen_images_url
+              .split(",")
+              .map((img: string) => `${baseImageUrl}${img.trim()}`)
+          : [],
+        imagesDuration: res.data.feedback_screen_images_duration,
+        imagesObjectFit: res.data.feedback_screen_images_object_fit,
+      });
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchAds();
 
     return () => {
       if (socket) {
@@ -112,6 +239,7 @@ export default function RatingScreen() {
       setStaffPosition(null);
       setStaffAvatarUrl(null);
       setStatusTicket(null);
+      showAds();
     } else if (response.status === "update") {
       if (response.staffName !== undefined) {
         setStaffName(response.staffName);
@@ -130,9 +258,16 @@ export default function RatingScreen() {
       }
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
+        hideAds();
       }
       if (response.statusTicket !== undefined) {
         setStatusTicket(response.statusTicket);
+        if (response.statusTicket === null) {
+          showAds();
+        }
+        if ([3, 4].includes(response.statusTicket)) {
+          showAds(30000);
+        }
       }
       if (response.ticketId !== undefined) {
         setTicketId(response.ticketId);
@@ -301,145 +436,154 @@ export default function RatingScreen() {
           </svg>
         </button>
       )}
-
-      {/* Header */}
-      <header className="px-8 py-10 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
-        <div className="flex items-center justify-between ">
-          <div>
-            <h1 className="text-6xl font-bold uppercase ">
-              {counterNameSelected}
-            </h1>
-            <p className="mt-1 text-3xl uppercase leading-12 opacity-90 ">
-              {serviceName}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="flex items-center">
-              <div className="mr-4">
-                <h3 className="text-4xl">{staffName}</h3>
-                <p className="text-2xl">{StaffPosition}</p>
-              </div>
+      {!isShowAds ? (
+        <>
+          {/* Header */}
+          <header className="px-8 py-10 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
+            <div className="flex items-center justify-between ">
               <div>
-                <img
-                  src={`${API_BASE}/accounts/avatar/${
-                    staffAvatarUrl
-                      ? `${staffAvatarUrl}`
-                      : staffGender === 0
-                      ? "avatar_default_female.png"
-                      : "avatar_default_male.png"
-                  }`}
-                  alt="Avatar"
-                  className="object-cover w-24 h-24 bg-white cursor-pointer"
-                  onClick={() => setShowAvatarPreview(true)}
+                <h1 className="text-6xl font-bold uppercase ">
+                  {counterNameSelected}
+                </h1>
+                <p className="mt-1 text-3xl uppercase leading-12 opacity-90 ">
+                  {serviceName}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center">
+                  <div className="mr-4">
+                    <h3 className="text-4xl">{staffName}</h3>
+                    <p className="text-2xl">{StaffPosition}</p>
+                  </div>
+                  <div>
+                    <img
+                      src={`${API_BASE}/accounts/avatar/${
+                        staffAvatarUrl
+                          ? `${staffAvatarUrl}`
+                          : staffGender === 0
+                          ? "avatar_default_female.png"
+                          : "avatar_default_male.png"
+                      }`}
+                      alt="Avatar"
+                      className="object-cover w-24 h-24 bg-white cursor-pointer"
+                      onClick={() => setShowAvatarPreview(true)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <div className="flex w-full h-full">
+            {/* Left Panel - Staff Info */}
+            <div className="flex flex-col justify-center border-r-4 border-blue-200 w-4/10 bg-blue-50">
+              <div className="-mt-32 text-center">
+                <p className="text-[3rem] font-semibold text-blue-700 ">
+                  {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
+                </p>
+                <div className="text-[12rem] text-blue-800 font-extrabold tracking-widest zoom-loop leading-50">
+                  {currentNumber}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Panel - Rating */}
+            <div className="relative flex-1 bg-white">
+              <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto -mt-16">
+                <div className="mb-8 text-center">
+                  <h2 className="mb-4 text-5xl font-bold text-blue-800">
+                    ĐÁNH GIÁ DỊCH VỤ
+                  </h2>
+                  <div className="w-32 h-1 mx-auto bg-blue-500 rounded-full"></div>
+                  <p className="mt-6 text-2xl text-blue-600">
+                    Bạn có hài lòng với chất lượng dịch vụ?
+                  </p>
+                </div>
+
+                {/* Stars */}
+                <div className="flex gap-4 mb-8">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      className={`text-8xl transition-all transform hover:scale-110 ${
+                        selectedStars >= star
+                          ? "text-yellow-400 drop-shadow-lg"
+                          : "text-gray-300 hover:text-yellow-200"
+                      }`}
+                      onClick={() => setSelectedStars(star)}
+                      disabled={submitted}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+
+                {/* Feedback */}
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
+                  className="w-full h-32 max-w-2xl p-4 text-lg text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  disabled={submitted}
                 />
+
+                {/* Submit Button */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitted || selectedStars === 0}
+                  className={`mt-8 px-12 py-4 text-xl font-bold rounded-2xl transition-all transform ${
+                    selectedStars > 0 && !submitted
+                      ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  Gửi đánh giá
+                </button>
+                <p
+                  className={`text-blue-700 text-xl font-semibold text-center text-[2rem] mt-10 ${
+                    submitted ? "" : "invisible"
+                  }`}
+                >
+                  🎉 Cảm ơn bạn đã phản hồi!
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="flex w-full h-full">
-        {/* Left Panel - Staff Info */}
-        <div className="flex flex-col justify-center border-r-4 border-blue-200 w-4/10 bg-blue-50">
-          <div className="-mt-32 text-center">
-            <p className="text-[3rem] font-semibold text-blue-700 ">
-              {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
-            </p>
-            <div className="text-[12rem] text-blue-800 font-extrabold tracking-widest zoom-loop leading-50">
-              {currentNumber}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Panel - Rating */}
-        <div className="relative flex-1 bg-white">
-          <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto -mt-16">
-            <div className="mb-8 text-center">
-              <h2 className="mb-4 text-5xl font-bold text-blue-800">
-                ĐÁNH GIÁ DỊCH VỤ
-              </h2>
-              <div className="w-32 h-1 mx-auto bg-blue-500 rounded-full"></div>
-              <p className="mt-6 text-2xl text-blue-600">
-                Bạn có hài lòng với chất lượng dịch vụ?
-              </p>
-            </div>
-
-            {/* Stars */}
-            <div className="flex gap-4 mb-8">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  className={`text-8xl transition-all transform hover:scale-110 ${
-                    selectedStars >= star
-                      ? "text-yellow-400 drop-shadow-lg"
-                      : "text-gray-300 hover:text-yellow-200"
-                  }`}
-                  onClick={() => setSelectedStars(star)}
-                  disabled={submitted}
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-
-            {/* Feedback */}
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
-              className="w-full h-32 max-w-2xl p-4 text-lg text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              disabled={submitted}
-            />
-
-            {/* Submit Button */}
-            <button
-              onClick={handleSubmit}
-              disabled={submitted || selectedStars === 0}
-              className={`mt-8 px-12 py-4 text-xl font-bold rounded-2xl transition-all transform ${
-                selectedStars > 0 && !submitted
-                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+          {showAvatarPreview && (
+            <div
+              onClick={() => setShowAvatarPreview(false)}
+              className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
             >
-              Gửi đánh giá
-            </button>
-            <p
-              className={`text-blue-700 text-xl font-semibold text-center text-[2rem] mt-10 ${
-                submitted ? "" : "invisible"
-              }`}
-            >
-              🎉 Cảm ơn bạn đã phản hồi!
-            </p>
-          </div>
-        </div>
-      </div>
-      {showAvatarPreview && (
-        <div
-          onClick={() => setShowAvatarPreview(false)}
-          className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
-        >
-          <img
-            src={`${API_BASE}/accounts/avatar/${
-              staffAvatarUrl
-                ? `${staffAvatarUrl}`
-                : staffGender === 0
-                ? "avatar_default_female.png"
-                : "avatar_default_male.png"
-            }`}
-            alt="Avatar full"
-            className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
-          />
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowAvatarPreview(false);
-            }}
-            className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
-          >
-            ×
-          </button>
-        </div>
+              <img
+                src={`${API_BASE}/accounts/avatar/${
+                  staffAvatarUrl
+                    ? `${staffAvatarUrl}`
+                    : staffGender === 0
+                    ? "avatar_default_female.png"
+                    : "avatar_default_male.png"
+                }`}
+                alt="Avatar full"
+                className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAvatarPreview(false);
+                }}
+                className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
+              >
+                ×
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <section className="w-full h-full bg-black">
+            <AdsDisplay ads={adsData} />
+          </section>
+        </>
       )}
       <PopupManager ref={popupRef} />
       {showPasswordModal && (
