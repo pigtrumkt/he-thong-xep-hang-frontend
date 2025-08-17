@@ -81,6 +81,7 @@ export default function ImagesAdvertisementComponent({
         createdUrlsRef.current = createdUrlsRef.current.filter(
           (u) => u !== removed
         );
+        uploadedFilesRef.current.splice(idx, 1);
       }
       return copy;
     });
@@ -92,6 +93,7 @@ export default function ImagesAdvertisementComponent({
     setUploadedImages([]);
     setCurrentIndex(0);
     createdUrlsRef.current = [];
+    uploadedFilesRef.current = [];
   };
 
   // Map object-fit -> class
@@ -106,13 +108,6 @@ export default function ImagesAdvertisementComponent({
       } as const
     )[objectFit] || "object-cover";
 
-  const reorder = (arr: string[], from: number, to: number) => {
-    const copy = [...arr];
-    const [item] = copy.splice(from, 1);
-    copy.splice(to, 0, item);
-    return copy;
-  };
-
   const handleDragStart = (index: number) => {
     setDragIndex(index);
     document.body.style.cursor = "grabbing";
@@ -126,22 +121,31 @@ export default function ImagesAdvertisementComponent({
     e.preventDefault(); // cho phép drop
   };
 
-  const handleDrop = () => {
-    const targetIndex = dragOverIndex;
-    setDragIndex(null);
-    setDragOverIndex(null);
+  const reorder = <T,>(arr: T[], from: number, to: number): T[] => {
+    const copy = [...arr];
+    const [item] = copy.splice(from, 1);
+    copy.splice(to, 0, item);
+    return copy;
+  };
 
+  const handleDrop = () => {
     if (
       dragIndex !== null &&
-      targetIndex !== null &&
-      dragIndex !== targetIndex
+      dragOverIndex !== null &&
+      dragIndex !== dragOverIndex
     ) {
-      setUploadedImages((prev) => {
-        const next = reorder(prev, dragIndex, targetIndex);
-        return next;
-      });
-      setCurrentIndex(targetIndex);
+      setUploadedImages((prev) => reorder(prev, dragIndex, dragOverIndex));
+      uploadedFilesRef.current = reorder(
+        uploadedFilesRef.current,
+        dragIndex,
+        dragOverIndex
+      ); // ✅ reorder files
+      setCurrentIndex(dragOverIndex);
     }
+
+    setDragIndex(null);
+    setDragOverIndex(null);
+    document.body.style.cursor = "default";
   };
 
   const handleDragEnd = () => {
