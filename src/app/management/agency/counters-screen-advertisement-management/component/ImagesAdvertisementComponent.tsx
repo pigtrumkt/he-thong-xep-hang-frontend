@@ -1,20 +1,17 @@
 "use client";
 
+import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiPost } from "@/lib/api";
+import { API_BASE, apiUploadWithProgress } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function ImagesAdvertisementComponent({
-  setLoading,
-  setUploadProgress,
   onHandlesRef,
   initialConfig,
   onSuccessSubmit,
 }: {
-  setLoading: (val: boolean) => void;
-  setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
   initialConfig: {
     slideDuration: number;
@@ -23,6 +20,7 @@ export default function ImagesAdvertisementComponent({
   } | null;
   onSuccessSubmit?: () => void;
 }) {
+  const { showLoading, hideLoading, setProgress } = useGlobalParams();
   const router = useRouter();
   const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState<string>("1");
@@ -207,8 +205,6 @@ export default function ImagesAdvertisementComponent({
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
-
       const formData = new FormData();
 
       // gửi file mới up
@@ -225,10 +221,11 @@ export default function ImagesAdvertisementComponent({
       formData.append("slideDuration", String(slideDuration));
       formData.append("objectFit", objectFit);
 
-      const res = await apiPost(
+      showLoading(0, "Đang tải lên...");
+      const res = await apiUploadWithProgress(
         "/advertising/counter-screen/images",
         formData,
-        true
+        (percent) => setProgress(percent)
       );
       if (![201, 400].includes(res.status)) {
         handleApiError(res, popupMessage, router);
@@ -243,7 +240,7 @@ export default function ImagesAdvertisementComponent({
     } catch (err) {
       popupMessage({ description: "Lỗi mạng hoặc máy chủ không phản hồi." });
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 

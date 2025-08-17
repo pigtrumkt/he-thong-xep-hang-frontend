@@ -57,3 +57,40 @@ async function apiRequest(
     return { status: 0, data: null };
   }
 }
+
+export function apiUploadWithProgress(
+  path: string,
+  formData: FormData,
+  onProgress?: (percent: number) => void
+): Promise<{ status: number; data: any }> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE}${path}`, true);
+    xhr.withCredentials = true;
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        const percent = (event.loaded / event.total) * 100;
+        onProgress(percent);
+      }
+    };
+
+    xhr.onload = () => {
+      let json = {};
+      try {
+        json = JSON.parse(xhr.responseText);
+      } catch (err) {}
+
+      resolve({
+        status: xhr.status,
+        data: json,
+      });
+    };
+
+    xhr.onerror = () => {
+      resolve({ status: 0, data: null });
+    };
+
+    xhr.send(formData);
+  });
+}

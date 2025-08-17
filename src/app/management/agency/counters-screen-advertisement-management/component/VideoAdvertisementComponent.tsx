@@ -1,20 +1,17 @@
 "use client";
 
+import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiPost } from "@/lib/api";
+import { API_BASE, apiPost, apiUploadWithProgress } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function VideoAdvertisementComponent({
-  setLoading,
-  setUploadProgress,
   onHandlesRef,
   initialConfig,
   onSuccessSubmit,
 }: {
-  setLoading: (val: boolean) => void;
-  setUploadProgress: (val: number | null) => void;
   onHandlesRef: any;
   initialConfig: {
     objectFit: number;
@@ -22,6 +19,7 @@ export default function VideoAdvertisementComponent({
   } | null;
   onSuccessSubmit?: () => void;
 }) {
+  const { showLoading, hideLoading, setProgress } = useGlobalParams();
   const router = useRouter();
   const { popupMessage } = usePopup();
   const [objectFit, setObjectFit] = useState("cover");
@@ -50,7 +48,6 @@ export default function VideoAdvertisementComponent({
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
       const formData = new FormData();
 
       if (file) {
@@ -60,11 +57,13 @@ export default function VideoAdvertisementComponent({
       formData.append("filename", filename);
       formData.append("objectFit", objectFit);
 
-      const res = await apiPost(
+      showLoading(0, "Đang tải lên...");
+      const res = await apiUploadWithProgress(
         "/advertising/counter-screen/video",
         formData,
-        true
+        (percent) => setProgress(percent) // hoặc showLoading(percent)
       );
+
       if (![201, 400].includes(res.status)) {
         handleApiError(res, popupMessage, router);
       }
@@ -81,7 +80,7 @@ export default function VideoAdvertisementComponent({
     } catch (err) {
       popupMessage({ description: "Lỗi mạng hoặc máy chủ không phản hồi." });
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 
