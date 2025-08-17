@@ -30,13 +30,13 @@ export default function FeedbackScreenAdvertisementManagementPage() {
     const res = await apiGet("/advertising/getFeedbackScreenAdvertising");
     if (res.status === 200) {
       const data = res.data;
-      setMode(data.counter_status_screen_type);
+      setMode(data.feedback_screen_type);
 
       // Hình ảnh
       setImageInitialConfig({
-        slideDuration: data.counter_status_screen_images_duration ?? 5,
-        objectFit: data.counter_status_screen_images_object_fit ?? 1,
-        filenames: (data.counter_status_screen_images_url || "")
+        slideDuration: data.feedback_screen_images_duration ?? 5,
+        objectFit: data.feedback_screen_images_object_fit ?? 1,
+        filenames: (data.feedback_screen_images_url || "")
           .split(",")
           .map((s: string) => s.trim())
           .filter(Boolean),
@@ -44,8 +44,8 @@ export default function FeedbackScreenAdvertisementManagementPage() {
 
       // Video
       setVideoInitialConfig({
-        objectFit: data.counter_status_screen_video_object_fit ?? 1,
-        filename: data.counter_status_screen_video_url,
+        objectFit: data.feedback_screen_video_object_fit ?? 1,
+        filename: data.feedback_screen_video_url,
       });
     }
   };
