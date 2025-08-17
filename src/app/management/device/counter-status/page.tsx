@@ -112,6 +112,10 @@ export default function CounterStatusScreen() {
   const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
 
   const showAds = (delay = 0) => {
+    if (!adsData || adsData.type === 0) {
+      return;
+    }
+
     if (delay === 0) {
       setShowAds(true);
     } else {
@@ -187,6 +191,11 @@ export default function CounterStatusScreen() {
         setScreenNotice(response.screenNotice);
       if (response.statusTicket !== undefined) {
         setStatusTicket(response.statusTicket);
+
+        if (response.statusTicket === null) {
+          showAds();
+        }
+
         if ([3, 4].includes(response.statusTicket)) {
           showAds(30000);
         }
