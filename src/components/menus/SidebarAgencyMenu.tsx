@@ -240,10 +240,10 @@ export default function SidebarAgencyMenu() {
           }) && (
             <li>
               <Link
-                href="/management/agency/counters-screen-advertisement-management"
+                href="/management/agency/counters-advertisement-management"
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
                   pathname ===
-                  "/management/agency/counters-screen-advertisement-management"
+                  "/management/agency/counters-advertisement-management"
                     ? "active"
                     : ""
                 }`}
@@ -272,10 +272,10 @@ export default function SidebarAgencyMenu() {
           }) && (
             <li>
               <Link
-                href="/management/agency/feedback-screen-advertisement-management"
+                href="/management/agency/feedback-advertisement-management"
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
                   pathname ===
-                  "/management/agency/feedback-screen-advertisement-management"
+                  "/management/agency/feedback-advertisement-management"
                     ? "active"
                     : ""
                 }`}
