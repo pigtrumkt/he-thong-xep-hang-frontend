@@ -82,7 +82,7 @@ function AdsDisplay({ ads }: { ads?: AdsData }) {
   return null;
 }
 
-export default function CounterStatusScreen() {
+export default function GeneralStatusScreen() {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { popupMessage } = usePopup();
@@ -126,7 +126,7 @@ export default function CounterStatusScreen() {
   };
 
   const fetchAds = async () => {
-    const res = await apiGet("/advertising/getCounterScreenAdvertising");
+    const res = await apiGet("/advertising/getGeneralScreenAdvertising");
     if (![200, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       return;
@@ -137,18 +137,18 @@ export default function CounterStatusScreen() {
       const baseVideoUrl = `${API_BASE}/advertising/videos/`;
 
       setAdsData({
-        type: res.data.counter_status_screen_type,
-        videoUrl: res.data.counter_status_screen_video_url
-          ? `${baseVideoUrl}${res.data.counter_status_screen_video_url}`
+        type: res.data.general_status_screen_type,
+        videoUrl: res.data.general_status_screen_video_url
+          ? `${baseVideoUrl}${res.data.general_status_screen_video_url}`
           : undefined,
-        videoObjectFit: res.data.counter_status_screen_video_object_fit,
-        imagesUrl: res.data.counter_status_screen_images_url
-          ? res.data.counter_status_screen_images_url
+        videoObjectFit: res.data.general_status_screen_video_object_fit,
+        imagesUrl: res.data.general_status_screen_images_url
+          ? res.data.general_status_screen_images_url
               .split(",")
               .map((img: string) => `${baseImageUrl}${img.trim()}`)
           : [],
-        imagesDuration: res.data.counter_status_screen_images_duration,
-        imagesObjectFit: res.data.counter_status_screen_images_object_fit,
+        imagesDuration: res.data.general_status_screen_images_duration,
+        imagesObjectFit: res.data.general_status_screen_images_object_fit,
       });
     }
   };
