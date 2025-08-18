@@ -197,7 +197,7 @@ export default function CounterStatusScreen() {
         }
 
         if ([3, 4].includes(response.statusTicket)) {
-          showAds(30000);
+          showAds(180000);
         }
       }
 

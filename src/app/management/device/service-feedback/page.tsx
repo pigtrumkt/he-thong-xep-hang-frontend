@@ -272,7 +272,7 @@ export default function RatingScreen() {
         }
 
         if ([3, 4].includes(response.statusTicket)) {
-          showAds(30000);
+          showAds(180000);
         }
       }
       if (response.ticketId !== undefined) {
@@ -320,6 +320,7 @@ export default function RatingScreen() {
     if (res.status === 201) {
       setSubmitted(true);
       setTicketId(null);
+      showAds(180000);
     } else {
       popupRef.current?.showMessage({
         description: "Mất kết nối",
