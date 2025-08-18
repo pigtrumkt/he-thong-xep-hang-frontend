@@ -265,6 +265,7 @@ export default function CounterStatusPage() {
         serviceId: serviceIdSelected,
         serviceName: serviceNameSelectedRef.current,
         ticketId: ticketId,
+        currentNumber: currentNumber,
         action: "done",
       },
       (response: any) => {
@@ -290,6 +291,7 @@ export default function CounterStatusPage() {
         serviceId: serviceIdSelected,
         serviceName: serviceNameSelectedRef.current,
         ticketId: ticketId,
+        currentNumber: currentNumber,
         action: "missed",
       },
       (response: any) => {
