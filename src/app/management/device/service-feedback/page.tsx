@@ -320,7 +320,7 @@ export default function RatingScreen() {
     if (res.status === 201) {
       setSubmitted(true);
       setTicketId(null);
-      showAds(180000);
+      showAds(60000);
     } else {
       popupRef.current?.showMessage({
         description: "Mất kết nối",
