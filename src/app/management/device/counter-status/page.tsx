@@ -2,11 +2,12 @@
 
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiGet } from "@/lib/api";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
 
 type AdsData = {
   type?: number; // 0:none, 1:images, 2:video
@@ -83,6 +84,7 @@ function AdsDisplay({ ads }: { ads?: AdsData }) {
 }
 
 export default function CounterStatusScreen() {
+  const popupRef = useRef<PopupManagerRef>(null);
   const parentRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { popupMessage } = usePopup();
@@ -110,6 +112,9 @@ export default function CounterStatusScreen() {
   const [adsData, setAdsData] = useState<AdsData>();
   const [isShowAds, setShowAds] = useState<boolean>(false);
   const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
 
   const showAds = (delay = 0) => {
     if (!adsData || adsData.type === 0) {
@@ -309,8 +314,8 @@ export default function CounterStatusScreen() {
       setIsFullscreen(true);
       target.requestFullscreen?.();
     } else {
-      setIsFullscreen(false);
-      document.exitFullscreen?.();
+      setPasswordInput("");
+      setShowPasswordModal(true);
     }
   };
 
@@ -508,6 +513,7 @@ export default function CounterStatusScreen() {
               {screenNotice}
             </div>
           </footer>
+
           {/* STYLES */}
           <style jsx global>{`
             html {
@@ -571,6 +577,55 @@ export default function CounterStatusScreen() {
             <AdsDisplay ads={adsData} />
           </section>
         </>
+      )}
+
+      <PopupManager ref={popupRef} />
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+          <div className="relative bg-white p-8 rounded-2xl shadow-2xl w-[90%] max-w-[30rem]">
+            {/* Nút đóng */}
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              className="absolute text-2xl text-gray-400 top-3 right-4 hover:text-red-500"
+            >
+              ×
+            </button>
+
+            <h2 className="mb-6 text-2xl font-bold text-center text-blue-800">
+              Xác thực mật khẩu
+            </h2>
+
+            <input
+              type="password"
+              placeholder="Nhập mật khẩu"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={async () => {
+                  const res = await apiPost("/auth/kiosk-verify", {
+                    password: passwordInput,
+                  });
+                  if (res.status === 200) {
+                    setIsFullscreen(false);
+                    document.exitFullscreen?.();
+                  } else {
+                    popupRef.current?.showMessage({
+                      description: "Sai mật khẩu",
+                    });
+                  }
+                  setShowPasswordModal(false);
+                }}
+                className="px-6 py-2 text-lg font-semibold text-white transition bg-blue-600 rounded-xl hover:bg-blue-700"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   ) : (
