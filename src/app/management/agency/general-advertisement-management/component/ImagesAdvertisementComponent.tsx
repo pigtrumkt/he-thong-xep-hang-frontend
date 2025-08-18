@@ -223,7 +223,7 @@ export default function ImagesAdvertisementComponent({
 
       showLoading(0, "Đang tải lên...");
       const res = await apiUploadWithProgress(
-        "/advertising/counter-screen/images",
+        "/advertising/general-screen/images",
         formData,
         (percent) => setProgress(percent)
       );

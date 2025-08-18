@@ -11,7 +11,7 @@ type Handles = {
   handleSubmit: () => void;
 };
 
-export default function CountersScreenAdvertisementManagementPage() {
+export default function GeneralScreenAdvertisementManagementPage() {
   const [mode, setMode] = useState<Mode>(0);
   const handlesRef = useRef<Handles>(null);
 
@@ -27,16 +27,16 @@ export default function CountersScreenAdvertisementManagementPage() {
   } | null>(null);
 
   const fetchInitialConfig = async () => {
-    const res = await apiGet("/advertising/getCounterScreenAdvertising");
+    const res = await apiGet("/advertising/getGeneralScreenAdvertising");
     if (res.status === 200) {
       const data = res.data;
-      setMode(data.counter_status_screen_type);
+      setMode(data.general_status_screen_type);
 
       // Hình ảnh
       setImageInitialConfig({
-        slideDuration: data.counter_status_screen_images_duration ?? 5,
-        objectFit: data.counter_status_screen_images_object_fit ?? 1,
-        filenames: (data.counter_status_screen_images_url || "")
+        slideDuration: data.general_status_screen_images_duration ?? 5,
+        objectFit: data.general_status_screen_images_object_fit ?? 1,
+        filenames: (data.general_status_screen_images_url || "")
           .split(",")
           .map((s: string) => s.trim())
           .filter(Boolean),
@@ -44,8 +44,8 @@ export default function CountersScreenAdvertisementManagementPage() {
 
       // Video
       setVideoInitialConfig({
-        objectFit: data.counter_status_screen_video_object_fit ?? 1,
-        filename: data.counter_status_screen_video_url,
+        objectFit: data.general_status_screen_video_object_fit ?? 1,
+        filename: data.general_status_screen_video_url,
       });
     }
   };
