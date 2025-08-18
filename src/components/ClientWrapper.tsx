@@ -90,10 +90,14 @@ export default function ClientWrapper({
     if (typeof window === "undefined") return;
     if (!globalParams.user) return;
 
+    const path = window.location.pathname;
+    if (path.startsWith("/take-number-mobile/")) {
+      return;
+    }
+
     setSocket(getSocket(globalParams.user.token));
     setSocketSound(getSocketSound(globalParams.user.token));
 
-    const path = window.location.pathname;
     const roleId = globalParams.user["role_id"];
     if (path === "/") {
       if ([1, 2].includes(roleId)) {
