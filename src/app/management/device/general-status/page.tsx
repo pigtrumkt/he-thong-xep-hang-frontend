@@ -90,22 +90,16 @@ export default function CounterStatusScreen() {
     socket: Socket;
     globalParams: any;
   };
-  const [counters, setCounters] = useState<any[]>([]);
-  const [counterIdSelected, setCounterIdSelected] = useState<any>(null);
-  const counterNameSelectedRef = useRef("");
-  const [isReady, setIsReady] = useState<any>(false);
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [agencyName1, setAgencyName1] = useState<string | null>(null);
   const [agencyName2, setAgencyName2] = useState<string | null>(null);
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
-  const [statusTicket, setStatusTicket] = useState<number | null>(null);
+  const [counterName, setCounterName] = useState<string | null>(null);
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
 
   const [history, setHistory] = useState<any[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [autoConnect, setAutoConnect] = useState(false);
-  const mainRef = useRef<HTMLDivElement>(null);
 
   const [adsData, setAdsData] = useState<AdsData>();
   const [isShowAds, setShowAds] = useState<boolean>(false);
@@ -159,47 +153,28 @@ export default function CounterStatusScreen() {
     }
   };
 
-  const fetchData = async () => {
-    const counterRes = await apiGet("/counters/findActiveByAgency");
-    if (![200, 400].includes(counterRes.status)) {
-      handleApiError(counterRes, popupMessage, router);
-      return;
-    }
-
-    if (counterRes.status === 200 && counterRes.data) {
-      setCounters(counterRes.data);
-    }
-  };
-
   const handleResSocket = (response: any) => {
     if (response.status === "success") {
     } else if (response.status === "empty") {
       setCurrentNumber(null);
-      setStatusTicket(null);
       showAds();
     } else if (response.status === "update") {
       if (response.logoUrl !== undefined) setLogoUrl(response.logoUrl);
+
       if (response.agencyName1 !== undefined)
         setAgencyName1(response.agencyName1);
+
       if (response.agencyName2 !== undefined)
         setAgencyName2(response.agencyName2);
+
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
         hideAds();
+        showAds(180000);
       }
+
       if (response.screenNotice !== undefined)
         setScreenNotice(response.screenNotice);
-      if (response.statusTicket !== undefined) {
-        setStatusTicket(response.statusTicket);
-
-        if (response.statusTicket === null) {
-          showAds();
-        }
-
-        if ([3, 4].includes(response.statusTicket)) {
-          showAds(30000);
-        }
-      }
 
       if (response.history !== undefined) {
         setHistory((prev) => {
@@ -237,19 +212,16 @@ export default function CounterStatusScreen() {
   };
 
   const onConnect = () => {
-    setIsReady(true);
     joinListenSocket();
   };
 
   const onDisconnect = () => {
-    setIsReady(false);
     setLogoUrl(null);
     setAgencyName1(null);
     setAgencyName2(null);
     setCurrentNumber(null);
     setHistory([]);
     setScreenNotice(null);
-    setStatusTicket(null);
   };
 
   const listingServer = (response: any) => {
@@ -257,41 +229,12 @@ export default function CounterStatusScreen() {
   };
 
   const joinListenSocket = () => {
-    socket.emit(
-      "join_counter_status_screen",
-      {
-        counterId: counterIdSelected,
-      },
-      (response: any) => {
-        handleResSocket(response);
-      }
-    );
-  };
-
-  const handleConfirmSelected = () => {
-    socket.disconnect();
-
-    // set name counter
-    counterNameSelectedRef.current = counters.find(
-      (c) => c.id === counterIdSelected
-    )?.name;
-
-    socket.removeAllListeners();
-    socket.on("connect", onConnect);
-    socket.on("connect_error", onConnectError);
-    socket.on("disconnect", onDisconnect);
-    socket.on("ListingServer", listingServer);
-
-    // connect
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    rememberChoice();
+    socket.emit("join_counter_status_screen", {}, (response: any) => {
+      handleResSocket(response);
+    });
   };
 
   useEffect(() => {
-    fetchData();
     fetchAds();
 
     return () => {
@@ -313,307 +256,172 @@ export default function CounterStatusScreen() {
       document.exitFullscreen?.();
     }
   };
-
-  const handleBack = () => {
-    if (socket) {
-      socket.disconnect();
-      socket.removeAllListeners();
-    }
-
-    setIsReady(false);
-    setCounterIdSelected(null);
-    removeRememberChoice();
-  };
-
-  // ghi nhớ lựa chọn
-  const rememberChoice = () => {
-    const accountId = globalParams.user.id;
-    localStorage.setItem(
-      `counter_screen_selectedCounterId_${accountId}`,
-      counterIdSelected.toString()
-    );
-  };
-
-  const removeRememberChoice = () => {
-    const accountId = globalParams.user.id;
-    localStorage.removeItem(`counter_screen_selectedCounterId_${accountId}`);
-  };
-
-  useEffect(() => {
-    if (!counters || counters.length === 0) {
-      return;
-    }
-
-    const accountId = globalParams.user.id;
-    const rememberedCounterId = localStorage.getItem(
-      `counter_screen_selectedCounterId_${accountId}`
-    );
-
-    if (!rememberedCounterId) {
-      return;
-    }
-
-    if (
-      rememberedCounterId &&
-      counters.some((c) => c.id === Number(rememberedCounterId))
-    ) {
-      setCounterIdSelected(Number(rememberedCounterId));
-      setAutoConnect(true);
-    }
-  }, [counters]);
-
-  useEffect(() => {
-    if (!autoConnect) {
-      return;
-    }
-
-    setAutoConnect(false);
-    handleConfirmSelected();
-  }, [autoConnect]);
-
-  return isReady ? (
-    <div
-      ref={parentRef}
-      className="relative flex flex-col w-full h-full uppercase "
+  return;
+  <div
+    ref={parentRef}
+    className="relative flex flex-col w-full h-full uppercase "
+  >
+    {/* FULLSCREEN BUTTON */}
+    <button
+      onClick={toggleFullscreen}
+      title="Toàn màn hình"
+      className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
     >
-      {/* FULLSCREEN BUTTON */}
-      <button
-        onClick={toggleFullscreen}
-        title="Toàn màn hình"
-        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-        </svg>
-      </button>
-      {/* BACK BUTTON */}
-      {!isFullscreen && (
-        <button
-          onClick={handleBack}
-          title="Quay lại"
-          className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-16 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10 6l-6 6 6 6"
-            />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
-          </svg>
-        </button>
-      )}
-      {!isShowAds ? (
-        <>
-          {/* HEADER */}
-          <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-            <div className="flex items-center gap-6 justify-left">
-              {logoUrl && (
-                <div className="flex-shrink-0">
-                  <img
-                    src={`${API_BASE}/agencies/logos/${logoUrl}`}
-                    alt="Logo cơ quan"
-                    className="object-contain h-40"
-                  />
-                </div>
-              )}
-              <div className="flex flex-col">
-                <p className="text-6xl font-bold leading-tight">
-                  {agencyName1}
-                </p>
-                <p className="text-6xl font-bold leading-tight">
-                  {agencyName2}
-                </p>
-              </div>
-            </div>
-          </header>
-          {/* MAIN */}
-          <main className="flex flex-1 overflow-hidden">
-            {/* SỐ CHÍNH */}
-            <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
-              <div className="text-6xl font-semibold tracking-wide text-blue-800">
-                {statusTicket === 2 && currentNumber
-                  ? "Mời công dân có số"
-                  : ""}
-              </div>
-              <div
-                ref={mainRef}
-                className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop"
-              >
-                {statusTicket === 2 && currentNumber ? currentNumber : ""}
-              </div>
-              <div className="mt-6 text-6xl font-semibold tracking-wide text-red-600">
-                {statusTicket === 2 && currentNumber
-                  ? `Đến ${counterNameSelectedRef.current}`
-                  : ""}
-              </div>
-            </section>
+        <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
+      </svg>
+    </button>
 
-            {/* SỐ ĐÃ GỌI */}
-            <aside className="flex flex-col w-1/4 p-6 overflow-hidden bg-blue-100">
-              <h2 className="flex items-center justify-center gap-2 mb-2 text-5xl font-semibold leading-normal text-center text-blue-800">
-                Số đã gọi
-              </h2>
-              <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
-                {[...history].map((item, idx) => (
+    {!isShowAds ? (
+      <>
+        {/* HEADER */}
+        <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
+          <div className="flex items-center gap-6 justify-left">
+            {logoUrl && (
+              <div className="flex-shrink-0">
+                <img
+                  src={`${API_BASE}/agencies/logos/${logoUrl}`}
+                  alt="Logo cơ quan"
+                  className="object-contain h-40"
+                />
+              </div>
+            )}
+            <div className="flex flex-col">
+              <p className="text-6xl font-bold leading-tight">{agencyName1}</p>
+              <p className="text-6xl font-bold leading-tight">{agencyName2}</p>
+            </div>
+          </div>
+        </header>
+        {/* MAIN */}
+        <main className="flex flex-1 overflow-hidden">
+          {/* SỐ CHÍNH */}
+          <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
+            <div className="text-6xl font-semibold tracking-wide text-blue-800">
+              {currentNumber ? "Mời công dân có số" : ""}
+            </div>
+            <div className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop">
+              {currentNumber ? currentNumber : ""}
+            </div>
+            <div className="mt-6 text-6xl font-semibold tracking-wide text-red-600">
+              {currentNumber ? `Đến ${counterName}` : ""}
+            </div>
+          </section>
+
+          {/* SỐ ĐÃ GỌI */}
+          <aside className="flex flex-col w-1/4 p-6 overflow-hidden bg-blue-100">
+            <h2 className="flex items-center justify-center gap-2 mb-2 text-5xl font-semibold leading-normal text-center text-blue-800">
+              Số đã gọi
+            </h2>
+            <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
+              {[...history].map((item, idx) => (
+                <div
+                  key={item.id}
+                  className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
+                    idx === 0 ? "animate-zoom-in" : ""
+                  }`}
+                >
+                  <div className="text-3xl text-blue-600">
+                    {item.counter_name}
+                  </div>
+                  <div className="font-bold text-blue-800 text-8xl">
+                    {item.queue_number}
+                  </div>
                   <div
-                    key={item.id}
-                    className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
-                      idx === 0 ? "animate-zoom-in" : ""
+                    className={`flex gap-x-1.5 text-3xl mt-2 ${
+                      item.status === 3 ? "text-green-600" : "text-red-500"
                     }`}
                   >
-                    <div className="text-3xl text-blue-600">
-                      {item.counter_name}
-                    </div>
-                    <div className="font-bold text-blue-800 text-8xl">
-                      {item.queue_number}
-                    </div>
-                    <div
-                      className={`flex gap-x-1.5 text-3xl mt-2 ${
-                        item.status === 3 ? "text-green-600" : "text-red-500"
-                      }`}
-                    >
-                      <span>{item.status === 3 ? "✔️" : "❌"}</span>
-                      <span>
-                        {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
-                      </span>
-                    </div>
+                    <span>{item.status === 3 ? "✔️" : "❌"}</span>
+                    <span>
+                      {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
+                    </span>
                   </div>
-                ))}
-                {/* chèn dòng trống nếu thiếu */}
-                {Array.from({ length: Math.max(0, 4 - history.length) }).map(
-                  (_, i) => (
-                    <div key={i} className="flex-1 invisible" />
-                  )
-                )}
-              </div>
-            </aside>
-          </main>
-          {/* FOOTER */}
-          <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
-            <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
-              {screenNotice}
-            </div>
-          </footer>
-          {/* STYLES */}
-          <style jsx global>{`
-            html {
-              font-size: 1.2vmin;
-              touch-action: manipulation;
-              overscroll-behavior: none;
-            }
-
-            * {
-              user-select: none;
-              -webkit-user-select: none;
-              -ms-user-select: none;
-            }
-
-            @keyframes scrollText {
-              0% {
-                transform: translateX(100%);
-              }
-              100% {
-                transform: translateX(-100%);
-              }
-            }
-
-            @keyframes zoomLoop {
-              0%,
-              100% {
-                transform: scale(1);
-              }
-              50% {
-                transform: scale(1.01);
-              }
-            }
-
-            @keyframes zoomIn {
-              0% {
-                transform: scale(0.8);
-                opacity: 0;
-              }
-              100% {
-                transform: scale(1);
-                opacity: 1;
-              }
-            }
-
-            .zoom-loop {
-              animation: zoomLoop 1.8s ease-in-out infinite;
-            }
-
-            .animate-zoom-in {
-              animation: zoomIn 0.3s ease-out;
-            }
-
-            .animate-scrollText {
-              animation: scrollText 15s linear infinite;
-            }
-          `}</style>
-        </>
-      ) : (
-        <>
-          <section className="w-full h-full bg-black">
-            <AdsDisplay ads={adsData} />
-          </section>
-        </>
-      )}
-    </div>
-  ) : (
-    <div className="h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-blue-100 to-white px-4 py-8">
-      <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
-        <h2 className="text-2xl font-bold text-blue-800">Màn hình tại quầy</h2>
-
-        {/* Form chọn */}
-        <div className="space-y-4 text-left">
-          <div>
-            <label className="block mb-1 font-semibold text-blue-700">
-              Chọn quầy:
-            </label>
-            <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setCounterIdSelected(Number(e.target.value))}
-              value={counterIdSelected || ""}
-            >
-              <option value="" disabled>
-                -- Chọn quầy --
-              </option>
-              {counters.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+                </div>
               ))}
-            </select>
+              {/* chèn dòng trống nếu thiếu */}
+              {Array.from({ length: Math.max(0, 4 - history.length) }).map(
+                (_, i) => (
+                  <div key={i} className="flex-1 invisible" />
+                )
+              )}
+            </div>
+          </aside>
+        </main>
+        {/* FOOTER */}
+        <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
+          <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
+            {screenNotice}
           </div>
-        </div>
+        </footer>
+        {/* STYLES */}
+        <style jsx global>{`
+          html {
+            font-size: 1.2vmin;
+            touch-action: manipulation;
+            overscroll-behavior: none;
+          }
 
-        {/* Nút xác nhận */}
-        <button
-          className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
-            counterIdSelected
-              ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-          disabled={!counterIdSelected}
-          onClick={handleConfirmSelected}
-        >
-          Xác nhận
-        </button>
-      </div>
-    </div>
-  );
+          * {
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+          }
+
+          @keyframes scrollText {
+            0% {
+              transform: translateX(100%);
+            }
+            100% {
+              transform: translateX(-100%);
+            }
+          }
+
+          @keyframes zoomLoop {
+            0%,
+            100% {
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(1.01);
+            }
+          }
+
+          @keyframes zoomIn {
+            0% {
+              transform: scale(0.8);
+              opacity: 0;
+            }
+            100% {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+
+          .zoom-loop {
+            animation: zoomLoop 1.8s ease-in-out infinite;
+          }
+
+          .animate-zoom-in {
+            animation: zoomIn 0.3s ease-out;
+          }
+
+          .animate-scrollText {
+            animation: scrollText 15s linear infinite;
+          }
+        `}</style>
+      </>
+    ) : (
+      <>
+        <section className="w-full h-full bg-black">
+          <AdsDisplay ads={adsData} />
+        </section>
+      </>
+    )}
+  </div>;
 }
