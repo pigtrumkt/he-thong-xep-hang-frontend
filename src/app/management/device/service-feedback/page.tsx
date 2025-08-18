@@ -449,18 +449,18 @@ export default function RatingScreen() {
           <header className="px-8 py-10 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
             <div className="flex items-center justify-between ">
               <div>
-                <h1 className="text-6xl font-bold uppercase ">
+                <h1 className="text-[3vw] font-bold uppercase ">
                   {counterNameSelected}
                 </h1>
-                <p className="mt-1 text-3xl uppercase leading-12 opacity-90 ">
+                <p className="mt-1 text-[2vw] uppercase leading-12 opacity-90 ">
                   {serviceName}
                 </p>
               </div>
               <div className="text-right">
                 <div className="flex items-center">
                   <div className="mr-4">
-                    <h3 className="text-4xl">{staffName}</h3>
-                    <p className="text-2xl">{StaffPosition}</p>
+                    <h3 className="text-[2vw]">{staffName}</h3>
+                    <p className="text-[1.333vw]">{StaffPosition}</p>
                   </div>
                   <div>
                     <img
@@ -472,7 +472,7 @@ export default function RatingScreen() {
                           : "avatar_default_male.png"
                       }`}
                       alt="Avatar"
-                      className="object-cover w-24 h-24 bg-white cursor-pointer"
+                      className="object-cover w-[6vw] bg-white cursor-pointer"
                       onClick={() => setShowAvatarPreview(true)}
                     />
                   </div>
@@ -485,25 +485,25 @@ export default function RatingScreen() {
           <div className="flex w-full h-full">
             {/* Left Panel - Staff Info */}
             <div className="flex flex-col justify-center border-r-4 border-blue-200 w-4/10 bg-blue-50">
-              <div className="-mt-32 text-center">
-                <p className="text-[3rem] font-semibold text-blue-700 ">
+              <div className="text-center">
+                <p className="text-[2.6vw] font-semibold text-blue-700 ">
                   {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
                 </p>
-                <div className="text-[12rem] text-blue-800 font-extrabold tracking-widest zoom-loop leading-50">
+                <div className="text-[12vw] text-blue-800 font-extrabold tracking-widest zoom-loop leading-[12vw]">
                   {currentNumber}
                 </div>
               </div>
             </div>
 
             {/* Right Panel - Rating */}
-            <div className="relative flex-1 bg-white">
-              <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto -mt-16">
-                <div className="mb-8 text-center">
-                  <h2 className="mb-4 text-5xl font-bold text-blue-800">
+            <div className="relative flex-1 w-full bg-white">
+              <div className="flex flex-col items-center justify-center w-full h-full px-[2vw] mx-auto">
+                <div className="text-center">
+                  <h2 className="mb-[1vw] text-[4vw] font-bold text-blue-800">
                     ĐÁNH GIÁ DỊCH VỤ
                   </h2>
                   <div className="w-32 h-1 mx-auto bg-blue-500 rounded-full"></div>
-                  <p className="mt-6 text-2xl text-blue-600">
+                  <p className="mt-[3vw] text-[1.8vw] text-blue-600">
                     Bạn có hài lòng với chất lượng dịch vụ?
                   </p>
                 </div>
@@ -513,7 +513,7 @@ export default function RatingScreen() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      className={`text-8xl transition-all transform hover:scale-110 ${
+                      className={`text-[6vw] transition-all transform hover:scale-110 leading-[6vw] ${
                         selectedStars >= star
                           ? "text-yellow-400 drop-shadow-lg"
                           : "text-gray-300 hover:text-yellow-200"
@@ -531,7 +531,7 @@ export default function RatingScreen() {
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
-                  className="w-full h-32 max-w-2xl p-4 text-lg text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-[50vw] h-[8vw] p-[1vw] mt-[1vw] text-[1vw] text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                   disabled={submitted}
                 />
 
@@ -539,7 +539,7 @@ export default function RatingScreen() {
                 <button
                   onClick={handleSubmit}
                   disabled={submitted || selectedStars === 0}
-                  className={`mt-8 px-12 py-4 text-xl font-bold rounded-2xl transition-all transform ${
+                  className={`mt-[2vw] px-[4vw] py-[1vw] text-[1.2vw] font-bold rounded-2xl transition-all transform ${
                     selectedStars > 0 && !submitted
                       ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -548,7 +548,7 @@ export default function RatingScreen() {
                   Gửi đánh giá
                 </button>
                 <p
-                  className={`text-blue-700 text-xl font-semibold text-center text-[2rem] mt-10 ${
+                  className={`text-blue-700 text-[1.5vw] font-semibold text-center mt-[1.5vw] ${
                     submitted ? "" : "invisible"
                   }`}
                 >
