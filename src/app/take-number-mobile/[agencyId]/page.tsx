@@ -27,9 +27,7 @@ export default function Page() {
   }, []);
 
   async function fetchServices() {
-    const res = await apiGet(
-      "/services/findGroupedActiveServicesInAgency?agency_id=" + agencyId
-    );
+    const res = await apiGet("/services/findGroupedActiveServicesInAgency");
     if (res.status !== 200) {
       return;
     }
