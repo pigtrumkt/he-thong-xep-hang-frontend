@@ -156,6 +156,11 @@ export default function GeneralStatusScreen() {
         imagesDuration: res.data.general_status_screen_images_duration,
         imagesObjectFit: res.data.general_status_screen_images_object_fit,
       });
+
+      // hiển thị quảng cáo khi lần đầu vô
+      setTimeout(() => {
+        showAdsRef.current();
+      });
     }
   };
 
