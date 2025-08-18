@@ -105,7 +105,8 @@ export default function GeneralStatusScreen() {
   const [isShowAds, setShowAds] = useState<boolean>(false);
   const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
 
-  const showAds = (delay = 0) => {
+  const showAdsRef = useRef<(delay?: number) => void>(() => {});
+  showAdsRef.current = (delay = 0) => {
     if (!adsData || adsData.type === 0) {
       return;
     }
@@ -158,7 +159,7 @@ export default function GeneralStatusScreen() {
     } else if (response.status === "empty") {
       setCurrentNumber(null);
       setCounterName(null);
-      showAds();
+      showAdsRef.current();
     } else if (response.status === "update") {
       if (response.logoUrl !== undefined) setLogoUrl(response.logoUrl);
 
@@ -179,7 +180,7 @@ export default function GeneralStatusScreen() {
         if (response.statusTicket === 2) {
           setCurrentNumber(response.currentNumber);
           hideAds();
-          showAds(180000);
+          showAdsRef.current(180000);
         }
 
         // nếu đánh dấu done hoặc miss số đang hiển thị hiện tại thì ẩn nó đi
@@ -256,8 +257,21 @@ export default function GeneralStatusScreen() {
     });
   };
 
+  const toggleFullscreen = () => {
+    const target = parentRef.current;
+    if (!target) return;
+    if (!document.fullscreenElement) {
+      target.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
   useEffect(() => {
     fetchAds();
+  }, []);
+
+  useEffect(() => {
     if (socket) {
       socket.disconnect();
       socket.removeAllListeners();
@@ -275,16 +289,6 @@ export default function GeneralStatusScreen() {
       }
     };
   }, [socket]);
-
-  const toggleFullscreen = () => {
-    const target = parentRef.current;
-    if (!target) return;
-    if (!document.fullscreenElement) {
-      target.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
-    }
-  };
 
   return (
     <div
