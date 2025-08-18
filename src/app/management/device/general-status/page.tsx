@@ -95,11 +95,12 @@ export default function GeneralStatusScreen() {
   const [agencyName1, setAgencyName1] = useState<string | null>(null);
   const [agencyName2, setAgencyName2] = useState<string | null>(null);
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
+  const [statusTicket, setStatusTicket] = useState<number | null>(null);
+
   const [counterName, setCounterName] = useState<string | null>(null);
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
 
   const [history, setHistory] = useState<any[]>([]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [adsData, setAdsData] = useState<AdsData>();
   const [isShowAds, setShowAds] = useState<boolean>(false);
@@ -157,6 +158,8 @@ export default function GeneralStatusScreen() {
     if (response.status === "success") {
     } else if (response.status === "empty") {
       setCurrentNumber(null);
+      setStatusTicket(null);
+      setCounterName(null);
       showAds();
     } else if (response.status === "update") {
       if (response.logoUrl !== undefined) setLogoUrl(response.logoUrl);
@@ -167,14 +170,22 @@ export default function GeneralStatusScreen() {
       if (response.agencyName2 !== undefined)
         setAgencyName2(response.agencyName2);
 
+      if (response.screenNotice !== undefined)
+        setScreenNotice(response.screenNotice);
+
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
         hideAds();
         showAds(180000);
       }
 
-      if (response.screenNotice !== undefined)
-        setScreenNotice(response.screenNotice);
+      if (response.statusTicket !== undefined) {
+        setStatusTicket(response.statusTicket);
+      }
+
+      if (response.counterName !== undefined) {
+        setCounterName(response.counterName);
+      }
 
       if (response.history !== undefined) {
         setHistory((prev) => {
@@ -207,7 +218,6 @@ export default function GeneralStatusScreen() {
   const onConnectError = () => {
     popupMessage({
       title: "Mất kết nối",
-      description: "Vui lòng thử lại sau.",
     });
   };
 
@@ -220,6 +230,8 @@ export default function GeneralStatusScreen() {
     setAgencyName1(null);
     setAgencyName2(null);
     setCurrentNumber(null);
+    setStatusTicket(null);
+    setCounterName(null);
     setHistory([]);
     setScreenNotice(null);
   };
@@ -229,13 +241,22 @@ export default function GeneralStatusScreen() {
   };
 
   const joinListenSocket = () => {
-    socket.emit("join_counter_status_screen", {}, (response: any) => {
+    socket.emit("join_general_status_screen", {}, (response: any) => {
       handleResSocket(response);
     });
   };
 
   useEffect(() => {
     fetchAds();
+    if (socket) {
+      socket.disconnect();
+      socket.removeAllListeners();
+      socket.on("connect", onConnect);
+      socket.on("connect_error", onConnectError);
+      socket.on("disconnect", onDisconnect);
+      socket.on("ListingServer", listingServer);
+      socket.connect();
+    }
 
     return () => {
       if (socket) {
@@ -243,185 +264,189 @@ export default function GeneralStatusScreen() {
         socket.removeAllListeners();
       }
     };
-  }, []);
+  }, [socket]);
 
   const toggleFullscreen = () => {
     const target = parentRef.current;
     if (!target) return;
     if (!document.fullscreenElement) {
-      setIsFullscreen(true);
       target.requestFullscreen?.();
     } else {
-      setIsFullscreen(false);
       document.exitFullscreen?.();
     }
   };
-  return;
-  <div
-    ref={parentRef}
-    className="relative flex flex-col w-full h-full uppercase "
-  >
-    {/* FULLSCREEN BUTTON */}
-    <button
-      onClick={toggleFullscreen}
-      title="Toàn màn hình"
-      className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+
+  return (
+    <div
+      ref={parentRef}
+      className="relative flex flex-col w-full h-full uppercase "
     >
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
+      {/* FULLSCREEN BUTTON */}
+      <button
+        onClick={toggleFullscreen}
+        title="Toàn màn hình"
+        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
       >
-        <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-      </svg>
-    </button>
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
+        </svg>
+      </button>
 
-    {!isShowAds ? (
-      <>
-        {/* HEADER */}
-        <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-          <div className="flex items-center gap-6 justify-left">
-            {logoUrl && (
-              <div className="flex-shrink-0">
-                <img
-                  src={`${API_BASE}/agencies/logos/${logoUrl}`}
-                  alt="Logo cơ quan"
-                  className="object-contain h-40"
-                />
+      {!isShowAds ? (
+        <>
+          {/* HEADER */}
+          <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
+            <div className="flex items-center gap-6 justify-left">
+              {logoUrl && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={`${API_BASE}/agencies/logos/${logoUrl}`}
+                    alt="Logo cơ quan"
+                    className="object-contain h-40"
+                  />
+                </div>
+              )}
+              <div className="flex flex-col">
+                <p className="text-6xl font-bold leading-tight">
+                  {agencyName1}
+                </p>
+                <p className="text-6xl font-bold leading-tight">
+                  {agencyName2}
+                </p>
               </div>
-            )}
-            <div className="flex flex-col">
-              <p className="text-6xl font-bold leading-tight">{agencyName1}</p>
-              <p className="text-6xl font-bold leading-tight">{agencyName2}</p>
             </div>
-          </div>
-        </header>
-        {/* MAIN */}
-        <main className="flex flex-1 overflow-hidden">
-          {/* SỐ CHÍNH */}
-          <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
-            <div className="text-6xl font-semibold tracking-wide text-blue-800">
-              {currentNumber ? "Mời công dân có số" : ""}
-            </div>
-            <div className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop">
-              {currentNumber ? currentNumber : ""}
-            </div>
-            <div className="mt-6 text-6xl font-semibold tracking-wide text-red-600">
-              {currentNumber ? `Đến ${counterName}` : ""}
-            </div>
-          </section>
+          </header>
+          {/* MAIN */}
+          <main className="flex flex-1 overflow-hidden">
+            {/* SỐ CHÍNH */}
+            <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
+              <div className="text-6xl font-semibold tracking-wide text-blue-800">
+                {currentNumber ? "Mời công dân có số" : ""}
+              </div>
+              <div className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop">
+                {currentNumber ? currentNumber : ""}
+              </div>
+              <div className="mt-6 text-6xl font-semibold tracking-wide text-red-600">
+                {currentNumber ? `Đến ${counterName}` : ""}
+              </div>
+            </section>
 
-          {/* SỐ ĐÃ GỌI */}
-          <aside className="flex flex-col w-1/4 p-6 overflow-hidden bg-blue-100">
-            <h2 className="flex items-center justify-center gap-2 mb-2 text-5xl font-semibold leading-normal text-center text-blue-800">
-              Số đã gọi
-            </h2>
-            <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
-              {[...history].map((item, idx) => (
-                <div
-                  key={item.id}
-                  className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
-                    idx === 0 ? "animate-zoom-in" : ""
-                  }`}
-                >
-                  <div className="text-3xl text-blue-600">
-                    {item.counter_name}
-                  </div>
-                  <div className="font-bold text-blue-800 text-8xl">
-                    {item.queue_number}
-                  </div>
+            {/* SỐ ĐÃ GỌI */}
+            <aside className="flex flex-col w-1/4 p-6 overflow-hidden bg-blue-100">
+              <h2 className="flex items-center justify-center gap-2 mb-2 text-5xl font-semibold leading-normal text-center text-blue-800">
+                Số đã gọi
+              </h2>
+              <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
+                {[...history].map((item, idx) => (
                   <div
-                    className={`flex gap-x-1.5 text-3xl mt-2 ${
-                      item.status === 3 ? "text-green-600" : "text-red-500"
+                    key={item.id}
+                    className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
+                      idx === 0 ? "animate-zoom-in" : ""
                     }`}
                   >
-                    <span>{item.status === 3 ? "✔️" : "❌"}</span>
-                    <span>
-                      {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
-                    </span>
+                    <div className="text-3xl text-blue-600">
+                      {item.counter_name}
+                    </div>
+                    <div className="font-bold text-blue-800 text-8xl">
+                      {item.queue_number}
+                    </div>
+                    <div
+                      className={`flex gap-x-1.5 text-3xl mt-2 ${
+                        item.status === 3 ? "text-green-600" : "text-red-500"
+                      }`}
+                    >
+                      <span>{item.status === 3 ? "✔️" : "❌"}</span>
+                      <span>
+                        {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-              {/* chèn dòng trống nếu thiếu */}
-              {Array.from({ length: Math.max(0, 4 - history.length) }).map(
-                (_, i) => (
-                  <div key={i} className="flex-1 invisible" />
-                )
-              )}
+                ))}
+                {/* chèn dòng trống nếu thiếu */}
+                {Array.from({ length: Math.max(0, 4 - history.length) }).map(
+                  (_, i) => (
+                    <div key={i} className="flex-1 invisible" />
+                  )
+                )}
+              </div>
+            </aside>
+          </main>
+          {/* FOOTER */}
+          <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
+            <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
+              {screenNotice}
             </div>
-          </aside>
-        </main>
-        {/* FOOTER */}
-        <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
-          <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
-            {screenNotice}
-          </div>
-        </footer>
-        {/* STYLES */}
-        <style jsx global>{`
-          html {
-            font-size: 1.2vmin;
-            touch-action: manipulation;
-            overscroll-behavior: none;
-          }
-
-          * {
-            user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-          }
-
-          @keyframes scrollText {
-            0% {
-              transform: translateX(100%);
+          </footer>
+          {/* STYLES */}
+          <style jsx global>{`
+            html {
+              font-size: 1.2vmin;
+              touch-action: manipulation;
+              overscroll-behavior: none;
             }
-            100% {
-              transform: translateX(-100%);
-            }
-          }
 
-          @keyframes zoomLoop {
-            0%,
-            100% {
-              transform: scale(1);
+            * {
+              user-select: none;
+              -webkit-user-select: none;
+              -ms-user-select: none;
             }
-            50% {
-              transform: scale(1.01);
+
+            @keyframes scrollText {
+              0% {
+                transform: translateX(100%);
+              }
+              100% {
+                transform: translateX(-100%);
+              }
             }
-          }
 
-          @keyframes zoomIn {
-            0% {
-              transform: scale(0.8);
-              opacity: 0;
+            @keyframes zoomLoop {
+              0%,
+              100% {
+                transform: scale(1);
+              }
+              50% {
+                transform: scale(1.01);
+              }
             }
-            100% {
-              transform: scale(1);
-              opacity: 1;
+
+            @keyframes zoomIn {
+              0% {
+                transform: scale(0.8);
+                opacity: 0;
+              }
+              100% {
+                transform: scale(1);
+                opacity: 1;
+              }
             }
-          }
 
-          .zoom-loop {
-            animation: zoomLoop 1.8s ease-in-out infinite;
-          }
+            .zoom-loop {
+              animation: zoomLoop 1.8s ease-in-out infinite;
+            }
 
-          .animate-zoom-in {
-            animation: zoomIn 0.3s ease-out;
-          }
+            .animate-zoom-in {
+              animation: zoomIn 0.3s ease-out;
+            }
 
-          .animate-scrollText {
-            animation: scrollText 15s linear infinite;
-          }
-        `}</style>
-      </>
-    ) : (
-      <>
-        <section className="w-full h-full bg-black">
-          <AdsDisplay ads={adsData} />
-        </section>
-      </>
-    )}
-  </div>;
+            .animate-scrollText {
+              animation: scrollText 15s linear infinite;
+            }
+          `}</style>
+        </>
+      ) : (
+        <>
+          <section className="w-full h-full bg-black">
+            <AdsDisplay ads={adsData} />
+          </section>
+        </>
+      )}
+    </div>
+  );
 }
