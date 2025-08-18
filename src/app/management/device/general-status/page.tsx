@@ -269,6 +269,10 @@ export default function GeneralStatusScreen() {
 
   useEffect(() => {
     fetchAds();
+
+    return () => {
+      if (delayAdsRef.current) clearTimeout(delayAdsRef.current);
+    };
   }, []);
 
   useEffect(() => {
