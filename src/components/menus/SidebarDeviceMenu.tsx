@@ -175,13 +175,48 @@ export default function SidebarDeviceMenu() {
               <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
                 <svg
                   className="w-6 h-6"
+                  viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
-                  <rect x="3" y="7" width="18" height="13" rx="2" />
-                  <path d="M16 3v4M8 3v4" />
+                  {/* khung màn hình */}
+                  <rect x="3" y="4" width="18" height="12" rx="2" />
+                  {/* chân + đế */}
+                  <path d="M12 16v4M8 20h8" />
+                </svg>
+              </span>
+              Màn hình chung
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/management/device/general-status"
+              className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                pathname === "/management/device/general-status" ? "active" : ""
+              }`}
+            >
+              <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                <svg
+                  className="w-6 h-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {/* Overhead monitor */}
+                  <rect x="14" y="3" width="7" height="4" rx="0.8" />
+                  <path d="M17.5 7v6" /> {/* giá treo xuống quầy */}
+                  {/* Counter desk */}
+                  <rect x="3" y="13" width="18" height="5" rx="1" />
+                  {/* Staff (head + shoulders) phía sau quầy */}
+                  <circle cx="7" cy="10" r="2" />
+                  <path d="M5.2 13a3.8 3.8 0 0 1 3.6 0" />
                 </svg>
               </span>
               Màn hình quầy
