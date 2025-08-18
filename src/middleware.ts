@@ -14,5 +14,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|login).*)"], // bỏ qua login, static, favicon
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|login|take-number-mobile).*)",
+  ], // bỏ qua login, static, favicon
 };
