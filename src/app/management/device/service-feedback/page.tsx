@@ -444,9 +444,9 @@ export default function RatingScreen() {
         </button>
       )}
       {!isShowAds ? (
-        <>
+        <div className="flex flex-col h-[100vh]">
           {/* Header */}
-          <header className="px-8 py-10 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
+          <header className="px-[2vw] py-[1.8vw] text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-800">
             <div className="flex items-center justify-between ">
               <div>
                 <h1 className="text-[3vw] font-bold uppercase ">
@@ -499,11 +499,11 @@ export default function RatingScreen() {
             <div className="relative flex-1 w-full bg-white">
               <div className="flex flex-col items-center justify-center w-full h-full px-[2vw] mx-auto">
                 <div className="text-center">
-                  <h2 className="mb-[1vw] text-[4vw] font-bold text-blue-800">
+                  <h2 className="mb-[0.8vw] text-[3.5vw] font-bold text-blue-800">
                     ĐÁNH GIÁ DỊCH VỤ
                   </h2>
-                  <div className="w-32 h-1 mx-auto bg-blue-500 rounded-full"></div>
-                  <p className="mt-[3vw] text-[1.8vw] text-blue-600">
+                  <div className="w-[12vw] h-1 mx-auto bg-blue-500 rounded-full"></div>
+                  <p className="mt-[3vw] text-[1.5vw] text-blue-600">
                     Bạn có hài lòng với chất lượng dịch vụ?
                   </p>
                 </div>
@@ -513,7 +513,7 @@ export default function RatingScreen() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      className={`text-[6vw] transition-all transform hover:scale-110 leading-[6vw] ${
+                      className={`text-[5vw] transition-all transform hover:scale-110 leading-[5.5vw] ${
                         selectedStars >= star
                           ? "text-yellow-400 drop-shadow-lg"
                           : "text-gray-300 hover:text-yellow-200"
@@ -531,7 +531,7 @@ export default function RatingScreen() {
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
-                  className="w-[50vw] h-[8vw] p-[1vw] mt-[1vw] text-[1vw] text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  className="w-[45vw] h-[7.5vw] p-[1vw] mt-[1vw] text-[1vw] text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                   disabled={submitted}
                 />
 
@@ -584,7 +584,7 @@ export default function RatingScreen() {
               </button>
             </div>
           )}
-        </>
+        </div>
       ) : (
         <>
           <section className="w-full h-full bg-black">
