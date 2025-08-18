@@ -135,7 +135,7 @@ export default function RatingScreen() {
     }
   };
 
-  const hideAds = (delay = 0) => {
+  const hideAds = () => {
     if (delayAdsRef.current) clearTimeout(delayAdsRef.current);
     setShowAds(false);
   };

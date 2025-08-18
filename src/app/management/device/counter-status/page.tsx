@@ -126,7 +126,7 @@ export default function CounterStatusScreen() {
     }
   };
 
-  const hideAds = (delay = 0) => {
+  const hideAds = () => {
     if (delayAdsRef.current) clearTimeout(delayAdsRef.current);
     setShowAds(false);
   };
