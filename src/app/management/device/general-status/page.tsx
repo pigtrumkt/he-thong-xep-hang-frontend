@@ -95,7 +95,6 @@ export default function GeneralStatusScreen() {
   const [agencyName1, setAgencyName1] = useState<string | null>(null);
   const [agencyName2, setAgencyName2] = useState<string | null>(null);
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
-  const [statusTicket, setStatusTicket] = useState<number | null>(null);
 
   const [counterName, setCounterName] = useState<string | null>(null);
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
@@ -158,7 +157,6 @@ export default function GeneralStatusScreen() {
     if (response.status === "success") {
     } else if (response.status === "empty") {
       setCurrentNumber(null);
-      setStatusTicket(null);
       setCounterName(null);
       showAds();
     } else if (response.status === "update") {
@@ -173,14 +171,27 @@ export default function GeneralStatusScreen() {
       if (response.screenNotice !== undefined)
         setScreenNotice(response.screenNotice);
 
-      if (response.currentNumber !== undefined) {
-        setCurrentNumber(response.currentNumber);
-        hideAds();
-        showAds(180000);
-      }
+      if (
+        response.currentNumber !== undefined &&
+        response.statusTicket !== undefined
+      ) {
+        // nếu là số mới hoặc gọi lại
+        if (response.statusTicket === 2) {
+          setCurrentNumber(response.currentNumber);
+          hideAds();
+          showAds(180000);
+        }
 
-      if (response.statusTicket !== undefined) {
-        setStatusTicket(response.statusTicket);
+        // nếu đánh dấu done hoặc miss số đang hiển thị hiện tại thì ẩn nó đi
+        if ([3, 4].includes(response.statusTicket)) {
+          setCurrentNumber((oldVal) => {
+            if (oldVal === response.currentNumber) {
+              return null;
+            }
+
+            return oldVal;
+          });
+        }
       }
 
       if (response.counterName !== undefined) {
@@ -230,7 +241,6 @@ export default function GeneralStatusScreen() {
     setAgencyName1(null);
     setAgencyName2(null);
     setCurrentNumber(null);
-    setStatusTicket(null);
     setCounterName(null);
     setHistory([]);
     setScreenNotice(null);
