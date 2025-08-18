@@ -167,9 +167,9 @@ export default function SidebarDeviceMenu() {
           </li>
           <li>
             <Link
-              href="/management/device/counter-status"
+              href="/management/device/general-status"
               className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
-                pathname === "/management/device/counter-status" ? "active" : ""
+                pathname === "/management/device/general-status" ? "active" : ""
               }`}
             >
               <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
@@ -194,9 +194,9 @@ export default function SidebarDeviceMenu() {
           </li>
           <li>
             <Link
-              href="/management/device/general-status"
+              href="/management/device/counter-status"
               className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
-                pathname === "/management/device/general-status" ? "active" : ""
+                pathname === "/management/device/counter-status" ? "active" : ""
               }`}
             >
               <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
