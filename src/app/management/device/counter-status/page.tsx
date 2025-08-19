@@ -97,9 +97,8 @@ export default function CounterStatusScreen() {
   const counterNameSelectedRef = useRef("");
   const [isReady, setIsReady] = useState<any>(false);
 
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [agencyName1, setAgencyName1] = useState<string | null>(null);
-  const [agencyName2, setAgencyName2] = useState<string | null>(null);
+  const serviceIdRef = useRef(null);
+  const [serviceName, setServiceName] = useState<string | null>(null);
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
   const [statusTicket, setStatusTicket] = useState<number | null>(null);
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
@@ -107,7 +106,6 @@ export default function CounterStatusScreen() {
   const [history, setHistory] = useState<any[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoConnect, setAutoConnect] = useState(false);
-  const mainRef = useRef<HTMLDivElement>(null);
 
   const [adsData, setAdsData] = useState<AdsData>();
   const [isShowAds, setShowAds] = useState<boolean>(false);
@@ -179,21 +177,33 @@ export default function CounterStatusScreen() {
   const handleResSocket = (response: any) => {
     if (response.status === "success") {
     } else if (response.status === "empty") {
+      if (serviceIdRef.current) {
+        leaveListenHistory(serviceIdRef.current);
+      }
+
+      serviceIdRef.current = null;
+      setServiceName(null);
       setCurrentNumber(null);
       setStatusTicket(null);
+      setHistory([]);
       showAds();
     } else if (response.status === "update") {
-      if (response.logoUrl !== undefined) setLogoUrl(response.logoUrl);
-      if (response.agencyName1 !== undefined)
-        setAgencyName1(response.agencyName1);
-      if (response.agencyName2 !== undefined)
-        setAgencyName2(response.agencyName2);
+      if (response.serviceId) {
+        serviceIdRef.current = response.serviceId;
+        joinListenHistory(response.serviceId);
+      }
+
+      if (response.serviceName !== undefined)
+        setServiceName(response.serviceName);
+
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
         hideAds();
       }
+
       if (response.screenNotice !== undefined)
         setScreenNotice(response.screenNotice);
+
       if (response.statusTicket !== undefined) {
         setStatusTicket(response.statusTicket);
 
@@ -248,9 +258,7 @@ export default function CounterStatusScreen() {
 
   const onDisconnect = () => {
     setIsReady(false);
-    setLogoUrl(null);
-    setAgencyName1(null);
-    setAgencyName2(null);
+    setServiceName(null);
     setCurrentNumber(null);
     setHistory([]);
     setScreenNotice(null);
@@ -266,6 +274,30 @@ export default function CounterStatusScreen() {
       "join_counter_status_screen",
       {
         counterId: counterIdSelected,
+      },
+      (response: any) => {
+        handleResSocket(response);
+      }
+    );
+  };
+
+  const joinListenHistory = (serviceId: number) => {
+    socket.emit(
+      "counter_status_history_screen",
+      {
+        serviceId: serviceId,
+      },
+      (response: any) => {
+        handleResSocket(response);
+      }
+    );
+  };
+
+  const leaveListenHistory = (serviceId: number) => {
+    socket.emit(
+      "leave_counter_status_history_screen",
+      {
+        serviceId: serviceId,
       },
       (response: any) => {
         handleResSocket(response);
@@ -424,46 +456,22 @@ export default function CounterStatusScreen() {
       {!isShowAds ? (
         <>
           {/* HEADER */}
-          <header className="px-8 py-6 tracking-wide text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-            <div className="flex items-center gap-6 justify-left">
-              {logoUrl && (
-                <div className="flex-shrink-0">
-                  <img
-                    src={`${API_BASE}/agencies/logos/${logoUrl}`}
-                    alt="Logo cơ quan"
-                    className="object-contain h-40"
-                  />
-                </div>
-              )}
-              <div className="flex flex-col">
-                <p className="text-6xl font-bold leading-tight">
-                  {agencyName1}
-                </p>
-                <p className="text-6xl font-bold leading-tight">
-                  {agencyName2}
-                </p>
-              </div>
-            </div>
+          <header className="px-5 pt-2 pb-10 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
+            <h1 className="font-bold text-9xl leading-[1.4]">
+              {counterNameSelectedRef.current}
+            </h1>
+            <p className="text-6xl">{serviceName}</p>
           </header>
+
           {/* MAIN */}
           <main className="flex flex-1 overflow-hidden">
             {/* SỐ CHÍNH */}
             <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
               <div className="text-6xl font-semibold tracking-wide text-blue-800">
-                {statusTicket === 2 && currentNumber
-                  ? "Mời công dân có số"
-                  : ""}
+                {statusTicket === 2 && currentNumber && "Mời công dân có số"}
               </div>
-              <div
-                ref={mainRef}
-                className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop"
-              >
-                {statusTicket === 2 && currentNumber ? currentNumber : ""}
-              </div>
-              <div className="mt-6 text-6xl font-semibold tracking-wide text-red-600">
-                {statusTicket === 2 && currentNumber
-                  ? `Đến ${counterNameSelectedRef.current}`
-                  : ""}
+              <div className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop">
+                {statusTicket === 2 && currentNumber}
               </div>
             </section>
 

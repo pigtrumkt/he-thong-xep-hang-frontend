@@ -17,7 +17,7 @@ export default function NoAdvertisementComponent({
   const { popupMessage } = usePopup();
 
   const handleSubmit = async () => {
-    const res = await apiPost("/advertising/counter-status/disable", {});
+    const res = await apiPost("/advertising/general-status/disable", {});
     if (![201, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
       return;
