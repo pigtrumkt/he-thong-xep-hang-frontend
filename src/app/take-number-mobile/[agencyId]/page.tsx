@@ -70,7 +70,7 @@ export default function KioskMobilePage() {
           </div>
           <div className="text-xs opacity-90">📍 {AGENCY.address}</div>
           <div className="text-xs opacity-90">
-            <span className="px-1 text-xs opacity-90">☎ {AGENCY.phone}</span>
+            <span className="px-1 text-xs opacity-90">☎️ {AGENCY.phone}</span>
             <span className="px-1 text-xs opacity-90"> 📧 {AGENCY.email}</span>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function KioskMobilePage() {
               📍 {AGENCY.address}
             </div>
             <div className="text-[0.8rem] text-center text-slate-600">
-              ☎ {AGENCY.phone}
+              ☎️ {AGENCY.phone}
             </div>
             <hr />
             <div className="text-[1.2rem] font-medium text-center text-slate-600">
