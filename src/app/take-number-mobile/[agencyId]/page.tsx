@@ -132,15 +132,16 @@ export default function KioskMobilePage() {
                   className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-100 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
                 >
                   <div>
-                    <div className="text-sm font-medium text-slate-600">
+                    <div className="text-sm font-semibold leading-none text-slate-600">
                       {t.service}
                     </div>
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-[2rem]  font-bold text-blue-600">
                       {t.number}
                     </div>
                   </div>
-                  <div className="text-xs text-slate-500">
-                    ⏰Thời gian lấy số: {t.time}
+                  <div className="text-[0.5rem] text-slate-500">
+                    <span className="font-semibold">⏰ Thời gian lấy số: </span>{" "}
+                    {t.time}
                   </div>
                 </div>
               ))
