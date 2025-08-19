@@ -10,7 +10,7 @@ export default function KioskMobilePage() {
   const router = useRouter();
   const params = useParams();
   const agencyId = params.agencyId;
-  const { popupMessage } = usePopup();
+  const { popupMessageMobile } = usePopup();
   const [activeTab, setActiveTab] = useState<"services" | "my">("services");
   const [tickets, setTickets] = useState<any[]>([]);
   const [popup, setPopup] = useState<any | null>(null);
@@ -26,7 +26,7 @@ export default function KioskMobilePage() {
   async function fetchMyAgency() {
     const res = await apiGet("/agencies/getAgency/" + agencyId);
     if (![200, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
+      handleApiError(res, popupMessageMobile, router);
       return;
     }
 
@@ -47,7 +47,7 @@ export default function KioskMobilePage() {
     );
 
     if (![200, 400].includes(res.status)) {
-      handleApiError(res, popupMessage, router);
+      handleApiError(res, popupMessageMobile, router);
       return;
     }
 

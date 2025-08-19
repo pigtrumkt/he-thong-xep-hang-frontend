@@ -18,6 +18,10 @@ type PopupContextType = {
     title?: string;
     description?: string;
   }) => Promise<void>;
+  popupMessageMobile: (options: {
+    title?: string;
+    description?: string;
+  }) => Promise<void>;
   popupConfirm: (options: {
     title?: string;
     description?: string;
@@ -50,6 +54,13 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     description?: string;
     type: ConfirmType;
     resolve: (result: boolean) => void;
+  } | null>(null);
+
+  const [messageMobileVisible, setMessageMobileVisible] = useState(false);
+  const [messageMobilePopup, setMessageMobilePopup] = useState<{
+    title?: string;
+    description?: string;
+    resolve: () => void;
   } | null>(null);
 
   // Refs để quản lý timeout
@@ -109,6 +120,16 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const popupMessageMobile = useCallback(
+    (options: { title?: string; description?: string }) => {
+      return new Promise<void>((resolve) => {
+        setMessageMobilePopup({ ...options, resolve });
+        setTimeout(() => setMessageMobileVisible(true), 10);
+      });
+    },
+    []
+  );
+
   const popupConfirm = useCallback(
     (options: { title?: string; description?: string }) => {
       return new Promise<boolean>((resolve) => {
@@ -137,6 +158,14 @@ export function PopupProvider({ children }: { children: ReactNode }) {
     }, 100);
   };
 
+  const closePopupMessageMobile = () => {
+    setMessageMobileVisible(false);
+    setTimeout(() => {
+      messageMobilePopup?.resolve();
+      setMessageMobilePopup(null);
+    }, 100);
+  };
+
   const handleConfirm = (result: boolean) => {
     setConfirmVisible(false);
     setTimeout(() => {
@@ -151,6 +180,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
         alertMessageGreen,
         alertMessageRed,
         popupMessage,
+        popupMessageMobile,
         popupConfirm,
         popupConfirmRed,
       }}
@@ -191,6 +221,34 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             <button
               onClick={closePopupMessage}
               className="px-8 py-2 mt-4 text-white bg-blue-400 rounded-lg hover:bg-blue-500"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Popup Message Mobile */}
+      {messageMobilePopup && (
+        <div
+          className={`fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center transition-opacity duration-100 ${
+            messageMobileVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[90%] max-w-sm text-center space-y-4">
+            {messageMobilePopup.title && (
+              <h2 className="text-2xl font-bold text-blue-700">
+                {messageMobilePopup.title}
+              </h2>
+            )}
+            {messageMobilePopup.description && (
+              <p className="text-lg leading-relaxed text-slate-600">
+                {messageMobilePopup.description}
+              </p>
+            )}
+            <button
+              onClick={closePopupMessageMobile}
+              className="w-full py-3 text-lg font-semibold text-white bg-blue-600 rounded-xl active:scale-95"
             >
               OK
             </button>
