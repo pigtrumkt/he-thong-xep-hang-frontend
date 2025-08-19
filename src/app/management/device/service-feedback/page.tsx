@@ -456,107 +456,111 @@ export default function RatingScreen() {
                   {serviceName}
                 </p>
               </div>
-              <div className="text-right">
-                <div className="flex items-center">
-                  <div className="mr-4">
-                    <h3 className="text-[2vw]">{staffName}</h3>
-                    <p className="text-[1.333vw]">{StaffPosition}</p>
-                  </div>
-                  <div>
-                    <img
-                      src={`${API_BASE}/accounts/avatar/${
-                        staffAvatarUrl
-                          ? `${staffAvatarUrl}`
-                          : staffGender === 0
-                          ? "avatar_default_female.png"
-                          : "avatar_default_male.png"
-                      }`}
-                      alt="Avatar"
-                      className="object-cover w-[6vw] bg-white cursor-pointer"
-                      onClick={() => setShowAvatarPreview(true)}
-                    />
+              {staffName && (
+                <div className="text-right">
+                  <div className="flex items-center">
+                    <div className="mr-4">
+                      <h3 className="text-[2vw]">{staffName}</h3>
+                      <p className="text-[1.333vw]">{StaffPosition}</p>
+                    </div>
+                    <div>
+                      <img
+                        src={`${API_BASE}/accounts/avatar/${
+                          staffAvatarUrl
+                            ? `${staffAvatarUrl}`
+                            : staffGender === 0
+                            ? "avatar_default_female.png"
+                            : "avatar_default_male.png"
+                        }`}
+                        alt="Avatar"
+                        className="object-cover w-[6vw] bg-white cursor-pointer  border-4 border-white rounded-full"
+                        onClick={() => setShowAvatarPreview(true)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </header>
 
           {/* Main Content */}
-          <div className="flex w-full h-full">
-            {/* Left Panel - Staff Info */}
-            <div className="flex flex-col justify-center border-r-4 border-blue-200 w-4/10 bg-blue-50">
-              <div className="text-center">
-                <p className="text-[2.6vw] font-semibold text-blue-700 ">
-                  {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
-                </p>
-                <div className="text-[12vw] text-blue-800 font-extrabold tracking-widest zoom-loop leading-[12vw]">
-                  {currentNumber}
+          {ticketId && (
+            <div className="flex w-full h-full">
+              {/* Left Panel - Staff Info */}
+              <div className="flex flex-col justify-center border-r-4 border-blue-200 w-4/10 bg-blue-50">
+                <div className="text-center">
+                  <p className="text-[2.6vw] font-semibold text-blue-700 ">
+                    {currentNumber && "MỜI CÔNG DÂN CÓ SỐ"}
+                  </p>
+                  <div className="text-[12vw] text-blue-800 font-extrabold tracking-widest zoom-loop leading-[12vw]">
+                    {currentNumber}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Panel - Rating */}
-            <div className="relative flex-1 w-full bg-white">
-              <div className="flex flex-col items-center justify-center w-full h-full px-[2vw] mx-auto">
-                <div className="text-center">
-                  <h2 className="mb-[0.8vw] text-[3.5vw] font-bold text-blue-800">
-                    ĐÁNH GIÁ DỊCH VỤ
-                  </h2>
-                  <div className="w-[12vw] h-1 mx-auto bg-blue-500 rounded-full"></div>
-                  <p className="mt-[3vw] text-[1.5vw] text-blue-600">
-                    Bạn có hài lòng với chất lượng dịch vụ?
+              {/* Right Panel - Rating */}
+              <div className="relative flex-1 w-full bg-white">
+                <div className="flex flex-col items-center justify-center w-full h-full px-[2vw] mx-auto">
+                  <div className="text-center">
+                    <h2 className="mb-[0.8vw] text-[3.5vw] font-bold text-blue-800">
+                      ĐÁNH GIÁ DỊCH VỤ
+                    </h2>
+                    <div className="w-[12vw] h-1 mx-auto bg-blue-500 rounded-full"></div>
+                    <p className="mt-[3vw] text-[1.5vw] text-blue-600">
+                      Bạn có hài lòng với chất lượng dịch vụ?
+                    </p>
+                  </div>
+
+                  {/* Stars */}
+                  <div className="flex gap-4 mb-8">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        className={`text-[5vw] transition-all transform hover:scale-110 leading-[5.5vw] ${
+                          selectedStars >= star
+                            ? "text-yellow-400 drop-shadow-lg"
+                            : "text-gray-300 hover:text-yellow-200"
+                        }`}
+                        onClick={() => setSelectedStars(star)}
+                        disabled={submitted}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Feedback */}
+                  <textarea
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
+                    className="w-[45vw] h-[7.5vw] p-[1vw] mt-[1vw] text-[1vw] text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    disabled={submitted}
+                  />
+
+                  {/* Submit Button */}
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitted || selectedStars === 0}
+                    className={`mt-[2vw] px-[4vw] py-[1vw] text-[1.2vw] font-bold rounded-2xl transition-all transform ${
+                      selectedStars > 0 && !submitted
+                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Gửi đánh giá
+                  </button>
+                  <p
+                    className={`text-blue-700 text-[1.5vw] font-semibold text-center mt-[1.5vw] ${
+                      submitted ? "" : "invisible"
+                    }`}
+                  >
+                    🎉 Cảm ơn bạn đã phản hồi!
                   </p>
                 </div>
-
-                {/* Stars */}
-                <div className="flex gap-4 mb-8">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      className={`text-[5vw] transition-all transform hover:scale-110 leading-[5.5vw] ${
-                        selectedStars >= star
-                          ? "text-yellow-400 drop-shadow-lg"
-                          : "text-gray-300 hover:text-yellow-200"
-                      }`}
-                      onClick={() => setSelectedStars(star)}
-                      disabled={submitted}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-
-                {/* Feedback */}
-                <textarea
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
-                  className="w-[45vw] h-[7.5vw] p-[1vw] mt-[1vw] text-[1vw] text-blue-900 placeholder-blue-400 transition-all border-2 border-blue-200 outline-none resize-none rounded-2xl bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                  disabled={submitted}
-                />
-
-                {/* Submit Button */}
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitted || selectedStars === 0}
-                  className={`mt-[2vw] px-[4vw] py-[1vw] text-[1.2vw] font-bold rounded-2xl transition-all transform ${
-                    selectedStars > 0 && !submitted
-                      ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  Gửi đánh giá
-                </button>
-                <p
-                  className={`text-blue-700 text-[1.5vw] font-semibold text-center mt-[1.5vw] ${
-                    submitted ? "" : "invisible"
-                  }`}
-                >
-                  🎉 Cảm ơn bạn đã phản hồi!
-                </p>
               </div>
             </div>
-          </div>
+          )}
           {showAvatarPreview && (
             <div
               onClick={() => setShowAvatarPreview(false)}

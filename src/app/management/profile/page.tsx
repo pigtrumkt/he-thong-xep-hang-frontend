@@ -164,7 +164,7 @@ export default function ProfilePage() {
                 : "avatar_default_male.png"
             }`}
             alt="Avatar"
-            className="object-cover w-32 h-32 mb-3 border-2 border-blue-300 shadow-md cursor-pointer"
+            className="object-cover w-32 h-32 mb-3 border-2 border-blue-300 rounded-full shadow-md cursor-pointer"
             onClick={() => setShowAvatarPreview(true)}
           />
           <div className="flex gap-2">
