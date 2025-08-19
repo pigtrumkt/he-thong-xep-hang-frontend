@@ -1,36 +1,63 @@
 "use client";
 
-import { useState } from "react";
-
-const AGENCY = {
-  name_1: "UBND Hà Giang",
-  name_2: "TỈNH HÀ GIANG",
-  address: "Số 1 Nguyễn Trãi, TP. Hà Giang, Hà Giang",
-  phone: "0219-3862666",
-  email: "ubnd@hagiang.gov.vn",
-  logo:
-    "data:image/svg+xml;utf8," +
-    encodeURIComponent(
-      `<svg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'><rect rx='20' width='96' height='96' fill='#2563eb'/><polygon points='48,12 57,36 84,36 62,50 70,78 48,62 26,78 34,50 12,36 39,36' fill='#fbbf24'/></svg>`
-    ),
-};
-
-const SERVICES = [
-  { label: "Đô thị - Công thương" },
-  { label: "Nông nghiệp - Môi trường" },
-  // { label: "Tư pháp - Hộ tịch" },
-  // { label: "Văn hóa" },
-  // { label: "Phụ trách chung" },
-  // { label: "Giáo dục - Đào tạo" },
-  // { label: "Y tế - Xã hội" },
-] as const;
+import { usePopup } from "@/components/popup/PopupContext";
+import { API_BASE, apiGet } from "@/lib/api";
+import { handleApiError } from "@/lib/handleApiError";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function KioskMobilePage() {
+  const router = useRouter();
+  const params = useParams();
+  const agencyId = params.agencyId;
+  const { popupMessage } = usePopup();
   const [activeTab, setActiveTab] = useState<"services" | "my">("services");
   const [tickets, setTickets] = useState<any[]>([]);
   const [popup, setPopup] = useState<any | null>(null);
 
-  const handleSelectService = (service: string) => {
+  const [agency, setAgency] = useState<any>({});
+  const [services, setServices] = useState<{ id: number; name: string }[]>([]);
+
+  useEffect(() => {
+    fetchServices();
+    fetchMyAgency();
+  }, []);
+
+  async function fetchMyAgency() {
+    const res = await apiGet("/agencies/getAgency/" + agencyId);
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 200) {
+      const data = res.data;
+
+      if (data.logo_url) {
+        data.logo_url = `${API_BASE}/agencies/logos/${data.logo_url}`;
+      }
+
+      setAgency(res.data);
+    }
+  }
+
+  async function fetchServices() {
+    const res = await apiGet(
+      "/services/findGroupedActiveServicesByAgency/" + agencyId
+    );
+
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 200) {
+      const flat = (res.data || []).flatMap((g: any) => g.services || []);
+      setServices(flat);
+    }
+  }
+
+  const handleSelectService = (service: number) => {
     const now = new Date();
     const newTicket = {
       service,
@@ -57,17 +84,17 @@ export default function KioskMobilePage() {
       <header className="top-0 z-20 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-500">
         <div className="flex flex-col items-center gap-2 px-6 py-6 text-center">
           <img
-            src={AGENCY.logo}
+            src={agency.logo_url || "/img/white.png"}
             alt="Logo"
             className="w-16 h-16 p-2 bg-white rounded-lg shadow-md"
           />
           <div className="text-xl font-bold drop-shadow-sm">
-            {AGENCY.name_1}
+            {agency.name_1}
           </div>
           <div className="text-xl font-bold drop-shadow-sm">
-            {AGENCY.name_2}
+            {agency.name_2}
           </div>
-          <div className="text-xs opacity-90">📍 {AGENCY.address}</div>
+          <div className="text-xs opacity-90">📍 {agency.address}</div>
           <div className="flex items-center justify-center gap-4 text-xs opacity-90">
             {/* Phone */}
             <span className="flex items-center gap-1">
@@ -91,11 +118,11 @@ export default function KioskMobilePage() {
                22 16.92z"
                 />
               </svg>
-              {AGENCY.phone}
+              {agency.phone}
             </span>
 
             {/* Email */}
-            <span className="flex items-center gap-1">📧 {AGENCY.email}</span>
+            <span className="flex items-center gap-1">📧 {agency.email}</span>
           </div>
         </div>
         <div className="bottom-0 z-20 shadow-md">
@@ -131,18 +158,18 @@ export default function KioskMobilePage() {
         {activeTab === "services" ? (
           <div className="w-full max-w-lg">
             <div className="grid grid-cols-1 gap-4">
-              {SERVICES && SERVICES.length === 0 ? (
+              {services && services.length === 0 ? (
                 <div className="py-5 text-center bg-white text-slate-400 rounded-xl">
                   Không có dịch vụ
                 </div>
               ) : (
-                SERVICES.map((s) => (
+                services.map((s) => (
                   <button
-                    key={s.label}
-                    onClick={() => handleSelectService(s.label)}
+                    key={s.id}
+                    onClick={() => handleSelectService(s.id)}
                     className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-300 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
                   >
-                    {s.label}
+                    {s.name}
                   </button>
                 ))
               )}
@@ -185,10 +212,10 @@ export default function KioskMobilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="p-6 space-y-3 bg-white shadow-xl rounded-xl w-80">
             <div className="text-[1.2rem] font-bold text-center text-blue-700">
-              {AGENCY.name_1}
+              {agency.name_1}
             </div>
             <div className="text-[0.8rem] text-center text-slate-600">
-              📍 {AGENCY.address}
+              📍 {agency.address}
             </div>
             <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
               {/* Phone */}
@@ -213,7 +240,7 @@ export default function KioskMobilePage() {
                22 16.92z"
                   />
                 </svg>
-                {AGENCY.phone}
+                {agency.phone}
               </span>
             </div>
             <hr />
