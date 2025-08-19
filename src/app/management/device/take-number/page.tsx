@@ -212,42 +212,54 @@ export default function Page() {
             <h2 className="mb-8 text-4xl font-black text-blue-900">
               PHIẾU CỦA BẠN
             </h2>
-            <div
-              id="inDay"
-              className="p-8 mb-4 text-blue-600 border border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl"
-            >
-              <p className="text-[2rem] font-bold text-blue-800 uppercase">
-                {ticketData.agency_name || "Tên cơ quan"}
-              </p>
-              <p className="text-[1.5rem] mt-1">
-                Địa chỉ: {ticketData.agency_address || "-"}
-              </p>
-              <p className="text-[1.5rem]">
-                Điện thoại: {ticketData.agency_phone || "-"}
-              </p>
-              <div className="mt-4 mb-6 border-t border-blue-300 border-dashed" />
-              <p className="text-[2.5rem] font-bold">
-                {ticketData.service_name}
-              </p>
-              <div className="text-[8rem] font-black text-blue-600 mb-10 leading-34">
-                {ticketData.queue_number}
-              </div>
-              <p className="text-[1.5rem]">
-                Trước bạn còn <strong>{ticketData.waitingAhead}</strong> người,
-                vui lòng chờ đến lượt.
-              </p>
-              <div className="mt-4 mb-2 border-t border-blue-300 border-dashed" />
-              <div className="flex justify-end text-[1.2rem]">
-                <span className="mr-1">Thời gian in:</span>
-                <span>
-                  {new Date(ticketData.created_at).toLocaleString("vi-VN", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })}
-                </span>
+            <div className="p-8 mb-4 text-blue-600 border border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl">
+              <div id="printArea">
+                <p
+                  id="agency"
+                  className="text-[2rem] font-bold text-blue-800 uppercase"
+                >
+                  {ticketData.agency_name || "Tên cơ quan"}
+                </p>
+                <p id="address" className="text-[1.5rem] mt-1">
+                  Địa chỉ: {ticketData.agency_address || "-"}
+                </p>
+                <p id="phone" className="text-[1.5rem]">
+                  Điện thoại: {ticketData.agency_phone || "-"}
+                </p>
+                <div
+                  id="borderTop"
+                  className="mt-4 mb-6 border-t border-blue-300 border-dashed"
+                />
+                <p id="serviceName" className="text-[2.5rem] font-bold">
+                  {ticketData.service_name}
+                </p>
+                <div
+                  id="queueNumber"
+                  className="text-[8rem] font-black text-blue-600 mb-10 leading-34"
+                >
+                  {ticketData.queue_number}
+                </div>
+                <p id="messageWaiting" className="text-[1.5rem]">
+                  Trước bạn còn{" "}
+                  <span className="font-medium">{ticketData.waitingAhead}</span>{" "}
+                  người, vui lòng chờ đến lượt.
+                </p>
+                <div
+                  id="borderBot"
+                  className="mt-4 mb-2 border-t border-blue-300 border-dashed"
+                />
+                <div id="timePrint" className="flex justify-end text-[1.2rem]">
+                  <span className="mr-1 font-medium">Thời gian in:</span>
+                  <span>
+                    {new Date(ticketData.created_at).toLocaleString("vi-VN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
               </div>
             </div>
 

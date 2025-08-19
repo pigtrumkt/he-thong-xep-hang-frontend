@@ -105,17 +105,107 @@ aside .active svg {
   animation: fade-in-out-popup 4s ease forwards;
 }
 
+/* ===== PRINT ONLY ===== */
 @media print {
+  /* Khổ giấy: đổi biến --paper-width thành 100mm nếu dùng máy 100mm */
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0;
+    height: auto;
+  }
+
+  /* Ẩn toàn bộ app, chỉ chừa #printArea */
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
-  #inDay,
-  #inDay * {
-    visibility: visible;
+
+  #printArea,
+  #printArea * {
+    visibility: visible !important;
   }
-  #inDay {
-    position: absolute;
-    top: 0;
-    left: 0;
+
+  /* Khối in: cố định giữa trang, vùng in an toàn cho giấy 80mm là ~72mm */
+  #printArea {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    padding: 4mm 3mm;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1.25;
+    break-inside: avoid;
+    page-break-inside: avoid;
+
+    /* Ép đen trắng cho toàn khối (ghi đè Tailwind) */
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  #printArea * {
+    color: #000 !important;
+    background: transparent !important;
+    border-color: #000 !important;
+    -webkit-text-fill-color: #000 !important; /* Safari/Chromium cases */
+  }
+
+  /* Viền gạch ngang */
+  #printArea #borderTop,
+  #printArea #borderBot {
+    margin-top: 2mm !important;
+    margin-bottom: 2mm !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-color: #000 !important;
+  }
+
+  /* Cỡ chữ bằng mm (ổn định khi in) */
+  #printArea #agency {
+    font-size: 4mm;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0 0 1mm;
+  }
+
+  #printArea #address,
+  #printArea #phone {
+    font-size: 3.2mm;
+    margin: 0.5mm 0;
+  }
+
+  #printArea #serviceName {
+    font-size: 5mm;
+    font-weight: 700;
+    margin: 2mm 0;
+  }
+
+  #printArea #queueNumber {
+    font-size: 18mm; /* số rất to */
+    font-weight: 800;
+    line-height: 1; /* tránh thừa khoảng trên/dưới */
+    margin: 2mm 0 3mm;
+  }
+
+  #printArea #messageWaiting {
+    font-size: 3mm;
+  }
+
+  #printArea #timePrint {
+    font-size: 3mm;
+  }
+
+  #printArea #timePrint {
+    font-size: 3mm;
+  }
+
+  /* Loại margin mặc định của p, div do Tailwind/browser */
+  #printArea p {
+    margin: 0.6mm 0;
   }
 }
