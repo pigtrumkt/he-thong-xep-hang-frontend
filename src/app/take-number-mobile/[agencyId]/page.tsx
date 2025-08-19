@@ -69,9 +69,34 @@ export default function KioskMobilePage() {
             {AGENCY.name_2}
           </div>
           <div className="text-xs opacity-90">📍 {AGENCY.address}</div>
-          <div className="text-xs opacity-90">
-            <span className="px-1 text-xs opacity-90">☎️ {AGENCY.phone}</span>
-            <span className="px-1 text-xs opacity-90"> 📧 {AGENCY.email}</span>
+          <div className="flex items-center justify-center gap-4 text-xs opacity-90">
+            {/* Phone */}
+            <span className="flex items-center gap-1">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 text-red-500"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 
+               19.79 19.79 0 0 1-8.63-3.07 
+               19.5 19.5 0 0 1-6-6 
+               19.79 19.79 0 0 1-3.07-8.67 
+               A2 2 0 0 1 4.17 2h3a2 2 0 0 1 2 
+               1.72c.12.81.37 1.6.72 2.34a2 
+               2 0 0 1-.45 2.18L8.09 9.91a16 
+               16 0 0 0 6 6l1.67-1.67a2 
+               2 0 0 1 2.18-.45c.74.35 
+               1.53.6 2.34.72A2 2 0 0 1 
+               22 16.92z"
+                />
+              </svg>
+              {AGENCY.phone}
+            </span>
+
+            {/* Email */}
+            <span className="flex items-center gap-1">📧 {AGENCY.email}</span>
           </div>
         </div>
         <div className="bottom-0 z-20 shadow-md">
@@ -160,8 +185,31 @@ export default function KioskMobilePage() {
             <div className="text-[0.8rem] text-center text-slate-600">
               📍 {AGENCY.address}
             </div>
-            <div className="text-[0.8rem] text-center text-slate-600">
-              ☎️ {AGENCY.phone}
+            <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
+              {/* Phone */}
+              <span className="flex items-center gap-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  className="w-4 h-4 text-red-500"
+                >
+                  <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2 
+               19.79 19.79 0 0 1-8.63-3.07 
+               19.5 19.5 0 0 1-6-6 
+               19.79 19.79 0 0 1-3.07-8.67 
+               A2 2 0 0 1 4.17 2h3a2 2 0 0 1 2 
+               1.72c.12.81.37 1.6.72 2.34a2 
+               2 0 0 1-.45 2.18L8.09 9.91a16 
+               16 0 0 0 6 6l1.67-1.67a2 
+               2 0 0 1 2.18-.45c.74.35 
+               1.53.6 2.34.72A2 2 0 0 1 
+               22 16.92z"
+                  />
+                </svg>
+                {AGENCY.phone}
+              </span>
             </div>
             <hr />
             <div className="text-[1.2rem] font-medium text-center text-slate-600">
