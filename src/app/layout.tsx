@@ -51,7 +51,7 @@ export default async function RootLayout({
 
   return (
     <html lang="vi" data-scroll-behavior="smooth">
-      <body className="text-[18px] min-h-[100vh] min-w-[800px]">
+      <body className="text-[18px] min-h-[100vh] md:min-w-[800px]">
         <ClientWrapper value={{ user }}>{children}</ClientWrapper>
       </body>
     </html>
