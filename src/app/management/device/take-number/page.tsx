@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { apiGet, apiPost } from "@/lib/api";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
@@ -20,6 +20,8 @@ export default function Page() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+
+  const [logoUrl, setLogoUrl] = useState("/img/white.png");
 
   const [popupMessageData, setPopupMessageData] = useState<{
     title?: string;
@@ -42,6 +44,7 @@ export default function Page() {
 
   useEffect(() => {
     fetchServices();
+    fetchMyAgency();
   }, []);
 
   useEffect(() => {
@@ -59,6 +62,20 @@ export default function Page() {
     }, 1000);
     return () => clearInterval(timer);
   }, [showSuccess]);
+
+  async function fetchMyAgency() {
+    const res = await apiGet("/agencies/getMyAgency");
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, showMessage, router);
+      return;
+    }
+
+    if (res.status === 200) {
+      if (res.data.logo_url) {
+        setLogoUrl(`${API_BASE}/agencies/logos/${res.data.logo_url}`);
+      }
+    }
+  }
 
   async function fetchServices() {
     const res = await apiGet("/services/findGroupedActiveServicesInAgency");
@@ -144,9 +161,9 @@ export default function Page() {
       <div className="w-full h-full max-w-[100rem] pt-8 px-8 flex-1 flex flex-col">
         <div className="flex items-center gap-6 mb-10 ml-7">
           <img
-            src="/img/vn-circle.png"
+            src={logoUrl}
             alt="Avatar"
-            className="w-24 h-24 bg-white border-4 border-white rounded-full shadow-lg"
+            className="object-cover w-24 h-24 bg-white border-4 border-white rounded-full shadow-lg"
           />
           <div>
             <h1 className="mb-2 text-6xl font-extrabold tracking-wide text-blue-600 rounded-3xl drop-shadow-sm">
