@@ -16,14 +16,13 @@ const AGENCY = {
 };
 
 const SERVICES = [
-  { label: "Cấp căn cước công dân" },
   { label: "Đô thị - Công thương" },
   { label: "Nông nghiệp - Môi trường" },
-  { label: "Tư pháp - Hộ tịch" },
-  { label: "Văn hóa" },
-  { label: "Phụ trách chung" },
-  { label: "Giáo dục - Đào tạo" },
-  { label: "Y tế - Xã hội" },
+  // { label: "Tư pháp - Hộ tịch" },
+  // { label: "Văn hóa" },
+  // { label: "Phụ trách chung" },
+  // { label: "Giáo dục - Đào tạo" },
+  // { label: "Y tế - Xã hội" },
 ] as const;
 
 export default function KioskMobilePage() {
@@ -53,7 +52,7 @@ export default function KioskMobilePage() {
   };
 
   return (
-    <div className="flex flex-col bg-gradient-to-b from-blue-100 via-white to-blue-50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-100 via-white to-blue-50">
       {/* Header with Agency Info */}
       <header className="top-0 z-20 text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-500">
         <div className="flex flex-col items-center gap-2 px-6 py-6 text-center">
@@ -132,29 +131,35 @@ export default function KioskMobilePage() {
         {activeTab === "services" ? (
           <div className="w-full max-w-lg">
             <div className="grid grid-cols-1 gap-4">
-              {SERVICES.map((s) => (
-                <button
-                  key={s.label}
-                  onClick={() => handleSelectService(s.label)}
-                  className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-100 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
-                >
-                  {s.label}
-                </button>
-              ))}
+              {SERVICES && SERVICES.length === 0 ? (
+                <div className="py-5 text-center bg-white text-slate-400 rounded-xl">
+                  Không có dịch vụ
+                </div>
+              ) : (
+                SERVICES.map((s) => (
+                  <button
+                    key={s.label}
+                    onClick={() => handleSelectService(s.label)}
+                    className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-300 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
+                  >
+                    {s.label}
+                  </button>
+                ))
+              )}
             </div>
           </div>
         ) : (
           <div className="w-full max-w-lg space-y-4">
             {tickets.length === 0 ? (
-              <div className="py-10 text-center bg-white border shadow-md text-slate-500 rounded-xl">
-                Chưa có vé nào hôm nay
+              <div className="py-5 text-center bg-white text-slate-400 rounded-xl">
+                Bạn chưa lấy số thứ tự
               </div>
             ) : (
               tickets.map((t) => (
                 <div
                   key={t.timestamp}
                   onClick={() => setPopup(t)}
-                  className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-100 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
+                  className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-300 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
                 >
                   <div>
                     <div className="text-sm font-semibold leading-none text-slate-600">
