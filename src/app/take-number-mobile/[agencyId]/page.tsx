@@ -118,6 +118,7 @@ export default function KioskMobilePage() {
 
     if (res.status === 201) {
       const newTicket = res.data;
+      newTicket.id = newTicket.ticket_id;
       newTicket.status = 1;
       setTickets([newTicket, ...tickets]);
       setPopup(newTicket);
@@ -241,7 +242,7 @@ export default function KioskMobilePage() {
               ) : (
                 tickets.map((t) => (
                   <div
-                    key={t.ticket_id}
+                    key={t.id}
                     onClick={() => setPopup(t)}
                     className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-300 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
                   >
