@@ -114,7 +114,10 @@ export default function KioskMobilePage() {
       setPopup(newTicket);
       setActiveTab("my");
     } else if (res.status === 400 && typeof res.data === "object") {
-      popupMessageMobile(res.data.message);
+      popupMessageMobile({
+        title: "Tin nhắn hệ thống",
+        description: res.data.message,
+      });
     } else {
       popupMessageMobile({
         description: "Lỗi không xác định",

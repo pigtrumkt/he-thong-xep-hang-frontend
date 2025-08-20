@@ -248,7 +248,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             )}
             <button
               onClick={closePopupMessageMobile}
-              className="w-full py-3 text-lg font-semibold text-white bg-blue-600 rounded-xl active:scale-95"
+              className="px-10 py-2 mt-4 text-lg font-semibold text-white bg-blue-600 rounded-xl active:scale-95"
             >
               OK
             </button>
