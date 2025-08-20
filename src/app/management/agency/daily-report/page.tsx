@@ -101,7 +101,7 @@ export default function DailyReportPage() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-full p-8 bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-extrabold text-blue-700">
@@ -159,9 +159,9 @@ export default function DailyReportPage() {
               {/* Tổng số */}
               <div className="flex items-center justify-between pt-2 mt-2 text-sm border-t border-gray-200">
                 <span className="flex items-center gap-2 font-semibold text-gray-700">
-                  <Ticket size={18} className="text-blue-600" /> Tổng số
+                  <Ticket size={18} className="text-blue-800" /> Tổng số
                 </span>
-                <span className="font-bold text-blue-600">{totalTickets}</span>
+                <span className="font-bold text-blue-800">{totalTickets}</span>
               </div>
             </div>
           </div>
@@ -214,9 +214,9 @@ export default function DailyReportPage() {
               {/* Tổng số */}
               <div className="flex items-center justify-between pt-2 mt-2 text-sm border-t border-gray-200">
                 <span className="flex items-center gap-2 font-semibold text-gray-700">
-                  <Ticket size={18} className="text-blue-600" /> Tổng số
+                  <Ticket size={18} className="text-blue-800" /> Tổng số
                 </span>
-                <span className="font-bold text-blue-600">{totalTickets}</span>
+                <span className="font-bold text-blue-800">{totalTickets}</span>
               </div>
             </div>
           </div>
