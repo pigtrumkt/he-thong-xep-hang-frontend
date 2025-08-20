@@ -71,12 +71,20 @@ function AdsDisplay({ ads }: { ads?: AdsData }) {
   if (ads.type === 1 && ads.imagesUrl && ads.imagesUrl.length) {
     const cur = ads.imagesUrl[idx] || ads.imagesUrl[0];
     const fit = objectFitClassFromNumber(ads.imagesObjectFit);
+
     return (
-      <img
-        src={cur}
-        className={`w-full h-full ${fit} bg-black`}
-        alt="Quảng cáo"
-      />
+      <div className="relative w-full h-full overflow-hidden bg-black">
+        {ads.imagesUrl.map((url, i) => (
+          <img
+            key={i}
+            src={url}
+            alt="Quảng cáo"
+            className={`absolute inset-0 w-full h-full ${fit} transition-opacity duration-1000 ${
+              i === idx ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
+      </div>
     );
   }
 
