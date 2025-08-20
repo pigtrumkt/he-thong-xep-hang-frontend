@@ -9,7 +9,19 @@ import { useEffect, useState } from "react";
 function getClientIdentifier(): string {
   let uuid = localStorage.getItem("client_identifier");
   if (!uuid) {
-    uuid = crypto.randomUUID();
+    if (typeof crypto.randomUUID === "function") {
+      uuid = crypto.randomUUID();
+    } else {
+      // fallback cho Safari cũ
+      uuid = "xxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+        /[xy]/g,
+        function (c) {
+          const r = (Math.random() * 16) | 0,
+            v = c === "x" ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        }
+      );
+    }
     localStorage.setItem("client_identifier", uuid);
   }
   return uuid;
@@ -118,7 +130,7 @@ export default function KioskMobilePage() {
           <img
             src={agency.logo_url || "/img/white.png"}
             alt="Logo"
-            className="w-16 h-16 p-2 bg-white rounded-lg shadow-md"
+            className="object-contain h-16"
           />
           <div className="text-xl font-bold drop-shadow-sm">
             {agency.name_1}
@@ -225,18 +237,24 @@ export default function KioskMobilePage() {
                       {t.service_name}
                     </div>
                     {t.status === 1 && (
-                      <div className="text-xs text-slate-600">
+                      <div className="text-xs text-slate-600 whitespace-nowrap">
                         Đang đợi: {t.waitingAhead}
                       </div>
                     )}
                     {t.status === 2 && (
-                      <div className="text-xs text-blue-500">Đang phục vụ</div>
+                      <div className="text-xs text-blue-500 whitespace-nowrap">
+                        Đang phục vụ
+                      </div>
                     )}
                     {t.status === 3 && (
-                      <div className="text-xs text-green-500">Phục vụ xong</div>
+                      <div className="text-xs text-green-500 whitespace-nowrap">
+                        Phục vụ xong
+                      </div>
                     )}
                     {t.status === 4 && (
-                      <div className="text-xs text-red-500">Vắng mặt</div>
+                      <div className="text-xs text-red-500 whitespace-nowrap">
+                        Vắng mặt
+                      </div>
                     )}
                   </div>
 
@@ -244,7 +262,7 @@ export default function KioskMobilePage() {
                     {t.queue_number}
                   </div>
 
-                  <div className="text-[0.6rem] text-blue-500">
+                  <div className="text-[0.5rem] text-blue-500">
                     <span className="font-semibold">⏰ Thời gian lấy số: </span>{" "}
                     {new Date(t.created_at).toLocaleString("vi-VN", {
                       hour: "2-digit",
