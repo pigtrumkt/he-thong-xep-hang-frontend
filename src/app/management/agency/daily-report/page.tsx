@@ -15,9 +15,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { handleApiError } from "@/lib/handleApiError";
 import { usePopup } from "@/components/popup/PopupContext";
+import { lab } from "d3-color";
 
-const COLORS = ["#3b82f6", "#facc15", "#22c55e", "#ef4444"];
-const COLORS2 = ["#2563eb", "#60a5fa"];
+const COLORS = [
+  "#06b6d4",
+  lab(44.0605, 29.0279, -86.0352).formatHex(),
+  lab(70.5521, -66.5147, 45.8072).formatHex(),
+  lab(55.4814, 75.0732, 48.8528).formatHex(),
+];
+const COLORS2 = [lab(44.0605, 29.0279, -86.0352).formatHex(), "#06b6d4"];
 
 export default function DailyReportPage() {
   const router = useRouter();
@@ -75,7 +81,7 @@ export default function DailyReportPage() {
       color: COLORS2[0],
       icon: Building2,
     },
-    { name: "Online", value: stats.online, color: COLORS2[1], icon: Globe },
+    { name: "Trực tuyến", value: stats.online, color: COLORS2[1], icon: Globe },
   ];
 
   const totalTickets = stats.totalTickets;
@@ -113,7 +119,7 @@ export default function DailyReportPage() {
           </h2>
           <div className="flex gap-6">
             <div className="flex-1">
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={ticketStats}
@@ -164,11 +170,11 @@ export default function DailyReportPage() {
         {/* Nguồn */}
         <div className="p-6 bg-white shadow rounded-2xl">
           <h2 className="mb-4 text-lg font-semibold text-blue-700">
-            Nguồn phát số
+            Nguồn lấy số
           </h2>
           <div className="flex gap-6">
             <div className="flex-1">
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={sourceStats}
