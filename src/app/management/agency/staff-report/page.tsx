@@ -49,11 +49,6 @@ export default function EmployeeReportPage() {
     setData(res.data || []);
   }
 
-  // danh sách đã lọc theo username tại FE
-  const filtered = data.filter((emp) =>
-    emp.full_name?.toLowerCase().includes(username.toLowerCase())
-  );
-
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
       {/* Header + Filter */}
@@ -107,18 +102,18 @@ export default function EmployeeReportPage() {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={6} className="py-6 text-center text-gray-400">
+              <td colSpan={6} className="py-6 text-center text-gray-500">
                 Đang tải...
               </td>
             </tr>
-          ) : filtered.length === 0 ? (
+          ) : data.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-6 text-center text-gray-400">
+              <td colSpan={6} className="py-6 text-center text-gray-500">
                 Không có dữ liệu
               </td>
             </tr>
           ) : (
-            filtered.map((emp, idx) => (
+            data.map((emp, idx) => (
               <tr
                 key={idx}
                 className="transition border-b border-slate-300 last:border-none hover:bg-blue-50 group"
