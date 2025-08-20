@@ -52,6 +52,7 @@ async function apiRequest(
       status: res.status,
       data: json || null,
     };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     if (timeout) clearTimeout(timeout);
     return { status: 0, data: null };
@@ -79,6 +80,7 @@ export function apiUploadWithProgress(
       let json = {};
       try {
         json = JSON.parse(xhr.responseText);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {}
 
       resolve({

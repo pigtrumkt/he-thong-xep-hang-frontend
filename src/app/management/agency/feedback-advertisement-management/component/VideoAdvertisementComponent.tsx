@@ -2,7 +2,7 @@
 
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiPost, apiUploadWithProgress } from "@/lib/api";
+import { API_BASE, apiUploadWithProgress } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

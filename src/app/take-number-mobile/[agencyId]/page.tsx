@@ -1,6 +1,5 @@
 "use client";
 
-import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
 import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
