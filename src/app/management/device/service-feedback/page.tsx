@@ -128,7 +128,8 @@ export default function RatingScreen() {
   const [isShowAds, setShowAds] = useState<boolean>(false);
   const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
 
-  const showAds = (delay = 0) => {
+  const showAdsRef = useRef<(delay?: number) => void>(() => {});
+  showAdsRef.current = (delay = 0) => {
     if (!adsData || adsData.type === 0) {
       return;
     }
@@ -249,7 +250,7 @@ export default function RatingScreen() {
       setStatusTicket(null);
       setSelectedStars(0);
       setFeedback("");
-      showAds();
+      showAdsRef.current();
     } else if (response.status === "update") {
       if (response.staffName !== undefined) {
         setStaffName(response.staffName);
@@ -276,11 +277,11 @@ export default function RatingScreen() {
       if (response.statusTicket !== undefined) {
         setStatusTicket(response.statusTicket);
         if (response.statusTicket === null) {
-          showAds();
+          showAdsRef.current();
         }
 
         if ([3, 4].includes(response.statusTicket)) {
-          showAds(180000);
+          showAdsRef.current(180000);
         }
       }
       if (response.ticketId !== undefined) {
@@ -327,7 +328,7 @@ export default function RatingScreen() {
 
     if (res.status === 201) {
       setSubmitted(true);
-      showAds(60000);
+      showAdsRef.current(60000);
     } else {
       popupRef.current?.showMessage({
         description: "Mất kết nối",

@@ -122,7 +122,8 @@ export default function CounterStatusScreen() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
 
-  const showAds = (delay = 0) => {
+  const showAdsRef = useRef<(delay?: number) => void>(() => {});
+  showAdsRef.current = (delay = 0) => {
     if (!adsData || adsData.type === 0) {
       return;
     }
@@ -194,7 +195,7 @@ export default function CounterStatusScreen() {
       setCurrentNumber(null);
       setStatusTicket(null);
       setHistory([]);
-      showAds();
+      showAdsRef.current();
     } else if (response.status === "update") {
       if (response.serviceId) {
         serviceIdRef.current = response.serviceId;
@@ -216,11 +217,11 @@ export default function CounterStatusScreen() {
         setStatusTicket(response.statusTicket);
 
         if (response.statusTicket === null) {
-          showAds();
+          showAdsRef.current();
         }
 
         if ([3, 4].includes(response.statusTicket)) {
-          showAds(180000);
+          showAdsRef.current(180000);
         }
       }
 
