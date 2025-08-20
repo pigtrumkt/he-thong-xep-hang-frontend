@@ -1,7 +1,7 @@
 "use client";
 
 import { usePopup } from "@/components/popup/PopupContext";
-import { API_BASE, apiGet } from "@/lib/api";
+import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -57,25 +57,38 @@ export default function KioskMobilePage() {
     }
   }
 
-  const handleSelectService = (service: number) => {
-    const now = new Date();
-    const newTicket = {
-      service,
-      number: Math.floor(Math.random() * 100) + 1,
-      timestamp: now.getTime(),
-      time: now.toLocaleString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }), // ✅ HH:mm dd/MM/yyyy
-      waiting: 1,
-    };
+  const handleSelectService = async (serviceId: number) => {
+    // lấy hoặc tạo client_mac từ localStorage
+    let clientMac = localStorage.getItem("client_mac");
+    if (!clientMac) {
+      clientMac = crypto.randomUUID();
+      localStorage.setItem("client_mac", clientMac);
+    }
 
-    setTickets([...tickets, newTicket]);
-    setPopup(newTicket);
-    setActiveTab("my");
+    const res = await apiPost("/tickets/get-number-mobile", {
+      agency_id: Number(agencyId),
+      service_id: serviceId,
+      source: 2,
+      client_mac: clientMac,
+    });
+
+    if (![201, 400].includes(res.status)) {
+      handleApiError(res, popupMessageMobile, router);
+      return;
+    }
+
+    if (res.status === 201) {
+      const newTicket = res.data;
+      setTickets([...tickets, newTicket]);
+      setPopup(newTicket);
+      setActiveTab("my");
+    } else if (res.status === 400 && typeof res.data === "object") {
+      popupMessageMobile(res.data.message);
+    } else {
+      popupMessageMobile({
+        description: "Lỗi không xác định",
+      });
+    }
   };
 
   return (
@@ -184,21 +197,27 @@ export default function KioskMobilePage() {
             ) : (
               tickets.map((t) => (
                 <div
-                  key={t.timestamp}
+                  key={t.ticket_id}
                   onClick={() => setPopup(t)}
                   className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-300 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
                 >
                   <div>
                     <div className="text-sm font-semibold leading-none text-slate-600">
-                      {t.service}
+                      {t.service_name}
                     </div>
                     <div className="text-[2rem]  font-bold text-blue-600">
-                      {t.number}
+                      {t.queue_number}
                     </div>
                   </div>
                   <div className="text-[0.5rem] text-slate-500">
                     <span className="font-semibold">⏰ Thời gian lấy số: </span>{" "}
-                    {t.time}
+                    {new Date(t.created_at).toLocaleString("vi-VN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
                   </div>
                 </div>
               ))
@@ -245,19 +264,26 @@ export default function KioskMobilePage() {
             </div>
             <hr />
             <div className="text-[1.2rem] font-medium text-center text-slate-600">
-              {popup.service}
+              {popup.service_name}
             </div>
             <div className="text-[5rem] font-bold text-center text-blue-600 leading-[4rem]">
-              {popup.number}
+              {popup.queue_number}
             </div>
             <div className="text-xs text-center text-slate-500">
-              Trước bạn còn <span className="font-bold">{popup.waiting}</span>{" "}
-              người, vui lòng chờ đến lượt.
+              Trước bạn còn{" "}
+              <span className="font-bold">{popup.waitingAhead}</span> người, vui
+              lòng chờ đến lượt.
             </div>
             <hr />
             <div className="text-xs text-center text-slate-500">
               <span className="font-bold">⏰ Thời gian lấy số: </span>
-              {popup.time}
+              {new Date(popup.created_at).toLocaleString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
             </div>
             <button
               onClick={() => setPopup(null)}
@@ -268,8 +294,6 @@ export default function KioskMobilePage() {
           </div>
         </div>
       )}
-
-      {/* Footer with Full-width Tabs */}
     </div>
   );
 }
