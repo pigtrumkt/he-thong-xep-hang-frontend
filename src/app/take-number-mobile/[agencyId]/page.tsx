@@ -97,6 +97,7 @@ export default function KioskMobilePage() {
 
     if (res.status === 201) {
       const newTicket = res.data;
+      newTicket.status = 1;
       setTickets([newTicket, ...tickets]);
       setPopup(newTicket);
       setActiveTab("my");
@@ -219,15 +220,31 @@ export default function KioskMobilePage() {
                   onClick={() => setPopup(t)}
                   className="p-4 font-semibold text-blue-700 transition bg-white border border-blue-300 shadow-lg rounded-xl hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-white active:scale-95"
                 >
-                  <div>
-                    <div className="text-sm font-semibold leading-none text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-semibold leading-none text-blue-700">
                       {t.service_name}
                     </div>
-                    <div className="text-[2rem]  font-bold text-blue-600">
-                      {t.queue_number}
-                    </div>
+                    {t.status === 1 && (
+                      <div className="text-xs text-slate-600">
+                        Đang đợi: {t.waitingAhead}
+                      </div>
+                    )}
+                    {t.status === 2 && (
+                      <div className="text-xs text-blue-500">Đang phục vụ</div>
+                    )}
+                    {t.status === 3 && (
+                      <div className="text-xs text-green-500">Phục vụ xong</div>
+                    )}
+                    {t.status === 4 && (
+                      <div className="text-xs text-red-500">Vắng mặt</div>
+                    )}
                   </div>
-                  <div className="text-[0.5rem] text-slate-500">
+
+                  <div className="text-[2rem] font-bold text-blue-800">
+                    {t.queue_number}
+                  </div>
+
+                  <div className="text-[0.6rem] text-blue-500">
                     <span className="font-semibold">⏰ Thời gian lấy số: </span>{" "}
                     {new Date(t.created_at).toLocaleString("vi-VN", {
                       hour: "2-digit",
@@ -287,11 +304,28 @@ export default function KioskMobilePage() {
             <div className="text-[5rem] font-bold text-center text-blue-600 leading-[4rem]">
               {popup.queue_number}
             </div>
-            <div className="text-xs text-center text-slate-500">
-              Trước bạn còn{" "}
-              <span className="font-bold">{popup.waitingAhead}</span> người, vui
-              lòng chờ đến lượt.
-            </div>
+            {popup.status === 1 && (
+              <div className="text-xs text-center text-slate-500">
+                Trước bạn còn{" "}
+                <span className="font-bold">{popup.waitingAhead}</span> người,
+                vui lòng chờ đến lượt.
+              </div>
+            )}
+            {popup.status === 2 && (
+              <div className="text-[1rem] font-medium text-center text-blue-500">
+                Đang phục vụ
+              </div>
+            )}
+            {popup.status === 3 && (
+              <div className="text-[1rem] font-medium text-center text-green-500">
+                Phục vụ xong
+              </div>
+            )}
+            {popup.status === 4 && (
+              <div className="text-[1rem] font-medium text-center text-red-500">
+                Vắng mặt
+              </div>
+            )}
             <hr />
             <div className="text-xs text-center text-slate-500">
               <span className="font-bold">⏰ Thời gian lấy số: </span>
