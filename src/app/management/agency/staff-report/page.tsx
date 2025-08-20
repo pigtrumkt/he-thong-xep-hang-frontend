@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePopup } from "@/components/popup/PopupContext";
 import { apiGet } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
+
+function formatDateLocal(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+const today = new Date();
+const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 export default function EmployeeReportPage() {
   const router = useRouter();
@@ -12,25 +22,24 @@ export default function EmployeeReportPage() {
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any[]>([]);
-  const [fromDate, setFromDate] = useState(
-    new Date(new Date().setDate(new Date().getDate() - 7))
-      .toISOString()
-      .slice(0, 10)
-  ); // mặc định 7 ngày trước
-  const [toDate, setToDate] = useState(new Date().toISOString().slice(0, 10)); // hôm nay
-  const [username, setUsername] = useState(""); // lọc theo tài khoản
+  const [fromDate, setFromDate] = useState(formatDateLocal(firstDayOfMonth));
+  const [toDate, setToDate] = useState(formatDateLocal(today));
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    fetchReport();
+  }, []);
 
   async function fetchReport() {
     setLoading(true);
-    const query = new URLSearchParams({
-      from: fromDate,
-      to: toDate,
-    });
+
+    let url = `/tickets/employeesReport?from=${fromDate}&to=${toDate}`;
     if (username.trim()) {
-      query.append("username", username.trim());
+      url += `&username=${encodeURIComponent(username.trim())}`;
     }
 
-    const res = await apiGet(`/reports/employees?${query.toString()}`);
+    const res = await apiGet(url);
+
     setLoading(false);
 
     if (res.status !== 200) {
@@ -39,6 +48,11 @@ export default function EmployeeReportPage() {
     }
     setData(res.data || []);
   }
+
+  // danh sách đã lọc theo username tại FE
+  const filtered = data.filter((emp) =>
+    emp.full_name?.toLowerCase().includes(username.toLowerCase())
+  );
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 min-w-[60rem]">
@@ -93,18 +107,18 @@ export default function EmployeeReportPage() {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={7} className="py-6 text-center text-gray-400">
+              <td colSpan={6} className="py-6 text-center text-gray-400">
                 Đang tải...
               </td>
             </tr>
-          ) : data.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <tr>
-              <td colSpan={7} className="py-6 text-center text-gray-400">
+              <td colSpan={6} className="py-6 text-center text-gray-400">
                 Không có dữ liệu
               </td>
             </tr>
           ) : (
-            data.map((emp, idx) => (
+            filtered.map((emp, idx) => (
               <tr
                 key={idx}
                 className="transition border-b border-slate-300 last:border-none hover:bg-blue-50 group"
@@ -113,23 +127,25 @@ export default function EmployeeReportPage() {
                   {idx + 1}
                 </td>
                 <td className="px-4 py-3">{emp.username}</td>
-                <td className="px-4 py-3">{emp.name}</td>
+                <td className="px-4 py-3">{emp.full_name}</td>
                 <td className="px-4 py-3 text-center text-green-600">
                   {emp.doneTickets}
                 </td>
                 <td className="flex items-center justify-center gap-1 px-4 py-3 text-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    className="w-4 h-4 text-yellow-400"
-                  >
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                  </svg>
+                  {emp.avgRating && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 text-yellow-400"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  )}
                   {emp.avgRating ?? "-"}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  {emp.feedbackCount ?? 0}
+                  {emp.commentCount ?? 0}
                 </td>
               </tr>
             ))

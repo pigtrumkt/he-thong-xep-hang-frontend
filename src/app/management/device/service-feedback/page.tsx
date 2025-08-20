@@ -319,7 +319,6 @@ export default function RatingScreen() {
 
     if (res.status === 201) {
       setSubmitted(true);
-      setTicketId(null);
       showAds(60000);
     } else {
       popupRef.current?.showMessage({
