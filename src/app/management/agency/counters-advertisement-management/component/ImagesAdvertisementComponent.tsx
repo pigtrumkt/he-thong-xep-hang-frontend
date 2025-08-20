@@ -35,7 +35,7 @@ export default function ImagesAdvertisementComponent({
   const [imagesPreview, setImagesPreview] = useState<string[]>([]); // link hiển thị cho thẻ img
   const [imagesFilename, setImagesFilename] = useState<string[]>([]); // lưu tên file để đưa lên server
 
-  let filenameIndex = useRef(0);
+  const filenameIndex = useRef(0);
 
   // init load
   useEffect(() => {
