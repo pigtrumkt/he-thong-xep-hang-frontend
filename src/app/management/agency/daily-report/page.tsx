@@ -37,7 +37,7 @@ export default function DailyReportPage() {
 
   async function fetchReport() {
     setLoading(true);
-    const res = await apiGet("/tickets/daily");
+    const res = await apiGet("/tickets/dailyReport");
     setLoading(false);
     if (![200, 400].includes(res.status)) {
       handleApiError(res, popupMessage, router);
