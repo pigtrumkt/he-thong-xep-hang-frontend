@@ -54,72 +54,24 @@ export default function EmployeeReportPage() {
     setData(res.data || []);
   }
 
-  function openComments(emp: any) {
+  async function openComments(emp: any) {
     setSelectedEmp(emp);
-    // mock data góp ý
-    setComments([
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Cấp CCCD",
-        stars: 5,
-        comment:
-          "Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng Rất nhanh chóng, hài lòng",
-      },
-      {
-        service: "Chứng thực giấy tờ",
-        stars: 3,
-        comment: "Bình thường, hơi chậm",
-      },
-      { service: "Hộ khẩu", stars: 4, comment: "Ổn, nhân viên thân thiện" },
-    ]);
+    setComments([]);
     setShowComments(true);
+
+    const res = await apiGet(
+      `/tickets/employeeComments?accountId=${emp.id}&from=${fromDate}&to=${toDate}`
+    );
+
+    if (res.status === 200) {
+      setComments(res.data || []);
+    } else if (res.status === 400 && typeof res.data === "object") {
+      popupMessage({
+        description: res.data.message,
+      });
+    } else {
+      handleApiError(res, popupMessage, router);
+    }
   }
 
   return (
