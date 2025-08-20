@@ -6,6 +6,15 @@ import { handleApiError } from "@/lib/handleApiError";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+function getClientIdentifier(): string {
+  let uuid = localStorage.getItem("client_identifier");
+  if (!uuid) {
+    uuid = crypto.randomUUID();
+    localStorage.setItem("client_identifier", uuid);
+  }
+  return uuid;
+}
+
 export default function KioskMobilePage() {
   const router = useRouter();
   const params = useParams();
@@ -21,7 +30,23 @@ export default function KioskMobilePage() {
   useEffect(() => {
     fetchServices();
     fetchMyAgency();
+    fetchMyTickets();
   }, []);
+
+  async function fetchMyTickets() {
+    const res = await apiGet(
+      `/tickets/my-tickets/${agencyId}/${getClientIdentifier()}`
+    );
+
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessageMobile, router);
+      return;
+    }
+
+    if (res.status === 200) {
+      setTickets(res.data);
+    }
+  }
 
   async function fetchMyAgency() {
     const res = await apiGet("/agencies/getAgency/" + agencyId);
@@ -58,18 +83,11 @@ export default function KioskMobilePage() {
   }
 
   const handleSelectService = async (serviceId: number) => {
-    // lấy hoặc tạo client_mac từ localStorage
-    let clientMac = localStorage.getItem("client_mac");
-    if (!clientMac) {
-      clientMac = crypto.randomUUID();
-      localStorage.setItem("client_mac", clientMac);
-    }
-
     const res = await apiPost("/tickets/get-number-mobile", {
       agency_id: Number(agencyId),
       service_id: serviceId,
       source: 2,
-      client_mac: clientMac,
+      client_identifier: getClientIdentifier(),
     });
 
     if (![201, 400].includes(res.status)) {
@@ -79,7 +97,7 @@ export default function KioskMobilePage() {
 
     if (res.status === 201) {
       const newTicket = res.data;
-      setTickets([...tickets, newTicket]);
+      setTickets([newTicket, ...tickets]);
       setPopup(newTicket);
       setActiveTab("my");
     } else if (res.status === 400 && typeof res.data === "object") {
