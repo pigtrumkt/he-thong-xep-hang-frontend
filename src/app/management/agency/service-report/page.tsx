@@ -30,16 +30,34 @@ export default function ServiceReportPage() {
   const [comments, setComments] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
 
+  // filter
+  const [filterServiceId, setFilterServiceId] = useState<string>("");
+  const [services, setServices] = useState<any[]>([]);
+
   useEffect(() => {
     fetchReport();
+    fetchServices();
   }, []);
+
+  async function fetchServices() {
+    const res = await apiGet("/services/findGroupedActiveServicesInAgency");
+    if (res.status !== 200) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    setServices(res.data || []);
+  }
 
   async function fetchReport() {
     setLoading(true);
 
-    const url = `/tickets/serviceReport?from=${fromDate}&to=${toDate}`;
-    const res = await apiGet(url);
+    let url = `/tickets/serviceReport?from=${fromDate}&to=${toDate}`;
+    if (filterServiceId) {
+      url += `&serviceId=${filterServiceId}`;
+    }
 
+    const res = await apiGet(url);
     setLoading(false);
 
     if (res.status !== 200) {
@@ -61,9 +79,7 @@ export default function ServiceReportPage() {
     if (res.status === 200) {
       setComments(res.data || []);
     } else if (res.status === 400 && typeof res.data === "object") {
-      popupMessage({
-        description: res.data.message,
-      });
+      popupMessage({ description: res.data.message });
     } else {
       handleApiError(res, popupMessage, router);
     }
@@ -74,6 +90,23 @@ export default function ServiceReportPage() {
       {/* Header + Filter */}
       <div className="flex flex-col items-center justify-between gap-4 mb-6 md:flex-row">
         <div className="flex items-center gap-3">
+          <select
+            value={filterServiceId}
+            onChange={(e) => setFilterServiceId(e.target.value)}
+            className="px-3 py-2 text-sm border rounded-lg outline-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="">Tất cả dịch vụ</option>
+            {services.map((group) => (
+              <optgroup key={group.id} label={group.name}>
+                {group.services.map((s: any) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+
           <input
             type="date"
             value={fromDate}
