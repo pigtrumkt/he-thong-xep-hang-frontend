@@ -10,22 +10,76 @@ import {
   Globe,
   Ticket,
 } from "lucide-react";
+import { apiGet } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { handleApiError } from "@/lib/handleApiError";
+import { usePopup } from "@/components/popup/PopupContext";
 
 const COLORS = ["#3b82f6", "#facc15", "#22c55e", "#ef4444"];
 const COLORS2 = ["#2563eb", "#60a5fa"];
 
 export default function DailyReportPage() {
+  const router = useRouter();
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { popupMessage } = usePopup();
+
+  useEffect(() => {
+    fetchReport();
+  }, []);
+
+  async function fetchReport() {
+    setLoading(true);
+    const res = await apiGet("/tickets/daily");
+    setLoading(false);
+    if (![200, 400].includes(res.status)) {
+      handleApiError(res, popupMessage, router);
+      return;
+    }
+
+    if (res.status === 200) {
+      setStats(res.data);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="inset-0 z-50 flex flex-col items-center justify-center w-full h-full select-none bg-white/80 backdrop-blur-sm">
+        <div className="border-blue-500 rounded-full border-6 w-15 h-15 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
   const ticketStats = [
-    { name: "Đang đợi", value: 120, color: COLORS[0], icon: Clock },
-    { name: "Đang phục vụ", value: 50, color: COLORS[1], icon: PlayCircle },
-    { name: "Phục vụ xong", value: 200, color: COLORS[2], icon: CheckCircle },
-    { name: "Vắng mặt", value: 30, color: COLORS[3], icon: XCircle },
+    { name: "Đang đợi", value: stats.waiting, color: COLORS[0], icon: Clock },
+    {
+      name: "Đang phục vụ",
+      value: stats.serving,
+      color: COLORS[1],
+      icon: PlayCircle,
+    },
+    {
+      name: "Phục vụ xong",
+      value: stats.done,
+      color: COLORS[2],
+      icon: CheckCircle,
+    },
+    { name: "Vắng mặt", value: stats.missed, color: COLORS[3], icon: XCircle },
   ];
 
   const sourceStats = [
-    { name: "Tại cơ quan", value: 250, color: COLORS2[0], icon: Building2 },
-    { name: "Online", value: 150, color: COLORS2[1], icon: Globe },
+    {
+      name: "Tại cơ quan",
+      value: stats.kiosk,
+      color: COLORS2[0],
+      icon: Building2,
+    },
+    { name: "Online", value: stats.online, color: COLORS2[1], icon: Globe },
   ];
+
+  const totalTickets = stats.totalTickets;
+  const avgRating = stats.avgRating;
 
   const today = new Date().toLocaleDateString("vi-VN", {
     weekday: "long",
@@ -34,12 +88,9 @@ export default function DailyReportPage() {
     year: "numeric",
   });
 
-  const totalTickets = ticketStats.reduce((a, b) => a + b.value, 0);
-  const totalSource = sourceStats.reduce((a, b) => a + b.value, 0);
-
   const renderLabel = (entry: any, _: number, data: any[]) => {
     const total = data.reduce((sum, d) => sum + d.value, 0);
-    const percent = ((entry.value / total) * 100).toFixed(1);
+    const percent = total ? ((entry.value / total) * 100).toFixed(1) : 0;
     return `${percent}%`;
   };
 
