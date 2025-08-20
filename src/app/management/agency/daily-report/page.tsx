@@ -8,10 +8,11 @@ import {
   XCircle,
   Building2,
   Globe,
+  Ticket,
 } from "lucide-react";
 
-const COLORS = ["#3b82f6", "#facc15", "#22c55e", "#ef4444"]; // trạng thái
-const COLORS2 = ["#2563eb", "#60a5fa"]; // nguồn
+const COLORS = ["#3b82f6", "#facc15", "#22c55e", "#ef4444"];
+const COLORS2 = ["#2563eb", "#60a5fa"];
 
 export default function DailyReportPage() {
   const ticketStats = [
@@ -22,13 +23,8 @@ export default function DailyReportPage() {
   ];
 
   const sourceStats = [
-    {
-      name: "Lấy số tại cơ quan",
-      value: 250,
-      color: COLORS2[0],
-      icon: Building2,
-    },
-    { name: "Lấy số Online", value: 150, color: COLORS2[1], icon: Globe },
+    { name: "Tại cơ quan", value: 250, color: COLORS2[0], icon: Building2 },
+    { name: "Online", value: 150, color: COLORS2[1], icon: Globe },
   ];
 
   const today = new Date().toLocaleDateString("vi-VN", {
@@ -50,23 +46,17 @@ export default function DailyReportPage() {
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-2xl font-extrabold text-blue-700">
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-extrabold text-blue-700">
           📊 Báo cáo hàng ngày
         </h1>
-        <p className="text-gray-500">{today}</p>
-      </div>
-
-      {/* Tổng vé */}
-      <div className="p-6 mb-10 text-center text-white shadow-lg bg-gradient-to-r from-sky-600 to-sky-700 rounded-2xl">
-        <div className="text-lg font-medium">Tổng số vé đã phát</div>
-        <div className="mt-2 text-4xl font-extrabold">{totalTickets}</div>
+        <p className="mt-1 text-gray-500">{today}</p>
       </div>
 
       {/* Biểu đồ */}
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         {/* Trạng thái */}
-        <div className="p-6 bg-white shadow-md rounded-2xl">
+        <div className="p-6 bg-white shadow rounded-2xl">
           <h2 className="mb-4 text-lg font-semibold text-blue-700">
             Trạng thái phục vụ
           </h2>
@@ -108,12 +98,20 @@ export default function DailyReportPage() {
                   </div>
                 );
               })}
+
+              {/* Tổng số */}
+              <div className="flex items-center justify-between pt-2 mt-2 text-sm border-t border-gray-200">
+                <span className="flex items-center gap-2 font-semibold text-gray-700">
+                  <Ticket size={18} className="text-blue-600" /> Tổng số
+                </span>
+                <span className="font-bold text-blue-600">{totalTickets}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Nguồn */}
-        <div className="p-6 bg-white shadow-md rounded-2xl">
+        <div className="p-6 bg-white shadow rounded-2xl">
           <h2 className="mb-4 text-lg font-semibold text-blue-700">
             Nguồn phát số
           </h2>
@@ -155,6 +153,14 @@ export default function DailyReportPage() {
                   </div>
                 );
               })}
+
+              {/* Tổng số */}
+              <div className="flex items-center justify-between pt-2 mt-2 text-sm border-t border-gray-200">
+                <span className="flex items-center gap-2 font-semibold text-gray-700">
+                  <Ticket size={18} className="text-blue-600" /> Tổng số
+                </span>
+                <span className="font-bold text-blue-600">{totalTickets}</span>
+              </div>
             </div>
           </div>
         </div>
