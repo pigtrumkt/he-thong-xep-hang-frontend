@@ -29,13 +29,13 @@ export default function KioskMobilePage() {
 
   useEffect(() => {
     fetchServices();
-    fetchMyAgency();
+    fetchAgency();
     fetchMyTickets();
   }, []);
 
   async function fetchMyTickets() {
     const res = await apiGet(
-      `/tickets/my-tickets/${agencyId}/${getClientIdentifier()}`
+      `/tickets/client-get-tickets/${agencyId}/${getClientIdentifier()}`
     );
 
     if (![200, 400].includes(res.status)) {
@@ -48,7 +48,7 @@ export default function KioskMobilePage() {
     }
   }
 
-  async function fetchMyAgency() {
+  async function fetchAgency() {
     const res = await apiGet("/agencies/getAgency/" + agencyId);
     if (![200, 400].includes(res.status)) {
       handleApiError(res, popupMessageMobile, router);
