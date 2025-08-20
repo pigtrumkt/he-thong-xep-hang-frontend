@@ -139,6 +139,13 @@ export default function GeneralStatusScreen() {
     setShowAds(false);
   };
 
+  // chạy lần đầu tiên
+  useEffect(() => {
+    if (adsData && adsData.type !== 0) {
+      showAdsRef.current();
+    }
+  }, [adsData]);
+
   const fetchAds = async () => {
     const res = await apiGet("/advertising/getGeneralScreenAdvertising");
     if (![200, 400].includes(res.status)) {
@@ -163,11 +170,6 @@ export default function GeneralStatusScreen() {
           : [],
         imagesDuration: res.data.general_status_screen_images_duration,
         imagesObjectFit: res.data.general_status_screen_images_object_fit,
-      });
-
-      // hiển thị quảng cáo khi lần đầu vô
-      setTimeout(() => {
-        showAdsRef.current();
       });
     }
   };
