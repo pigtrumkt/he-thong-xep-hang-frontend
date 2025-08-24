@@ -28,6 +28,43 @@ export default function Page() {
     description?: string;
   } | null>(null);
 
+  const [voices, setVoices] = useState<any[] | null>(null);
+
+  const voice = (message: string) => {
+    if (!message) return;
+
+    const chosenVoice =
+      voices?.find(
+        (v) => v.voiceURI === (localStorage.getItem("voice-uri") || "")
+      ) || null;
+
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = "vi-VN";
+    utterance.volume = 1;
+    utterance.rate = Number(localStorage.getItem("voice-rate") ?? 1);
+    utterance.voice = chosenVoice;
+    speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    const handleVoicesChanged = () => {
+      setVoices(
+        speechSynthesis.getVoices().filter((v) => /(vi|vn)/i.test(v.lang || ""))
+      );
+    };
+
+    speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+
+    return () => {
+      speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+    };
+  }, []);
+
+  const voiceRef = useRef(voice);
+  useEffect(() => {
+    voiceRef.current = voice;
+  }, [voice]);
+
   const showMessage = ({
     title,
     description,
@@ -105,6 +142,11 @@ export default function Page() {
       if (result.status !== 201 && result.status !== 200) {
         throw new Error(result.data?.message || "Lỗi lấy số");
       }
+
+      voice(
+        "Số của bạn là, " +
+          result.data.queue_number.toString().split("").join("...")
+      );
 
       setTicketData(result.data);
       setShowSuccess(true);
