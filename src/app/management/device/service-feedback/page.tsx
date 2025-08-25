@@ -652,20 +652,6 @@ export default function RatingScreen() {
           </div>
         </div>
       )}
-      <style jsx global>{`
-        * {
-          user-select: none;
-          -webkit-user-select: none;
-          -ms-user-select: none;
-          -webkit-touch-callout: none;
-        }
-
-        @media (orientation: landscape) and (max-height: 768px) {
-          html {
-            font-size: 14px;
-          }
-        }
-      `}</style>
     </div>
   ) : (
     <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">

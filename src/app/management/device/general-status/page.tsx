@@ -431,12 +431,6 @@ export default function GeneralStatusScreen() {
               overscroll-behavior: none;
             }
 
-            * {
-              user-select: none;
-              -webkit-user-select: none;
-              -ms-user-select: none;
-            }
-
             @keyframes scrollText {
               0% {
                 transform: translateX(100%);

@@ -418,13 +418,6 @@ export default function Page() {
       )}
 
       <style jsx>{`
-        * {
-          user-select: none;
-          -webkit-user-select: none;
-          -ms-user-select: none;
-          -webkit-touch-callout: none;
-        }
-
         html {
           font-size: 1.2vmin;
         }

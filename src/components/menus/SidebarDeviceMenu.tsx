@@ -145,6 +145,15 @@ export default function SidebarDeviceMenu() {
 
   return (
     <>
+      {/* STYLES */}
+      <style jsx global>{`
+        * {
+          user-select: none;
+          -webkit-user-select: none;
+          -ms-user-select: none;
+          -webkit-touch-callout: none;
+        }
+      `}</style>
       <div>
         <div className="flex items-center mb-2">
           <span className="inline-block w-1.5 h-4 bg-blue-400 rounded-full mr-2"></span>
