@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
-export default function CounterStatusPage() {
+export default function CallPage() {
   const popupRef = useRef<PopupManagerRef>(null);
   const router = useRouter();
   const { popupMessage } = usePopup();
@@ -453,7 +453,7 @@ export default function CounterStatusPage() {
       {isReady ? (
         <div
           ref={parentRef}
-          className="h-[calc(100vh-4rem)] w-full min-w-[42rem] min-h-[64rem] lg:min-w-[67rem] lg:min-h-[42rem] px-4 py-8 bg-blue-100 select-none"
+          className="h-full w-full min-w-[42rem] min-h-[64rem] lg:min-w-[67rem] lg:min-h-[42rem] px-4 py-8 bg-blue-100 select-none"
         >
           <section
             ref={scaleRef}
@@ -721,7 +721,7 @@ export default function CounterStatusPage() {
           />
         </div>
       ) : (
-        <div className="h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-blue-100 to-white px-4 py-8">
+        <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">
           <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
             <h2 className="text-2xl font-bold text-blue-800">
               Chọn quầy và dịch vụ

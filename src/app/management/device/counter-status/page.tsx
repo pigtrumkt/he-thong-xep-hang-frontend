@@ -420,7 +420,7 @@ export default function CounterStatusScreen() {
   return isReady ? (
     <div
       ref={parentRef}
-      className="relative flex flex-col w-full h-full uppercase "
+      className="relative flex flex-col w-full h-full uppercase"
     >
       {/* FULLSCREEN BUTTON */}
       <button
@@ -646,7 +646,7 @@ export default function CounterStatusScreen() {
       )}
     </div>
   ) : (
-    <div className="h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-blue-100 to-white px-4 py-8">
+    <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">
       <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
         <h2 className="text-2xl font-bold text-blue-800">Màn hình tại quầy</h2>
 
