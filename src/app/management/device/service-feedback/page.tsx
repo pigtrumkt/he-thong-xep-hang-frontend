@@ -481,8 +481,9 @@ export default function RatingScreen() {
                           ? "avatar_default_female.png"
                           : "avatar_default_male.png"
                       }`}
-                      alt="Nhân viên"
+                      alt="Ảnh đại diện"
                       className="object-cover w-full h-full bg-white"
+                      onClick={() => setShowAvatarPreview(true)}
                     />
                   </div>
                   <div className="text-[3.2em] font-medium mb-1">
@@ -560,6 +561,33 @@ export default function RatingScreen() {
               </div>
             )}
           </div>
+          {showAvatarPreview && (
+            <div
+              onClick={() => setShowAvatarPreview(false)}
+              className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
+            >
+              <img
+                src={`${API_BASE}/accounts/avatar/${
+                  staffAvatarUrl
+                    ? `${staffAvatarUrl}`
+                    : staffGender === 0
+                    ? "avatar_default_female.png"
+                    : "avatar_default_male.png"
+                }`}
+                alt="Avatar full"
+                className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAvatarPreview(false);
+                }}
+                className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <>
