@@ -167,7 +167,7 @@ export default function SidebarDeviceMenu() {
             Màn hình
           </span>
         </div>
-        <ul className="flex flex-col gap-1 font-semibold text-white">
+        <ul className="flex flex-col gap-1 font-semibold text-white text-[1.3rem]">
           <li>
             <Link
               href="/management/device/take-number"
