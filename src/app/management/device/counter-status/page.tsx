@@ -465,11 +465,11 @@ export default function CounterStatusScreen() {
       {!isShowAds ? (
         <>
           {/* HEADER */}
-          <header className="px-5 pt-2 pb-10 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-            <h1 className="font-bold text-9xl leading-[1.4]">
+          <header className="px-5 pt-2 pb-6 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
+            <h1 className="font-bold text-[7rem] leading-[8rem]">
               {counterNameSelectedRef.current}
             </h1>
-            <p className="text-6xl">{serviceName}</p>
+            <p className="text-[3.5rem] leading-[5rem]">{serviceName}</p>
           </header>
 
           {/* MAIN */}
@@ -500,7 +500,7 @@ export default function CounterStatusScreen() {
                     <div className="text-3xl text-blue-600">
                       {item.counter_name}
                     </div>
-                    <div className="font-bold text-blue-800 text-8xl">
+                    <div className="font-bold text-blue-800 text-8xl leading-[5.5rem]">
                       {item.queue_number}
                     </div>
                     <div
@@ -533,12 +533,6 @@ export default function CounterStatusScreen() {
 
           {/* STYLES */}
           <style jsx global>{`
-            html {
-              font-size: 1.2vmin;
-              touch-action: manipulation;
-              overscroll-behavior: none;
-            }
-
             @keyframes scrollText {
               0% {
                 transform: translateX(100%);

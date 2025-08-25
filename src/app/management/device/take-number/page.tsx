@@ -418,10 +418,6 @@ export default function Page() {
       )}
 
       <style jsx>{`
-        html {
-          font-size: 1.2vmin;
-        }
-
         html,
         body {
           touch-action: manipulation;

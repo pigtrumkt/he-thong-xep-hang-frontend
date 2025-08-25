@@ -153,6 +153,12 @@ export default function SidebarDeviceMenu() {
           -ms-user-select: none;
           -webkit-touch-callout: none;
         }
+
+        html {
+          font-size: 1.35vmin;
+          touch-action: manipulation;
+          overscroll-behavior: none;
+        }
       `}</style>
       <div>
         <div className="flex items-center mb-2">

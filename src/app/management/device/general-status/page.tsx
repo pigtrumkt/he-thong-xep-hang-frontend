@@ -392,7 +392,7 @@ export default function GeneralStatusScreen() {
                     <div className="text-3xl text-blue-600">
                       {item.counter_name}
                     </div>
-                    <div className="font-bold text-blue-800 text-8xl">
+                    <div className="font-bold text-blue-800 text-8xl leading-[5.5rem]">
                       {item.queue_number}
                     </div>
                     <div
@@ -425,12 +425,6 @@ export default function GeneralStatusScreen() {
 
           {/* STYLES */}
           <style jsx global>{`
-            html {
-              font-size: 1.2vmin;
-              touch-action: manipulation;
-              overscroll-behavior: none;
-            }
-
             @keyframes scrollText {
               0% {
                 transform: translateX(100%);
