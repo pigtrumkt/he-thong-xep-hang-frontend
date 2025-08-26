@@ -453,8 +453,8 @@ export default function RatingScreen() {
         </button>
       )}
       {!isShowAds ? (
-        <div className="min-h-screen min-w-screen flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)] text-[1vmin]">
-          <div className="max-w-[120em] max-h-[78em] aspect-[20/13] w-full h-full bg-white rounded-[1.5em] shadow-[0_1em_2em_rgba(0,0,0,0.15)] overflow-hidden flex">
+        <div className="h-full w-full flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)]">
+          <div className=" flex aspect-[20/13] [width:min(90cqw,calc(90cqh*20/13))] [height:min(90cqh,calc(90cqw*13/20))] text-[0.75rem] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden">
             {/* LEFT */}
             <div className="flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center">
               <div className="mb-[6em] text-center">
