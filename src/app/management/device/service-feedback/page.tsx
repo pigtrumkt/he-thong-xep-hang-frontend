@@ -453,10 +453,10 @@ export default function RatingScreen() {
         </button>
       )}
       {!isShowAds ? (
-        <div className="h-full w-full flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)]">
-          <div className=" flex aspect-[20/13] [width:min(90cqw,calc(90cqh*20/13))] [height:min(90cqh,calc(90cqw*13/20))] text-[0.75rem] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden">
+        <div className="[container-type:size] h-full w-full flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)]">
+          <div className="[container-type:size] flex aspect-[20/13] [width:min(95cqw,calc(95cqh*20/13))] [height:min(95cqh,calc(95cqw*13/20))] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden text-[0.8cqw]">
             {/* LEFT */}
-            <div className="flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center">
+            <div className="flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center text-[0.8cqw]">
               <div className="mb-[6em] text-center">
                 <div
                   className={` font-semibold mb-2 uppercase ${
@@ -496,7 +496,7 @@ export default function RatingScreen() {
 
             {/* RIGHT */}
             {serviceName && (
-              <div className="flex-[1.5] p-[4em] flex flex-col">
+              <div className="flex-[1.5] p-[4em] flex flex-col text-[0.82cqw]">
                 <div className="text-center">
                   <h1 className="text-[4em] text-[#333] font-medium mt-[0.2em]">
                     MỜI CÔNG DÂN SỐ
@@ -551,7 +551,7 @@ export default function RatingScreen() {
                     GỬI ĐÁNH GIÁ
                   </button>
                   <p
-                    className={`text-blue-700 text-[2.8em] font-semibold text-center mt-[1.2vw] ${
+                    className={`text-blue-700 text-[2.8em] font-semibold text-center mt-[0.5em] ${
                       submitted ? "" : "invisible"
                     }`}
                   >
