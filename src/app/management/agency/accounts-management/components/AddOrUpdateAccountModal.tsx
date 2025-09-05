@@ -12,6 +12,7 @@ interface AddOrUpdateAccountModalProps {
   onSuccess?: () => void;
   initialData?: any;
   groupedActiveServices: any[];
+  counters: any[];
 }
 
 const permissionGroups = [
@@ -74,6 +75,7 @@ export default function AddOrUpdateAccountModal({
   onSuccess,
   initialData,
   groupedActiveServices,
+  counters,
 }: AddOrUpdateAccountModalProps) {
   const { globalParams } = useGlobalParams();
   const currentUserRole = globalParams?.user?.role_id;
@@ -110,6 +112,7 @@ export default function AddOrUpdateAccountModal({
     phone: "",
     position: "",
     role_id: "",
+    allowed_counter_id: "",
     permission_ids: [] as string[],
     assigned_service_ids: [] as string[],
   });
@@ -143,6 +146,7 @@ export default function AddOrUpdateAccountModal({
         phone: initialData.phone || "",
         position: initialData.position || "",
         role_id: initialData.role_id?.toString() || "",
+        allowed_counter_id: initialData.allowed_counter_id?.toString() || "",
         permission_ids: initialData.permission_ids
           ? initialData.permission_ids.split(",")
           : [],
@@ -203,6 +207,9 @@ export default function AddOrUpdateAccountModal({
       phone: form.phone.trim(),
       position: form.position.trim(),
       role_id: Number(form.role_id),
+      allowed_counter_id: form.allowed_counter_id
+        ? Number(form.allowed_counter_id)
+        : null,
       permission_ids: form.permission_ids?.join(",") || "",
       assigned_service_ids: form.assigned_service_ids.join(","),
     };
@@ -507,6 +514,31 @@ export default function AddOrUpdateAccountModal({
               )}
 
             {errorText("message")}
+
+            {Number(form.role_id) === 21 && (
+              <div>
+                <label className="block mb-1 font-medium">Chỉ định quầy</label>
+                <select
+                  name="allowed_counter_id"
+                  value={form.allowed_counter_id}
+                  onChange={(e) => {
+                    handleChange(e);
+                  }}
+                  className={`${inputClass} ${
+                    errors.allowed_counter_id ? "border-red-400" : ""
+                  }`}
+                  disabled={initialData?.id === globalParams?.user?.id}
+                >
+                  <option value="">Không chỉ định</option>
+                  {counters.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+                {errorText("allowed_counter_id")}
+              </div>
+            )}
             <div className="pt-4 text-right">
               <button
                 type="submit"

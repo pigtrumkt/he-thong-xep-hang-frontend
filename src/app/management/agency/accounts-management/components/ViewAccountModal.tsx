@@ -7,6 +7,7 @@ interface ViewAccountModalProps {
   onClose: () => void;
   accountData: any;
   groupedActiveServices: any[];
+  counters: any[];
 }
 
 const roleLabels: Record<number, string> = {
@@ -75,6 +76,7 @@ export default function ViewAccountModal({
   onClose,
   accountData,
   groupedActiveServices,
+  counters,
 }: ViewAccountModalProps) {
   const [visible, setVisible] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
@@ -225,6 +227,18 @@ export default function ViewAccountModal({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+            {accountData.role_id === 21 && (
+              <div className="grid">
+                <Field
+                  label="Chỉ định quầy"
+                  value={
+                    counters.find(
+                      (obj) => obj.id === accountData.allowed_counter_id
+                    )?.name
+                  }
+                />
               </div>
             )}
           </div>
