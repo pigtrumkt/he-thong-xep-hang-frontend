@@ -1,6 +1,6 @@
 "use client";
 
-import { API_BASE } from "@/lib/api";
+import { API_BASE, apiPost } from "@/lib/api";
 import { useEffect, useState } from "react";
 
 interface AgencyDetailModalProps {
@@ -25,6 +25,23 @@ export default function AgencyDetailModal({
 
   const allowed = (agency.allowed_days_of_week || "").split(",");
   const [start, end] = (agency.ticket_time_range || "").split("~");
+  const [encryptedId, setEncryptedId] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await apiPost("/agencies/encryption", {
+          text: String(agency.id),
+        });
+
+        setEncryptedId(res.data.encryptedText || "");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const closeWithFade = () => {
     setVisible(false);
@@ -163,14 +180,14 @@ export default function AgencyDetailModal({
             </label>
             <div className="px-3 py-2 text-blue-700 break-all bg-gray-100 rounded">
               <a
-                href={`/take-number-mobile/${agency.id}`}
+                href={`/take-number-mobile/${encryptedId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
               >
-                {typeof window !== "undefined"
-                  ? `${window.location.origin}/take-number-mobile/${agency.id}`
-                  : `/take-number-mobile/${agency.id}`}
+                {typeof window !== "undefined" && encryptedId
+                  ? `${window.location.origin}/take-number-mobile/${encryptedId}`
+                  : ``}
               </a>
             </div>
           </div>

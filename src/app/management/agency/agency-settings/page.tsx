@@ -11,6 +11,7 @@ import { PermissionEnum, RoleEnum } from "@/constants/Enum";
 
 interface AgencyForm {
   id: number;
+  encrypted_id: string;
   logo_file: null | File;
   logo_preview: null | string;
   name_1: string;
@@ -32,6 +33,7 @@ export default function AgencySettingsPage() {
   const { hasAccess } = useGlobalParams();
   const [form, setForm] = useState<AgencyForm>({
     id: 0,
+    encrypted_id: "",
     logo_file: null,
     logo_preview: null,
     name_1: "",
@@ -75,6 +77,7 @@ export default function AgencySettingsPage() {
       const [start, end] = agency.ticket_time_range?.split("~") || ["", ""];
       setForm({
         id: agency.id,
+        encrypted_id: agency.encrypted_id,
         logo_file: null,
         logo_preview: agency?.logo_url
           ? `${API_BASE}/agencies/logos/${agency.logo_url}`
@@ -470,7 +473,7 @@ export default function AgencySettingsPage() {
               icon="link"
               value={
                 typeof window !== "undefined"
-                  ? `${window.location.protocol}//${window.location.host}/take-number-mobile/${form.id}`
+                  ? `${window.location.protocol}//${window.location.host}/take-number-mobile/${form.encrypted_id}`
                   : ""
               }
               readOnly
