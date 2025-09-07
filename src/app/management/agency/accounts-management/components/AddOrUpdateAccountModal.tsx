@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { usePopup } from "@/components/popup/PopupContext";
 import { handleApiError } from "@/lib/handleApiError";
 import { useGlobalParams } from "@/components/ClientWrapper";
+import { RoleEnum } from "@/constants/Enum";
 
 interface AddOrUpdateAccountModalProps {
   onClose: () => void;
@@ -193,6 +194,25 @@ export default function AddOrUpdateAccountModal({
       ...prev,
       permission_ids: defaultPermissions,
     }));
+  };
+
+  const resetPassword = async () => {
+    const result = await apiPost(`/accounts/${initialData.id}/reset-pass`);
+    if (![201, 400].includes(result.status)) {
+      handleApiError(result, popupMessage, router);
+    }
+
+    if (result?.status === 201) {
+      popupMessage({ description: result.data.message });
+    } else if (
+      result &&
+      result.status === 400 &&
+      typeof result.data === "object"
+    ) {
+      popupMessage({ description: result.data.message });
+    } else {
+      popupMessage({ description: "Lỗi hệ thống" });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -540,9 +560,19 @@ export default function AddOrUpdateAccountModal({
               </div>
             )}
             <div className="pt-4 text-right">
+              {initialData &&
+                currentUserRole === RoleEnum.AGENCY_ADMIN_ROOT && (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition bg-red-400 shadow bg-gradient-to-r hover:bg-red-500 rounded-lg mr-2"
+                    onClick={resetPassword}
+                  >
+                    Đặt lại mật khẩu
+                  </button>
+                )}
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition bg-blue-700 shadow bg-gradient-to-r hover:bg-blue-900 rounded-xl"
+                className="inline-flex items-center gap-2 px-6 py-2 font-semibold text-white transition bg-blue-700 shadow bg-gradient-to-r hover:bg-blue-900 rounded-lg"
               >
                 {initialData ? "Cập nhật" : "Lưu lại"}
               </button>

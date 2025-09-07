@@ -11,7 +11,7 @@ export function apiGet(path: string) {
   return apiRequest("GET", path);
 }
 
-export function apiPost(path: string, body: any, noTimeout = false) {
+export function apiPost(path: string, body: any = {}, noTimeout = false) {
   return apiRequest("POST", path, body, noTimeout);
 }
 
