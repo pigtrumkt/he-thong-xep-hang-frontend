@@ -31,7 +31,7 @@ export default function KioskMobilePage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
-  const agencyId = params.agencyId;
+  const agencyEncryptedId = params.agencyEncryptedId;
   const { popupMessageMobile } = usePopup();
   const [activeTab, setActiveTab] = useState<"services" | "my">("services");
   const [tickets, setTickets] = useState<any[]>([]);
@@ -53,7 +53,7 @@ export default function KioskMobilePage() {
 
   async function fetchMyTickets() {
     const res = await apiGet(
-      `/tickets/client-get-tickets/${agencyId}/${getClientIdentifier()}`
+      `/tickets/client-get-tickets/${agencyEncryptedId}/${getClientIdentifier()}`
     );
 
     if (![200, 400].includes(res.status)) {
@@ -64,10 +64,14 @@ export default function KioskMobilePage() {
     if (res.status === 200) {
       setTickets(res.data);
     }
+
+    if (res.status === 400) {
+      router.replace("/take-number-mobile");
+    }
   }
 
   async function fetchAgency() {
-    const res = await apiGet("/agencies/getAgency/" + agencyId);
+    const res = await apiGet("/agencies/getAgency/" + agencyEncryptedId);
     if (![200, 400].includes(res.status)) {
       handleApiError(res, popupMessageMobile, router);
       return;
@@ -82,11 +86,15 @@ export default function KioskMobilePage() {
 
       setAgency(res.data);
     }
+
+    if (res.status === 400) {
+      router.replace("/take-number-mobile");
+    }
   }
 
   async function fetchServices() {
     const res = await apiGet(
-      "/services/findGroupedActiveServicesByAgency/" + agencyId
+      "/services/findGroupedActiveServicesByAgency/" + agencyEncryptedId
     );
 
     if (![200, 400].includes(res.status)) {
@@ -98,12 +106,16 @@ export default function KioskMobilePage() {
       const flat = (res.data || []).flatMap((g: any) => g.services || []);
       setServices(flat);
     }
+
+    if (res.status === 400) {
+      router.replace("/take-number-mobile");
+    }
   }
 
   const handleSelectService = async (serviceId: number) => {
     setLoading(true);
     const res = await apiPost("/tickets/get-number-mobile", {
-      agency_id: Number(agencyId),
+      agency_encrypted_id: agencyEncryptedId,
       service_id: serviceId,
       source: 2,
       client_identifier: getClientIdentifier(),
