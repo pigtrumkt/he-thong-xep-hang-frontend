@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useGlobalParams } from "../ClientWrapper";
 export default function SidebarAgencyMenu() {
   const pathname = usePathname();
-  const { hasAccess } = useGlobalParams();
+  const { hasAccess, globalParams } = useGlobalParams();
 
   if (
     !hasAccess({
@@ -69,29 +69,62 @@ export default function SidebarAgencyMenu() {
             {hasAccess({
               allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
               allowedPermissions: [PermissionEnum.CALL],
-            }) && (
-              <li>
-                <Link
-                  href="/management/agency/call"
-                  className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
-                    pathname === "/management/agency/call" ? "active" : ""
-                  }`}
-                >
-                  <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M22 16.92V19a2 2 0 01-2.18 2A19.72 19.72 0 013 5.18 2 2 0 015 3h2.09a2 2 0 012 1.72c.13 1.13.39 2.23.78 3.29a2 2 0 01-.45 2.11l-1.27 1.27a16 16 0 006.58 6.58l1.27-1.27a2 2 0 012.11-.45c1.06.39 2.16.65 3.29.78a2 2 0 011.72 2V19z" />
-                    </svg>
-                  </span>
-                  Gọi
-                </Link>
-              </li>
-            )}
+            }) &&
+              [RoleEnum.AGENCY_ADMIN, RoleEnum.AGENCY_ADMIN_ROOT].includes(
+                globalParams.user.role_id
+              ) && (
+                <li>
+                  <Link
+                    href="/management/agency/call"
+                    className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                      pathname === "/management/agency/call" ? "active" : ""
+                    }`}
+                  >
+                    <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M22 16.92V19a2 2 0 01-2.18 2A19.72 19.72 0 013 5.18 2 2 0 015 3h2.09a2 2 0 012 1.72c.13 1.13.39 2.23.78 3.29a2 2 0 01-.45 2.11l-1.27 1.27a16 16 0 006.58 6.58l1.27-1.27a2 2 0 012.11-.45c1.06.39 2.16.65 3.29.78a2 2 0 011.72 2V19z" />
+                      </svg>
+                    </span>
+                    Gọi
+                  </Link>
+                </li>
+              )}
+
+            {hasAccess({
+              allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+              allowedPermissions: [PermissionEnum.CALL],
+            }) &&
+              [RoleEnum.AGENCY_STAFF].includes(globalParams.user.role_id) && (
+                <li>
+                  <Link
+                    href="/management/agency/staff-call"
+                    className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                      pathname === "/management/agency/staff-call"
+                        ? "active"
+                        : ""
+                    }`}
+                  >
+                    <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M22 16.92V19a2 2 0 01-2.18 2A19.72 19.72 0 013 5.18 2 2 0 015 3h2.09a2 2 0 012 1.72c.13 1.13.39 2.23.78 3.29a2 2 0 01-.45 2.11l-1.27 1.27a16 16 0 006.58 6.58l1.27-1.27a2 2 0 012.11-.45c1.06.39 2.16.65 3.29.78a2 2 0 011.72 2V19z" />
+                      </svg>
+                    </span>
+                    Gọi
+                  </Link>
+                </li>
+              )}
           </ul>
         </div>
       )}
