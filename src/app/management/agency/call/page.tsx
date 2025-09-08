@@ -218,8 +218,8 @@ export default function CallPage() {
         {
           counterId: counterIdSelected,
           counterName: counterNameSelectedRef.current,
-          serviceId: serviceIdSelected,
-          serviceName: serviceNameSelectedRef.current,
+          serviceIds: [serviceIdSelected],
+          serviceNames: [serviceNameSelectedRef.current],
           action: "call",
         },
         (response: any) => {
@@ -238,8 +238,8 @@ export default function CallPage() {
         {
           counterId: counterIdSelected,
           counterName: counterNameSelectedRef.current,
-          serviceId: serviceIdSelected,
-          serviceName: serviceNameSelectedRef.current,
+          serviceIds: [serviceIdSelected],
+          serviceNames: [serviceNameSelectedRef.current],
           currentNumber: currentNumber,
           action: "recall",
         },
@@ -262,8 +262,8 @@ export default function CallPage() {
       {
         counterId: counterIdSelected,
         counterName: counterNameSelectedRef.current,
-        serviceId: serviceIdSelected,
-        serviceName: serviceNameSelectedRef.current,
+        serviceIds: [serviceIdSelected],
+        serviceNames: [serviceNameSelectedRef.current],
         ticketId: ticketId,
         currentNumber: currentNumber,
         action: "done",
@@ -288,8 +288,8 @@ export default function CallPage() {
       {
         counterId: counterIdSelected,
         counterName: counterNameSelectedRef.current,
-        serviceId: serviceIdSelected,
-        serviceName: serviceNameSelectedRef.current,
+        serviceIds: [serviceIdSelected],
+        serviceNames: [serviceNameSelectedRef.current],
         ticketId: ticketId,
         currentNumber: currentNumber,
         action: "missed",
@@ -315,7 +315,7 @@ export default function CallPage() {
       "action:call",
       {
         counterId: counterIdSelected,
-        serviceId: serviceIdSelected,
+        serviceIds: [serviceIdSelected],
         action: "leaveCounter",
       },
       (response: any) => {
@@ -367,8 +367,8 @@ export default function CallPage() {
       {
         counterId: counterIdSelected,
         counterName: counterNameSelectedRef.current,
-        serviceId: serviceIdSelected,
-        serviceName: serviceNameSelectedRef.current,
+        serviceIds: [serviceIdSelected],
+        serviceNames: [serviceNameSelectedRef.current],
       },
       (response: any) => {
         handleResSocket(response);
