@@ -45,6 +45,7 @@ export default function ClientWrapper({
   const [globalParams, setGlobalParams] = useState(value ?? null);
   const [socket, setSocket] = useState<Socket>();
   const [socketSound, setSocketSound] = useState<Socket>();
+  const [isReady, setIsReady] = useState(false);
 
   // ✅ Loading toàn cục
   const [loading, setLoading] = useState<LoadingState>({
@@ -87,16 +88,24 @@ export default function ClientWrapper({
   };
 
   useEffect(() => {
+    setIsReady(true);
+
     if (typeof window === "undefined") return;
     if (!globalParams.user) return;
+
+    setSocket(getSocket(globalParams.user.token));
+    setSocketSound(getSocketSound(globalParams.user.token));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!globalParams.user) return;
+    if (!isReady) return;
 
     const path = window.location.pathname;
     if (path.startsWith("/take-number-mobile/")) {
       return;
     }
-
-    setSocket(getSocket(globalParams.user.token));
-    setSocketSound(getSocketSound(globalParams.user.token));
 
     const roleId = globalParams.user["role_id"];
     if (path === "/") {
@@ -140,7 +149,7 @@ export default function ClientWrapper({
       router.replace("/management/device");
       return;
     }
-  }, []);
+  }, [isReady]);
 
   return (
     <UserContext.Provider
@@ -156,7 +165,7 @@ export default function ClientWrapper({
         setProgress,
       }}
     >
-      <PopupProvider>{children}</PopupProvider>
+      <PopupProvider>{isReady ? children : <></>}</PopupProvider>
     </UserContext.Provider>
   );
 }
