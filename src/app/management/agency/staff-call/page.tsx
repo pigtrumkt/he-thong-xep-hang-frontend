@@ -202,8 +202,16 @@ export default function CallPage() {
 
   const connectSocket = () => {
     socket.disconnect();
-
     socket.removeAllListeners();
+    if (!counterIdRef.current) {
+      popupMessage({ description: "Chưa chỉ định quầy" });
+      return;
+    }
+
+    if (!serviceIdsRef.current || serviceIdsRef.current.length === 0) {
+      popupMessage({ description: "Chưa chỉ định dịch vụ" });
+      return;
+    }
 
     socket.on("connect_error", onConnectError);
     socket.on("connect", onConnect);
