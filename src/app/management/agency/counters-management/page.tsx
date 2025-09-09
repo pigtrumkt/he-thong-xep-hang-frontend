@@ -61,16 +61,20 @@ export default function CountersPage() {
           <div className="text-slate-700 text-sm space-y-0.5">
             <div className="font-semibold text-red-600">Đang sử dụng</div>
             <div>
-              Tài khoản:{" "}
-              <span className="font-semibold text-blue-700">
+              <div>Tài khoản:</div>
+              <div className="pl-4 font-semibold text-blue-700">
                 {counter.occupiedBy.accountFullname}
-              </span>
+              </div>
             </div>
             <div>
-              Dịch vụ:{" "}
-              <span className="font-semibold text-blue-700">
-                {counter.occupiedBy.serviceName}
-              </span>
+              <div>Dịch vụ:</div>
+              <div className="pl-4 font-semibold text-blue-700">
+                {counter.occupiedBy.serviceNames.map(
+                  (s: string, idx: number) => (
+                    <div key={idx}>{s}</div>
+                  )
+                )}
+              </div>
             </div>
           </div>
         </div>
