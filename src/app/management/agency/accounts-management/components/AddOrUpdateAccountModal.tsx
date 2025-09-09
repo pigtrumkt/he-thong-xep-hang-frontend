@@ -102,7 +102,7 @@ export default function AddOrUpdateAccountModal({
       : [];
 
   const router = useRouter();
-  const { popupMessage } = usePopup();
+  const { popupMessage, popupConfirmRed } = usePopup();
   const [visible, setVisible] = useState(false);
   const [form, setForm] = useState({
     username: "",
@@ -197,22 +197,29 @@ export default function AddOrUpdateAccountModal({
   };
 
   const resetPassword = async () => {
-    const result = await apiPost(`/accounts/${initialData.id}/reset-pass`);
-    if (![201, 400].includes(result.status)) {
-      handleApiError(result, popupMessage, router);
-    }
+    popupConfirmRed({
+      title: "Xác nhận đặt lại mật khẩu?",
+      description: form.username.trim(),
+    }).then(async (confirmed) => {
+      if (!confirmed) return;
 
-    if (result?.status === 201) {
-      popupMessage({ description: result.data.message });
-    } else if (
-      result &&
-      result.status === 400 &&
-      typeof result.data === "object"
-    ) {
-      popupMessage({ description: result.data.message });
-    } else {
-      popupMessage({ description: "Lỗi hệ thống" });
-    }
+      const result = await apiPost(`/accounts/${initialData.id}/reset-pass`);
+      if (![201, 400].includes(result.status)) {
+        handleApiError(result, popupMessage, router);
+      }
+
+      if (result?.status === 201) {
+        popupMessage({ description: result.data.message });
+      } else if (
+        result &&
+        result.status === 400 &&
+        typeof result.data === "object"
+      ) {
+        popupMessage({ description: result.data.message });
+      } else {
+        popupMessage({ description: "Lỗi hệ thống" });
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
