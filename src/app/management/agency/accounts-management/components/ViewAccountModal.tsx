@@ -235,7 +235,7 @@ export default function ViewAccountModal({
                   label="Chỉ định quầy"
                   value={
                     counters.find(
-                      (obj) => obj.id === accountData.allowed_counter_id
+                      (obj) => obj.id === accountData.assigned_counter_id
                     )?.name
                   }
                 />
