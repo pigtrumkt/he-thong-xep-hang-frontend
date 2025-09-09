@@ -8,6 +8,7 @@ import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
+import { AnimatePresence, motion } from "framer-motion";
 
 type AdsData = {
   type?: number; // 0:none, 1:images, 2:video
@@ -105,8 +106,7 @@ export default function CounterStatusScreen() {
   const counterNameSelectedRef = useRef("");
   const [isReady, setIsReady] = useState<any>(false);
 
-  const serviceIdRef = useRef(null);
-  const [serviceName, setServiceName] = useState<string | null>(null);
+  const [serviceNames, setServiceNames] = useState<string[]>([]);
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
   const [statusTicket, setStatusTicket] = useState<number | null>(null);
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
@@ -121,6 +121,8 @@ export default function CounterStatusScreen() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+
+  const [serviceIndex, setServiceIndex] = useState(0);
 
   const showAdsRef = useRef<(delay?: number) => void>(() => {});
   showAdsRef.current = (delay = 0) => {
@@ -186,24 +188,14 @@ export default function CounterStatusScreen() {
   const handleResSocket = (response: any) => {
     if (response.status === "success") {
     } else if (response.status === "empty") {
-      if (serviceIdRef.current) {
-        leaveListenHistory(serviceIdRef.current);
-      }
-
-      serviceIdRef.current = null;
-      setServiceName(null);
+      setServiceNames([]);
       setCurrentNumber(null);
       setStatusTicket(null);
       setHistory([]);
       showAdsRef.current();
     } else if (response.status === "update") {
-      if (response.serviceId) {
-        serviceIdRef.current = response.serviceId;
-        joinListenHistory(response.serviceId);
-      }
-
-      if (response.serviceName !== undefined)
-        setServiceName(response.serviceName);
+      if (response.serviceNames !== undefined)
+        setServiceNames(response.serviceNames);
 
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
@@ -267,7 +259,7 @@ export default function CounterStatusScreen() {
 
   const onDisconnect = () => {
     setIsReady(false);
-    setServiceName(null);
+    setServiceNames([]);
     setCurrentNumber(null);
     setHistory([]);
     setScreenNotice(null);
@@ -283,30 +275,6 @@ export default function CounterStatusScreen() {
       "join_counter_status_screen",
       {
         counterId: counterIdSelected,
-      },
-      (response: any) => {
-        handleResSocket(response);
-      }
-    );
-  };
-
-  const joinListenHistory = (serviceId: number) => {
-    socket.emit(
-      "counter_status_history_screen",
-      {
-        serviceId: serviceId,
-      },
-      (response: any) => {
-        handleResSocket(response);
-      }
-    );
-  };
-
-  const leaveListenHistory = (serviceId: number) => {
-    socket.emit(
-      "leave_counter_status_history_screen",
-      {
-        serviceId: serviceId,
       },
       (response: any) => {
         handleResSocket(response);
@@ -347,6 +315,19 @@ export default function CounterStatusScreen() {
       }
     };
   }, []);
+
+  // vòng lặp hiển thị serviceNames
+  useEffect(() => {
+    if (!serviceNames || serviceNames.length === 0) return;
+
+    const intervalServiceNames = setInterval(() => {
+      setServiceIndex((prev) => (prev + 1) % serviceNames.length);
+    }, 2000);
+
+    return () => {
+      clearInterval(intervalServiceNames);
+    };
+  }, [serviceNames]);
 
   const toggleFullscreen = () => {
     const target = parentRef.current;
@@ -469,7 +450,18 @@ export default function CounterStatusScreen() {
             <h1 className="font-bold text-[7rem] leading-[8rem]">
               {counterNameSelectedRef.current}
             </h1>
-            <p className="text-[3.5rem] leading-[5rem]">{serviceName}</p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={serviceIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="text-[3.5rem] leading-[5rem]"
+              >
+                {serviceNames[serviceIndex] || ""}
+              </motion.div>
+            </AnimatePresence>
           </header>
 
           {/* MAIN */}
