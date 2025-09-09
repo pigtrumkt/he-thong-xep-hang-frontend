@@ -411,8 +411,6 @@ export default function CallPage() {
 
     window.addEventListener("resize", handleResize);
 
-    setTimeout(() => {}, 500);
-
     return () => {
       document.removeEventListener("fullscreenchange", fullscreenHandler);
       window.removeEventListener("resize", handleResize);
