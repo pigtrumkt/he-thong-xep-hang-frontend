@@ -9,6 +9,7 @@ import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
+import { AnimatePresence, motion } from "framer-motion";
 
 type AdsData = {
   type?: number; // 0:none, 1:images, 2:video
@@ -105,7 +106,7 @@ export default function RatingScreen() {
   const [counterNameSelected, setCounterNameSelected] = useState<any>(null);
   const [isReady, setIsReady] = useState<any>(false);
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
-  const [serviceName, setServiceName] = useState(null);
+  const [serviceNames, setServiceNames] = useState<string[]>([]);
   const [ticketId, setTicketId] = useState(null);
   const [staffName, setStaffName] = useState(null);
   const [staffGender, setStaffGender] = useState(null);
@@ -127,6 +128,9 @@ export default function RatingScreen() {
 
   const [adsData, setAdsData] = useState<AdsData>();
   const [isShowAds, setShowAds] = useState<boolean>(false);
+
+  const [serviceIndex, setServiceIndex] = useState(0);
+
   const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
 
   const showAdsRef = useRef<(delay?: number) => void>(() => {});
@@ -177,6 +181,19 @@ export default function RatingScreen() {
       });
     }
   };
+
+  // vòng lặp hiển thị serviceNames
+  useEffect(() => {
+    if (!serviceNames || serviceNames.length === 0) return;
+
+    const intervalServiceNames = setInterval(() => {
+      setServiceIndex((prev) => (prev + 1) % serviceNames.length);
+    }, 2000);
+
+    return () => {
+      clearInterval(intervalServiceNames);
+    };
+  }, [serviceNames]);
 
   useEffect(() => {
     fetchData();
@@ -243,7 +260,7 @@ export default function RatingScreen() {
     if (response.status === "empty") {
       setTicketId(null);
       setCurrentNumber(null);
-      setServiceName(null);
+      setServiceNames([]);
       setStaffName(null);
       setStaffGender(null);
       setStaffPosition(null);
@@ -265,8 +282,8 @@ export default function RatingScreen() {
       if (response.staffAvatarUrl !== undefined) {
         setStaffAvatarUrl(response.staffAvatarUrl);
       }
-      if (response.serviceName !== undefined) {
-        setServiceName(response.serviceName);
+      if (response.serviceNames !== undefined) {
+        setServiceNames(response.serviceNames);
       }
       if (response.currentNumber !== undefined) {
         setCurrentNumber(response.currentNumber);
@@ -460,17 +477,30 @@ export default function RatingScreen() {
               <div className="mb-[6em] text-center">
                 <div
                   className={` font-semibold mb-2 uppercase ${
-                    serviceName ? "text-[5em]" : "text-[12em]"
+                    serviceNames && serviceNames.length !== 0
+                      ? "text-[5em]"
+                      : "text-[12em]"
                   }`}
                 >
                   {counterNameSelected}
                 </div>
-                {serviceName && (
-                  <div className="text-[3em] opacity-90">{serviceName}</div>
+                {serviceNames && serviceNames.length !== 0 && (
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={serviceIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-[3em] opacity-90"
+                    >
+                      {serviceNames[serviceIndex] || ""}
+                    </motion.div>
+                  </AnimatePresence>
                 )}
               </div>
 
-              {serviceName && (
+              {serviceNames && serviceNames.length !== 0 && (
                 <div className="flex flex-col items-center justify-center">
                   <div className="w-[16em] h-[16em] rounded-full border-[0.6em] border-[rgba(255,255,255,0.3)] overflow-hidden mb-[1em]">
                     <img
@@ -495,7 +525,7 @@ export default function RatingScreen() {
             </div>
 
             {/* RIGHT */}
-            {serviceName && (
+            {serviceNames && serviceNames.length !== 0 && (
               <div className="flex-[1.5] p-[4em] flex flex-col text-[0.82cqw]">
                 <div className="text-center">
                   <h1 className="text-[4em] text-[#333] font-medium mt-[0.2em]">
