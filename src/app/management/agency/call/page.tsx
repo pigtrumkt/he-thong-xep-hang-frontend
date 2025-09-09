@@ -3,15 +3,17 @@
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
+import { RoleEnum } from "@/constants/Enum";
 import { apiGet } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
 export default function CallPage() {
-  const popupRef = useRef<PopupManagerRef>(null);
+  const pathname = usePathname();
   const router = useRouter();
+  const popupRef = useRef<PopupManagerRef>(null);
   const { popupMessage } = usePopup();
   const parentRef = useRef<HTMLDivElement | null>(null);
   const scaleRef = useRef<HTMLElement | null>(null);
@@ -405,6 +407,17 @@ export default function CallPage() {
   };
 
   useEffect(() => {
+    // chuyển hướng web khi vào sai trang call
+    if (
+      [RoleEnum.AGENCY_STAFF].includes(globalParams.user.role_id) &&
+      pathname === "/management/agency/call"
+    ) {
+      if (typeof window !== "undefined") {
+        router.replace("/management/agency/staff-call");
+        return;
+      }
+    }
+
     fetchData();
 
     document.addEventListener("fullscreenchange", fullscreenHandler);

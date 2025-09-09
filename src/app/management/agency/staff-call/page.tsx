@@ -3,16 +3,24 @@
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { usePopup } from "@/components/popup/PopupContext";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
+import { RoleEnum } from "@/constants/Enum";
 import { apiGet } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
 export default function CallPage() {
-  const popupRef = useRef<PopupManagerRef>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const { socket, globalParams } = useGlobalParams() as {
+    socket: Socket;
+    globalParams: any;
+  };
+
+  const popupRef = useRef<PopupManagerRef>(null);
+
   const { popupMessage } = usePopup();
   const parentRef = useRef<HTMLDivElement | null>(null);
   const scaleRef = useRef<HTMLElement | null>(null);
@@ -31,12 +39,54 @@ export default function CallPage() {
   const [ticketId, setTicketId] = useState(null);
   const [calledAt, setCalledAt] = useState<Date | null>(null);
 
-  const { socket, globalParams } = useGlobalParams() as {
-    socket: Socket;
-    globalParams: any;
-  };
-
   const [serviceIndex, setServiceIndex] = useState(0);
+
+  useEffect(() => {
+    // chuyển hướng web khi vào sai trang call
+    if (
+      [RoleEnum.AGENCY_ADMIN_ROOT, RoleEnum.AGENCY_ADMIN].includes(
+        globalParams.user.role_id
+      ) &&
+      pathname === "/management/agency/staff-call"
+    ) {
+      if (typeof window !== "undefined") {
+        router.replace("/management/agency/call");
+        return;
+      }
+    }
+
+    fetchData();
+    document.addEventListener("fullscreenchange", fullscreenHandler);
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearInterval(intervalServiceNames.current);
+      document.removeEventListener("fullscreenchange", fullscreenHandler);
+      window.removeEventListener("resize", handleResize);
+
+      if (socket) {
+        socket.disconnect();
+        socket.removeAllListeners();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!calledAt) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diffMs = now.getTime() - calledAt.getTime();
+      const diffSeconds = Math.floor(diffMs / 1000);
+      const minutes = Math.floor(diffSeconds / 60)
+        .toString()
+        .padStart(2, "0");
+      const seconds = (diffSeconds % 60).toString().padStart(2, "0");
+      setServiceTimer(`${minutes}:${seconds}`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [calledAt]);
 
   const toggleFullscreen = () => {
     const target = parentRef.current;
@@ -304,40 +354,6 @@ export default function CallPage() {
       });
     }
   };
-
-  useEffect(() => {
-    fetchData();
-    document.addEventListener("fullscreenchange", fullscreenHandler);
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      clearInterval(intervalServiceNames.current);
-      document.removeEventListener("fullscreenchange", fullscreenHandler);
-      window.removeEventListener("resize", handleResize);
-
-      if (socket) {
-        socket.disconnect();
-        socket.removeAllListeners();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!calledAt) return;
-    const interval = setInterval(() => {
-      const now = new Date();
-      const diffMs = now.getTime() - calledAt.getTime();
-      const diffSeconds = Math.floor(diffMs / 1000);
-      const minutes = Math.floor(diffSeconds / 60)
-        .toString()
-        .padStart(2, "0");
-      const seconds = (diffSeconds % 60).toString().padStart(2, "0");
-      setServiceTimer(`${minutes}:${seconds}`);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [calledAt]);
 
   function getScaleFromElement(el: HTMLElement | null): number {
     if (!el) return 1;
