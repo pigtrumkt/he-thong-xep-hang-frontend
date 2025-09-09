@@ -474,7 +474,7 @@ export default function RatingScreen() {
           <div className="[container-type:size] flex aspect-[20/13] [width:min(95cqw,calc(95cqh*20/13))] [height:min(95cqh,calc(95cqw*13/20))] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden text-[0.8cqw]">
             {/* LEFT */}
             <div className="flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center text-[0.8cqw]">
-              <div className="mb-[6em] text-center">
+              <div className="mb-[3em] text-center">
                 <div
                   className={` font-semibold mb-2 uppercase ${
                     serviceNames && serviceNames.length !== 0
@@ -492,7 +492,7 @@ export default function RatingScreen() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="text-[3em] opacity-90"
+                      className="text-[3em] opacity-90 line-clamp-2 min-h-[3em]"
                     >
                       {serviceNames[serviceIndex] || ""}
                     </motion.div>
