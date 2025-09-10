@@ -180,7 +180,7 @@ export default function EmployeeReportPage() {
       {/* STYLES */}
       <style jsx global>{`
         .employee-report-scroll::-webkit-scrollbar {
-          height: 0.6rem; /* thanh ngang */
+          height: 0.5rem; /* thanh ngang */
           width: 0.5rem; /* thanh ngang */
           background: #7c7c7c22;
         }
