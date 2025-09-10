@@ -64,4 +64,5 @@ export enum PermissionEnum {
   DAILY_REPORT = 190,
   STAFF_REPORT = 191,
   SERVICE_REPORT = 192,
+  DETAIL_STAFF_REPORT = 193,
 }

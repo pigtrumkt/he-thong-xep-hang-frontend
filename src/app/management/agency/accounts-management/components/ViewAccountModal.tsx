@@ -28,6 +28,7 @@ const permissionGroups = [
       { id: 190, label: "Báo cáo hàng ngày" },
       { id: 191, label: "Báo cáo nhân viên" },
       { id: 192, label: "Báo cáo dịch vụ" },
+      { id: 193, label: "Báo cáo chi tiết theo nhân viên" },
     ],
   },
   {

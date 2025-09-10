@@ -32,6 +32,7 @@ export default function SidebarAgencyMenu() {
       PermissionEnum.DAILY_REPORT,
       PermissionEnum.STAFF_REPORT,
       PermissionEnum.SERVICE_REPORT,
+      PermissionEnum.DETAIL_STAFF_REPORT,
     ],
   });
 
@@ -253,6 +254,39 @@ export default function SidebarAgencyMenu() {
                     </svg>
                   </span>
                   Báo cáo dịch vụ
+                </Link>
+              </li>
+            )}
+            {hasAccess({
+              allowedRoles: [RoleEnum.AGENCY_ADMIN_ROOT],
+              allowedPermissions: [PermissionEnum.DETAIL_STAFF_REPORT],
+            }) && (
+              <li>
+                <Link
+                  href="/management/agency/detail-staff-report"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-blue-600/40 transition-all ${
+                    pathname === "/management/agency/detail-staff-report"
+                      ? "active"
+                      : ""
+                  }`}
+                >
+                  <span className="p-2 text-blue-200 bg-blue-800 rounded-full shadow">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="7" cy="8" r="3" />
+                      <path d="M4 18c0-2 2-4 3-4s3 2 3 4" />
+
+                      <line x1="14" y1="7" x2="21" y2="7" />
+                      <line x1="14" y1="12" x2="21" y2="12" />
+                      <line x1="14" y1="17" x2="21" y2="17" />
+                    </svg>
+                  </span>
+                  Báo cáo chi tiết theo nhân viên
                 </Link>
               </li>
             )}
