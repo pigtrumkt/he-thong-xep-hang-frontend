@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import feather from "feather-icons";
 import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { usePopup } from "@/components/popup/PopupContext";
@@ -8,6 +8,7 @@ import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import { useGlobalParams } from "@/components/ClientWrapper";
 import { PermissionEnum, RoleEnum } from "@/constants/Enum";
+import { QRCodeSVG } from "qrcode.react";
 
 interface AgencyForm {
   id: number;
@@ -53,6 +54,7 @@ export default function AgencySettingsPage() {
   const [isActiveLocal, setIsActiveLocal] = useState(true);
   const { popupMessage, popupConfirmRed } = usePopup();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const qrRef = useRef<SVGSVGElement>(null);
 
   const errorText = (field: string) => {
     if (errors[field]) {
@@ -68,7 +70,7 @@ export default function AgencySettingsPage() {
 
   useEffect(() => {
     feather.replace();
-  }, []);
+  }, [form]);
 
   const fetchAgencyData = async () => {
     const res = await apiGet("/agencies/getMyAgency");
@@ -210,6 +212,29 @@ export default function AgencySettingsPage() {
 
   const dayLabels = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
   const dayValues = ["1", "2", "3", "4", "5", "6", "0"];
+
+  const handleDownloadPNG = () => {
+    if (!qrRef.current) return;
+    const svg = new XMLSerializer().serializeToString(qrRef.current);
+    const img = new Image();
+    const svg64 = btoa(svg);
+    const b64Start = "data:image/svg+xml;base64,";
+    img.src = b64Start + svg64;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = "HeThongXepHangMobile.png";
+      link.href = pngFile;
+      link.click();
+    };
+  };
 
   return (
     <section className="bg-white border border-blue-200 shadow-xl rounded-3xl p-6 mx-4 my-6 lg:min-w-[55rem]">
@@ -478,6 +503,31 @@ export default function AgencySettingsPage() {
               }
               readOnly
             />
+            {form.encrypted_id && (
+              <div className="flex flex-cols items-center gap-2 mt-4">
+                <div className="flex items-center gap-3">
+                  <QRCodeSVG
+                    ref={qrRef}
+                    value={`${window.location.protocol}//${window.location.host}/take-number-mobile/${form.encrypted_id}`}
+                    size={180}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                    level="H"
+                    includeMargin={true}
+                  />
+                </div>
+                {/* Nút tải QR */}
+                <button
+                  type="button"
+                  onClick={handleDownloadPNG}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium border-gray-200 border-1 bg-white rounded-lg shadow hover:bg-gray-50 active:bg-gray-100"
+                >
+                  {/* Icon download (Feather hoặc SVG tự viết) */}
+                  <i data-feather="download" className="w-4 h-4" />
+                  <span>Tải QR</span>
+                </button>
+              </div>
+            )}
           </FormCard>
         </div>
 
