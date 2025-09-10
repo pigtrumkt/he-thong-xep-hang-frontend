@@ -445,35 +445,39 @@ export default function RatingScreen() {
         </svg>
       </button>
 
-      {/* BACK BUTTON */}
-      {!isFullscreen && (
-        <button
-          onClick={handleBack}
-          title="Quay lại"
-          className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-10 top-1 right-13 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10 6l-6 6 6 6"
-            />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
-          </svg>
-        </button>
-      )}
       {!isShowAds ? (
         <div className="[container-type:size] h-full w-full flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)]">
           <div className="[container-type:size] flex aspect-[20/13] [width:min(95cqw,calc(95cqh*20/13))] [height:min(95cqh,calc(95cqw*13/20))] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden text-[0.8cqw]">
             {/* LEFT */}
-            <div className="flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center text-[0.8cqw]">
+            <div className="relative flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center text-[0.8cqw]">
+              {/* BACK BUTTON */}
+              {!isFullscreen && (
+                <button
+                  onClick={handleBack}
+                  title="Quay lại"
+                  className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 left-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10 6l-6 6 6 6"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 12h16"
+                    />
+                  </svg>
+                </button>
+              )}
               <div className="mb-[3em] text-center">
                 <div
                   className={` font-semibold mb-2 uppercase ${
