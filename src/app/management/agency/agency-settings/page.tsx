@@ -504,28 +504,30 @@ export default function AgencySettingsPage() {
               readOnly
             />
             {form.encrypted_id && (
-              <div className="flex flex-cols items-center gap-2 mt-4">
-                <div className="flex items-center gap-3">
-                  <QRCodeSVG
-                    ref={qrRef}
-                    value={`${window.location.protocol}//${window.location.host}/take-number-mobile/${form.encrypted_id}`}
-                    size={180}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    level="H"
-                    includeMargin={true}
-                  />
+              <div className="flex">
+                <div className="flex flex-col items-center gap-2 mt-4">
+                  <div>
+                    <QRCodeSVG
+                      ref={qrRef}
+                      value={`${window.location.protocol}//${window.location.host}/take-number-mobile/${form.encrypted_id}`}
+                      size={180}
+                      bgColor="#ffffff"
+                      fgColor="#000000"
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                  {/* Nút tải QR */}
+                  <button
+                    type="button"
+                    onClick={handleDownloadPNG}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium border-gray-200 border-1 bg-white rounded-lg shadow hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    {/* Icon download (Feather hoặc SVG tự viết) */}
+                    <i data-feather="download" className="w-4 h-4" />
+                    <span>Tải QR</span>
+                  </button>
                 </div>
-                {/* Nút tải QR */}
-                <button
-                  type="button"
-                  onClick={handleDownloadPNG}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium border-gray-200 border-1 bg-white rounded-lg shadow hover:bg-gray-50 active:bg-gray-100"
-                >
-                  {/* Icon download (Feather hoặc SVG tự viết) */}
-                  <i data-feather="download" className="w-4 h-4" />
-                  <span>Tải QR</span>
-                </button>
               </div>
             )}
           </FormCard>
