@@ -104,66 +104,92 @@ export default function EmployeeReportPage() {
       </div>
 
       {/* Table */}
-      <table className="min-w-full overflow-hidden rounded-xl">
-        <thead>
-          <tr className="text-left text-blue-900 bg-blue-100">
-            <th className="px-4 py-3 font-semibold rounded-tl-xl">#</th>
-            <th className="px-4 py-3 font-semibold">Tài khoản</th>
-            <th className="px-4 py-3 font-semibold">Tên nhân viên</th>
-            {allServices.map((srv) => (
-              <th key={srv.service_id} className="px-4 py-3 font-semibold">
-                {srv.service_name}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td
-                colSpan={3 + allServices.length}
-                className="py-6 text-center text-gray-500"
-              >
-                Đang tải...
-              </td>
+      <div className="max-w-full overflow-auto employee-report-scroll max-h-[calc(100vh-15rem)]">
+        <table className="min-w-full rounded-xl">
+          <thead>
+            <tr className="text-left text-blue-900 bg-blue-100">
+              <th className="px-4 py-3 font-semibold rounded-tl-xl">#</th>
+              <th className="px-4 py-3 font-semibold">Tài khoản</th>
+              <th className="px-4 py-3 font-semibold">Tên nhân viên</th>
+              {allServices.map((srv) => (
+                <th
+                  key={srv.service_id}
+                  className="px-4 py-3 font-semibold whitespace-nowrap"
+                >
+                  {srv.service_name}
+                </th>
+              ))}
             </tr>
-          ) : data.length === 0 ? (
-            <tr>
-              <td
-                colSpan={3 + allServices.length}
-                className="py-6 text-center text-gray-500"
-              >
-                Không có dữ liệu
-              </td>
-            </tr>
-          ) : (
-            data.map((emp, idx) => (
-              <tr
-                key={idx}
-                className="transition border-b border-slate-300 last:border-none hover:bg-blue-50 group"
-              >
-                <td className="px-4 py-3 font-semibold text-blue-800">
-                  {idx + 1}
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={3 + allServices.length}
+                  className="py-6 text-center text-gray-500"
+                >
+                  Đang tải...
                 </td>
-                <td className="px-4 py-3">{emp.username}</td>
-                <td className="px-4 py-3">{emp.full_name}</td>
-
-                {/* ✅ render số vé theo từng dịch vụ */}
-                {allServices.map((srv) => {
-                  const found = emp.services_report?.find(
-                    (s: any) => s.service_id === srv.service_id
-                  );
-                  return (
-                    <td key={srv.service_id} className="px-4 py-3 text-center">
-                      {found ? found.total_tickets : 0}
-                    </td>
-                  );
-                })}
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : data.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3 + allServices.length}
+                  className="py-6 text-center text-gray-500"
+                >
+                  Không có dữ liệu
+                </td>
+              </tr>
+            ) : (
+              data.map((emp, idx) => (
+                <tr
+                  key={idx}
+                  className="transition border-b border-slate-300 last:border-none hover:bg-blue-50 group"
+                >
+                  <td className="px-4 py-3 font-semibold text-blue-800">
+                    {idx + 1}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {emp.username}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {emp.full_name}
+                  </td>
+
+                  {/* ✅ render số vé theo từng dịch vụ */}
+                  {allServices.map((srv) => {
+                    const found = emp.services_report?.find(
+                      (s: any) => s.service_id === srv.service_id
+                    );
+                    return (
+                      <td
+                        key={srv.service_id}
+                        className="px-4 py-3 text-center"
+                      >
+                        {found ? found.total_tickets : 0}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* STYLES */}
+      <style jsx global>{`
+        .employee-report-scroll::-webkit-scrollbar {
+          height: 0.6rem; /* thanh ngang */
+          width: 0.5rem; /* thanh ngang */
+          background: #7c7c7c22;
+        }
+
+        .employee-report-scroll::-webkit-scrollbar-thumb {
+          background: #7c7c7c44;
+          border-radius: 1rem;
+        }
+      `}</style>
     </section>
   );
 }
