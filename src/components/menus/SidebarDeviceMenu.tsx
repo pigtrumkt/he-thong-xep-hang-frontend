@@ -47,6 +47,21 @@ export default function SidebarDeviceMenu() {
     voiceRef.current = voice;
   }, [voice]);
 
+  const initDataSocket = useCallback(() => {
+    socketSound.emit("join_sound", {}, (response: any) => {});
+  }, [socketSound]);
+
+  const onConnect = useCallback(() => {
+    initDataSocket();
+  }, [initDataSocket]);
+
+  const onConnectError = useCallback(() => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
+  }, [popupMessage]);
+
   useEffect(() => {
     if (!socketSound) return;
 
@@ -65,7 +80,7 @@ export default function SidebarDeviceMenu() {
         socketSound.connect();
       }
     }
-  }, [socketSound]);
+  }, [socketSound, onConnect, onConnectError]);
 
   useEffect(() => {
     const handleVoicesChanged = () => {
@@ -89,21 +104,6 @@ export default function SidebarDeviceMenu() {
   const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRate(Number(e.target.value));
     localStorage.setItem("voice-rate", String(e.target.value));
-  };
-
-  const initDataSocket = () => {
-    socketSound.emit("join_sound", {}, (response: any) => {});
-  };
-
-  const onConnect = () => {
-    initDataSocket();
-  };
-
-  const onConnectError = () => {
-    popupMessage({
-      title: "Mất kết nối",
-      description: "Vui lòng thử lại sau.",
-    });
   };
 
   const handleSound = async () => {
