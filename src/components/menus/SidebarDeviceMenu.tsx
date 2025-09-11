@@ -4,18 +4,17 @@ import { RoleEnum } from "@/constants/Enum";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useGlobalParams } from "../ClientWrapper";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePopup } from "../popup/PopupContext";
 import { Socket } from "socket.io-client";
 import { apiPost } from "@/lib/api";
 
 export default function SidebarDeviceMenu() {
-  const { socketSound, globalParams } = useGlobalParams() as {
+  const { hasAccess, socketSound } = useGlobalParams() as {
+    hasAccess: any;
     socketSound: Socket;
-    globalParams: any;
   };
   const pathname = usePathname();
-  const { hasAccess } = useGlobalParams();
   const { popupConfirm, popupMessage } = usePopup();
   const [voices, setVoices] = useState<any[] | null>(null);
   const [selectedVoice, setSelectedVoice] = useState<string>("");
@@ -25,42 +24,24 @@ export default function SidebarDeviceMenu() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
 
-  const voice = useCallback(
-    (message: string) => {
-      if (!message) return;
+  const voice = (message: string) => {
+    if (!message) return;
 
-      const chosenVoice =
-        voices?.find((v) => v.voiceURI === selectedVoice) || null;
+    const chosenVoice =
+      voices?.find((v) => v.voiceURI === selectedVoice) || null;
 
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = "vi-VN";
-      utterance.volume = 1;
-      utterance.rate = rate || 1;
-      utterance.voice = chosenVoice;
-      speechSynthesis.speak(utterance);
-    },
-    [selectedVoice, rate, voices]
-  );
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = "vi-VN";
+    utterance.volume = 1;
+    utterance.rate = rate || 1;
+    utterance.voice = chosenVoice;
+    speechSynthesis.speak(utterance);
+  };
 
   const voiceRef = useRef(voice);
   useEffect(() => {
     voiceRef.current = voice;
   }, [voice]);
-
-  const initDataSocket = useCallback(() => {
-    socketSound.emit("join_sound", {}, (response: any) => {});
-  }, [socketSound]);
-
-  const onConnect = useCallback(() => {
-    initDataSocket();
-  }, [initDataSocket]);
-
-  const onConnectError = useCallback(() => {
-    popupMessage({
-      title: "Mất kết nối",
-      description: "Vui lòng thử lại sau.",
-    });
-  }, [popupMessage]);
 
   useEffect(() => {
     if (!socketSound) return;
@@ -80,7 +61,7 @@ export default function SidebarDeviceMenu() {
         socketSound.connect();
       }
     }
-  }, [socketSound, onConnect, onConnectError]);
+  }, [socketSound]);
 
   useEffect(() => {
     const handleVoicesChanged = () => {
@@ -104,6 +85,21 @@ export default function SidebarDeviceMenu() {
   const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRate(Number(e.target.value));
     localStorage.setItem("voice-rate", String(e.target.value));
+  };
+
+  const initDataSocket = () => {
+    socketSound.emit("join_sound", {}, (response: any) => {});
+  };
+
+  const onConnect = () => {
+    initDataSocket();
+  };
+
+  const onConnectError = () => {
+    popupMessage({
+      title: "Mất kết nối",
+      description: "Vui lòng thử lại sau.",
+    });
   };
 
   const handleSound = async () => {
