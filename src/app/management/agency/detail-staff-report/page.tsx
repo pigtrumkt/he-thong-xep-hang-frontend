@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePopup } from "@/components/popup/PopupContext";
 import { apiGet } from "@/lib/api";
@@ -29,6 +29,12 @@ export default function EmployeeReportPage() {
     { service_id: number; service_name: string }[]
   >([]);
 
+  const headerContainerRef = useRef<HTMLDivElement | null>(null);
+  const bodyContainerRef = useRef<HTMLDivElement | null>(null);
+  const headerScrollRef = useRef<HTMLDivElement | null>(null);
+  const bodyScrollRef = useRef<HTMLDivElement | null>(null);
+  const leftFixedRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     fetchReport();
   }, []);
@@ -48,6 +54,89 @@ export default function EmployeeReportPage() {
 
     setAllServices(allServicesTemp);
   }, [data]);
+
+  // setup table
+  useLayoutEffect(() => {
+    if (
+      !headerContainerRef.current ||
+      !bodyContainerRef.current ||
+      !allServices ||
+      allServices.length === 0
+    )
+      return;
+
+    // Lấy tất cả row body fixed
+    const columnsBodyFixed =
+      bodyContainerRef.current.querySelectorAll<HTMLDivElement>(
+        "[data-row-fixed] > div"
+      );
+    if (columnsBodyFixed.length === 0) return;
+
+    // Lấy tất cả row body scroll
+    const columnsBodyScroll =
+      bodyContainerRef.current.querySelectorAll<HTMLDivElement>(
+        "[data-row-scroll] > div"
+      );
+    if (columnsBodyScroll.length === 0) return;
+
+    // lấy tất cả column header fixed
+    const columnsHeaderFixed =
+      headerContainerRef.current.querySelectorAll<HTMLDivElement>(
+        "[data-header-fixed] > div"
+      );
+
+    // lấy tất cả column header scroll
+    const columnsHeaderScroll =
+      headerContainerRef.current.querySelectorAll<HTMLDivElement>(
+        "[data-header-scroll] > div"
+      );
+
+    // set width fixed area
+    columnsBodyFixed.forEach((columnBody, index) => {
+      const columnHeader =
+        columnsHeaderFixed[index % columnsHeaderFixed.length];
+      const width = Math.max(
+        columnBody.getBoundingClientRect().width,
+        columnHeader.getBoundingClientRect().width
+      );
+
+      columnHeader.style.width = `${width}px`;
+      columnBody.style.width = `${width}px`;
+    });
+
+    // set width scroll area
+    columnsBodyScroll.forEach((columnBody, index) => {
+      const columnHeader =
+        columnsHeaderScroll[index % columnsHeaderScroll.length];
+      const width = Math.max(
+        columnBody.getBoundingClientRect().width,
+        columnHeader.getBoundingClientRect().width
+      );
+      columnHeader.style.width = `${width}px`;
+      columnBody.style.width = `${width}px`;
+    });
+  }, [allServices]);
+
+  useEffect(() => {
+    if (
+      !headerScrollRef.current ||
+      !bodyScrollRef.current ||
+      !leftFixedRef.current
+    )
+      return;
+
+    const bodyEl = bodyScrollRef.current;
+    const headerEl = headerScrollRef.current;
+    const leftFixedEl = leftFixedRef.current;
+
+    const handleScroll = () => {
+      headerEl.scrollLeft = bodyEl.scrollLeft;
+      leftFixedEl.scrollTop = bodyEl.scrollTop;
+    };
+
+    bodyEl.addEventListener("scroll", handleScroll);
+    return () => bodyEl.removeEventListener("scroll", handleScroll);
+  }, []);
 
   async function fetchReport() {
     setLoading(true);
@@ -103,78 +192,94 @@ export default function EmployeeReportPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="max-w-full overflow-auto employee-report-scroll max-h-[calc(100vh-15rem)]">
-        <table className="min-w-full rounded-xl">
-          <thead>
-            <tr className="text-left text-blue-900 bg-blue-100">
-              <th className="px-4 py-3 font-semibold rounded-tl-xl">#</th>
-              <th className="px-4 py-3 font-semibold">Tài khoản</th>
-              <th className="px-4 py-3 font-semibold">Tên nhân viên</th>
+      <div className="flex flex-col max-w-full max-h-[calc(100vh-15rem)]">
+        {/* header container */}
+        <div
+          ref={headerContainerRef}
+          className="rounded-tl-xl rounded-tr-xl font-semibold text-left text-blue-900 bg-blue-100 flex pr-[0.5rem]"
+        >
+          {/* header fixed */}
+          <div className="flex flex-none" data-header-fixed>
+            <div className="px-4 py-3 whitespace-nowrap">#</div>
+            <div className="px-4 py-3 whitespace-nowrap">Tài khoản</div>
+            <div className="px-4 py-3 whitespace-nowrap">Tên nhân viên</div>
+          </div>
+
+          {/* header scroll */}
+          <div ref={headerScrollRef} className="flex flex-1 overflow-hidden">
+            <div className="flex flex-none" data-header-scroll>
               {allServices.map((srv) => (
-                <th
+                <div
                   key={srv.service_id}
-                  className="px-4 py-3 font-semibold whitespace-nowrap"
+                  className="px-4 py-3 flex-none font-semibold text-center whitespace-nowrap"
                 >
                   {srv.service_name}
-                </th>
+                </div>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={3 + allServices.length}
-                  className="py-6 text-center text-gray-500"
-                >
-                  Đang tải...
-                </td>
-              </tr>
-            ) : data.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={3 + allServices.length}
-                  className="py-6 text-center text-gray-500"
-                >
-                  Không có dữ liệu
-                </td>
-              </tr>
-            ) : (
-              data.map((emp, idx) => (
-                <tr
-                  key={idx}
-                  className="transition border-b border-slate-300 last:border-none hover:bg-blue-50 group"
-                >
-                  <td className="px-4 py-3 font-semibold text-blue-800">
-                    {idx + 1}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {emp.username}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {emp.full_name}
-                  </td>
+            </div>
+          </div>
+        </div>
 
-                  {/* ✅ render số vé theo từng dịch vụ */}
+        {/* body container */}
+        <div
+          ref={bodyContainerRef}
+          className="flex flex-row flex-1 overflow-hidden"
+        >
+          {/* body fixed */}
+          <div
+            ref={leftFixedRef}
+            className="flex flex-col overflow-hidden pb-[0.7rem]"
+          >
+            {data.map((emp, idx) => (
+              <div
+                key={idx}
+                className="flex border-b border-slate-300 hover:bg-blue-50"
+              >
+                <div className="flex" data-row-fixed={idx}>
+                  <div className="px-4 py-3 font-semibold text-blue-800 whitespace-nowrap">
+                    {idx + 1}
+                  </div>
+                  <div className="px-4 py-3 whitespace-nowrap">
+                    {emp.username}
+                  </div>
+                  <div className="px-4 py-3 whitespace-nowrap">
+                    {emp.full_name}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* body scroll */}
+          <div
+            ref={bodyScrollRef}
+            className="flex flex-col flex-1 overflow-x-auto overflow-y-auto employee-report-scroll pb-[0.2rem]"
+          >
+            <div className="flex flex-col">
+              {data.map((emp, idx) => (
+                <div
+                  key={idx}
+                  data-row-scroll={idx}
+                  className="flex flex-row border-b border-slate-300 hover:bg-blue-50 w-max"
+                >
                   {allServices.map((srv) => {
                     const found = emp.services_report?.find(
                       (s: any) => s.service_id === srv.service_id
                     );
                     return (
-                      <td
+                      <div
                         key={srv.service_id}
                         className="px-4 py-3 text-center"
                       >
                         {found ? found.total_tickets : 0}
-                      </td>
+                      </div>
                     );
                   })}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* STYLES */}
