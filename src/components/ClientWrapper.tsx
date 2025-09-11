@@ -35,14 +35,19 @@ export interface AccessConfig {
 }
 
 export default function ClientWrapper({
-  value,
+  globalParamsInit,
+  globalFunctionsInit,
   children,
 }: {
-  value: any;
+  globalParamsInit: any;
+  globalFunctionsInit: any;
   children: ReactNode;
 }) {
   const router = useRouter();
-  const [globalParams, setGlobalParams] = useState(value ?? null);
+  const [globalParams, setGlobalParams] = useState(globalParamsInit ?? null);
+  const [globalFunctions, setGlobalFunctions] = useState(
+    globalFunctionsInit ?? {}
+  );
   const [socket, setSocket] = useState<Socket>();
   const [socketSound, setSocketSound] = useState<Socket>();
   const [isReady, setIsReady] = useState(false);
@@ -95,7 +100,7 @@ export default function ClientWrapper({
 
     setSocket(getSocket(globalParams.user.token));
     setSocketSound(getSocketSound(globalParams.user.token));
-  }, []);
+  }, [globalParams.user]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -149,13 +154,15 @@ export default function ClientWrapper({
       router.replace("/management/device");
       return;
     }
-  }, [isReady]);
+  }, [isReady, globalParams.user, router]);
 
   return (
     <UserContext.Provider
       value={{
         globalParams,
         setGlobalParams,
+        globalFunctions,
+        setGlobalFunctions,
         hasAccess,
         socket,
         socketSound,

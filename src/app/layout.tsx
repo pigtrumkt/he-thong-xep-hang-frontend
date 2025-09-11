@@ -49,10 +49,17 @@ export default async function RootLayout({
     } catch (err) {}
   }
 
+  const globalFunctionsInit = {};
+
   return (
     <html lang="vi" data-scroll-behavior="smooth">
       <body className="text-[18px] min-h-[100vh] md:min-w-[800px]">
-        <ClientWrapper value={{ user }}>{children}</ClientWrapper>
+        <ClientWrapper
+          globalParamsInit={{ user }}
+          globalFunctionsInit={globalFunctionsInit}
+        >
+          {children}
+        </ClientWrapper>
       </body>
     </html>
   );
