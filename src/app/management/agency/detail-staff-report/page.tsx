@@ -91,29 +91,52 @@ export default function EmployeeReportPage() {
         "[data-header-scroll] > div"
       );
 
-    // set width fixed area
-    columnsBodyFixed.forEach((columnBody, index) => {
-      const columnHeader =
-        columnsHeaderFixed[index % columnsHeaderFixed.length];
-      const width = Math.max(
-        columnBody.getBoundingClientRect().width,
-        columnHeader.getBoundingClientRect().width
+    // tính toán max width column fixed
+    const maxWidthColumnFixedArray: number[] = [];
+    columnsHeaderFixed.forEach((columnHeader, index) => {
+      const columnBody = columnsBodyFixed[index];
+      maxWidthColumnFixedArray.push(
+        Math.max(
+          columnBody.getBoundingClientRect().width,
+          columnHeader.getBoundingClientRect().width
+        )
       );
-
-      columnHeader.style.width = `${width}px`;
-      columnBody.style.width = `${width}px`;
     });
 
-    // set width scroll area
-    columnsBodyScroll.forEach((columnBody, index) => {
-      const columnHeader =
-        columnsHeaderScroll[index % columnsHeaderScroll.length];
-      const width = Math.max(
-        columnBody.getBoundingClientRect().width,
-        columnHeader.getBoundingClientRect().width
+    // tính toán max width column scroll
+    const maxWidthColumnScrollArray: number[] = [];
+    columnsHeaderScroll.forEach((columnHeader, index) => {
+      const columnBody = columnsBodyScroll[index];
+      maxWidthColumnScrollArray.push(
+        Math.max(
+          columnBody.getBoundingClientRect().width,
+          columnHeader.getBoundingClientRect().width
+        )
       );
-      columnHeader.style.width = `${width}px`;
-      columnBody.style.width = `${width}px`;
+    });
+
+    // apply width - header fixed
+    columnsHeaderFixed.forEach((columnHeader, index) => {
+      columnHeader.style.width = `${maxWidthColumnFixedArray[index]}px`;
+    });
+
+    // apply width - header scroll
+    columnsHeaderScroll.forEach((columnHeader, index) => {
+      columnHeader.style.width = `${maxWidthColumnScrollArray[index]}px`;
+    });
+
+    // apply width - body fixed
+    columnsBodyFixed.forEach((columnBody, index) => {
+      columnBody.style.width = `${
+        maxWidthColumnFixedArray[index % maxWidthColumnFixedArray.length]
+      }px`;
+    });
+
+    // apply width - body scroll
+    columnsBodyScroll.forEach((columnBody, index) => {
+      columnBody.style.width = `${
+        maxWidthColumnScrollArray[index % maxWidthColumnScrollArray.length]
+      }px`;
     });
   }, [allServices]);
 
