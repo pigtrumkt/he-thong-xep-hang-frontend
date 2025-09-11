@@ -161,6 +161,59 @@ export default function EmployeeReportPage() {
     return () => bodyEl.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const fixedRows =
+      bodyContainerRef.current?.querySelectorAll<HTMLDivElement>(
+        "[data-row-fixed]"
+      );
+    const scrollRows =
+      bodyContainerRef.current?.querySelectorAll<HTMLDivElement>(
+        "[data-row-scroll]"
+      );
+
+    if (!fixedRows || !scrollRows || fixedRows.length === 0) return;
+
+    const handleEnter = (idx: number) => {
+      fixedRows[idx].classList.add("bg-blue-50");
+      scrollRows[idx].classList.add("bg-blue-50");
+    };
+
+    const handleLeave = (idx: number) => {
+      fixedRows[idx].classList.remove("bg-blue-50");
+      scrollRows[idx].classList.remove("bg-blue-50");
+    };
+
+    // lưu danh sách listener để cleanup
+    const listeners: Array<() => void> = [];
+
+    fixedRows.forEach((row, idx) => {
+      const enter = () => handleEnter(idx);
+      const leave = () => handleLeave(idx);
+      row.addEventListener("mouseenter", enter);
+      row.addEventListener("mouseleave", leave);
+      listeners.push(() => {
+        row.removeEventListener("mouseenter", enter);
+        row.removeEventListener("mouseleave", leave);
+      });
+    });
+
+    scrollRows.forEach((row, idx) => {
+      const enter = () => handleEnter(idx);
+      const leave = () => handleLeave(idx);
+      row.addEventListener("mouseenter", enter);
+      row.addEventListener("mouseleave", leave);
+      listeners.push(() => {
+        row.removeEventListener("mouseenter", enter);
+        row.removeEventListener("mouseleave", leave);
+      });
+    });
+
+    // cleanup
+    return () => {
+      listeners.forEach((off) => off());
+    };
+  }, [allServices]);
+
   async function fetchReport() {
     setLoading(true);
 
@@ -254,10 +307,7 @@ export default function EmployeeReportPage() {
             className="flex flex-col overflow-hidden pb-[0.7rem]"
           >
             {data.map((emp, idx) => (
-              <div
-                key={idx}
-                className="flex border-b border-slate-300 hover:bg-blue-50"
-              >
+              <div key={idx} className="flex border-b border-slate-300">
                 <div className="flex" data-row-fixed={idx}>
                   <div className="px-4 py-3 font-semibold text-blue-800 whitespace-nowrap">
                     {idx + 1}
@@ -283,7 +333,7 @@ export default function EmployeeReportPage() {
                 <div
                   key={idx}
                   data-row-scroll={idx}
-                  className="flex flex-row border-b border-slate-300 hover:bg-blue-50 w-max"
+                  className="flex flex-row border-b border-slate-300 w-max"
                 >
                   {allServices.map((srv) => {
                     const found = emp.services_report?.find(
