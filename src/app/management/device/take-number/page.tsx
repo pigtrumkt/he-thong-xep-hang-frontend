@@ -5,6 +5,10 @@ import { API_BASE, apiGet, apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { useRouter } from "next/navigation";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
+import { useGlobalParams } from "@/components/ClientWrapper";
+import PopupContextMenuDevice, {
+  ContextMenuItem,
+} from "@/components/popup/PopupContextMenuDevice";
 
 export default function Page() {
   const router = useRouter();
@@ -20,6 +24,7 @@ export default function Page() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+  const [listContextMenu, setListContextMenu] = useState<ContextMenuItem[]>([]);
 
   const [logoUrl, setLogoUrl] = useState("/img/white.png");
 
@@ -27,6 +32,8 @@ export default function Page() {
     title?: string;
     description?: string;
   } | null>(null);
+
+  const { globalFunctions } = useGlobalParams();
 
   const [voices, setVoices] = useState<any[] | null>(null);
 
@@ -174,6 +181,35 @@ export default function Page() {
     }
   };
 
+  useEffect(() => {
+    if (!globalFunctions) return;
+    if (!globalFunctions.hideMenu) return;
+    if (!globalFunctions.showMenuByPassword) return;
+
+    const listContextMenu: ContextMenuItem[] = [
+      {
+        name1: "Phóng to màn hình",
+        action1: toggleFullscreen,
+        name2: "Thu nhỏ màn hình",
+        action2: toggleFullscreen,
+        checkSwitch: () => {
+          return !!document.fullscreenElement;
+        },
+      },
+      {
+        name1: "Ẩn menu",
+        action1: globalFunctions.hideMenu,
+        name2: "Hiện menu",
+        action2: globalFunctions.showMenuByPassword,
+        checkSwitch: () => {
+          return localStorage.getItem("isHideMenu") === "true";
+        },
+      },
+    ];
+
+    setListContextMenu(listContextMenu);
+  }, [globalFunctions.hideMenu, globalFunctions.showMenuByPassword]);
+
   const printTicket = () => {
     window.print();
   };
@@ -183,23 +219,6 @@ export default function Page() {
       ref={parentRef}
       className="relative flex flex-col items-center w-full h-full pt-10 bg-gradient-to-br from-blue-50 to-sky-100"
     >
-      {/* FULLSCREEN BUTTON */}
-      <button
-        onClick={toggleFullscreen}
-        title="Toàn màn hình"
-        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-40 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-      >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-        </svg>
-      </button>
-
       <div className="w-full h-full max-w-[100rem] pt-8 px-8 flex-1 flex flex-col">
         <div className="flex items-center gap-6 mb-10 ml-7">
           <img
@@ -416,6 +435,7 @@ export default function Page() {
           </div>
         </div>
       )}
+      <PopupContextMenuDevice listContextMenu={listContextMenu} />
 
       <style jsx>{`
         html,

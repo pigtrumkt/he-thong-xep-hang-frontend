@@ -97,7 +97,7 @@ export default function ManagementLayout({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { globalParams, loading } = useGlobalParams();
+  const { globalParams, loading, setGlobalFunctions } = useGlobalParams();
   const [host, setHost] = useState("");
   const [isHideMenu, setHideMenu] = useState<boolean>(false);
 
@@ -126,6 +126,11 @@ export default function ManagementLayout({
     };
   }, []);
 
+  const showMenuByPassword = () => {
+    setPasswordInput("");
+    setShowPasswordModal(true);
+  };
+
   const hideMenu = () => {
     if (globalParams.user.role_id !== RoleEnum.DEVICE) {
       return;
@@ -144,37 +149,17 @@ export default function ManagementLayout({
     localStorage.setItem("isHideMenu", "false");
   };
 
+  useEffect(() => {
+    setGlobalFunctions((prev: any) => ({
+      ...prev,
+      hideMenu,
+      showMenu,
+      showMenuByPassword,
+    }));
+  }, []);
+
   return (
     <>
-      {/* Button hiện lại menu */}
-      {isHideMenu && (
-        <button
-          onClick={() => {
-            setPasswordInput("");
-            setShowPasswordModal(true);
-          }}
-          className="fixed top-0 left-0 z-[100] p-2 rounded-full shadow-md
-               bg-gray-600 text-white hover:bg-gray-700 transition opacity-0"
-          title="Hiện menu"
-        >
-          {/* Icon menu 3 gạch */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-16 h-12"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      )}
-
       <div
         className={`relative grid h-screen transition-all duration-200 ease-in-out ${
           isHideMenu
@@ -191,10 +176,7 @@ export default function ManagementLayout({
           }`}
         >
           <div className="flex items-center gap-4 select-none">
-            <div
-              onClick={hideMenu}
-              className="p-2 shadow-lg cursor-pointer bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl"
-            >
+            <div className="p-2 shadow-lg bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl">
               <svg
                 className="w-6 h-6 text-white"
                 fill="none"
