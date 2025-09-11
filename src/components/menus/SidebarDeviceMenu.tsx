@@ -4,7 +4,7 @@ import { RoleEnum } from "@/constants/Enum";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useGlobalParams } from "../ClientWrapper";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePopup } from "../popup/PopupContext";
 import { Socket } from "socket.io-client";
 import { apiPost } from "@/lib/api";
@@ -25,19 +25,22 @@ export default function SidebarDeviceMenu() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
 
-  const voice = (message: string) => {
-    if (!message) return;
+  const voice = useCallback(
+    (message: string) => {
+      if (!message) return;
 
-    const chosenVoice =
-      voices?.find((v) => v.voiceURI === selectedVoice) || null;
+      const chosenVoice =
+        voices?.find((v) => v.voiceURI === selectedVoice) || null;
 
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = "vi-VN";
-    utterance.volume = 1;
-    utterance.rate = rate || 1;
-    utterance.voice = chosenVoice;
-    speechSynthesis.speak(utterance);
-  };
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = "vi-VN";
+      utterance.volume = 1;
+      utterance.rate = rate || 1;
+      utterance.voice = chosenVoice;
+      speechSynthesis.speak(utterance);
+    },
+    [selectedVoice, rate, voices]
+  );
 
   const voiceRef = useRef(voice);
   useEffect(() => {
