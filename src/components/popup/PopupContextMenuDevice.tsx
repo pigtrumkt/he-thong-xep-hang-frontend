@@ -7,9 +7,10 @@ import { useGlobalParams } from "../ClientWrapper";
 export type ContextMenuItem = {
   name1: string;
   action1: () => void | Promise<void>;
-  name2: string;
-  action2: () => void | Promise<void>;
-  checkSwitch: () => boolean | Promise<boolean>;
+  name2?: string;
+  action2?: () => void | Promise<void>;
+  checkSwitch?: () => boolean;
+  hidden?: boolean;
 };
 
 interface PopupContextMenuDeviceProps {
@@ -65,23 +66,26 @@ export default function PopupContextMenuDevice({
         </button>
         <h2 className="mb-6 text-2xl font-bold text-blue-800"></h2>
         <div className="flex flex-col gap-4">
-          {listContextMenu.map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                if (item.checkSwitch()) {
-                  item.action2();
-                } else {
-                  item.action1();
-                }
+          {listContextMenu.map(
+            (item, idx) =>
+              !item.hidden && (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (item.checkSwitch?.()) {
+                      item.action2?.();
+                    } else {
+                      item.action1();
+                    }
 
-                setShowContextMenu(false);
-              }}
-              className="px-6 py-3 text-lg font-semibold text-white bg-blue-500 rounded-xl hover:bg-blue-600"
-            >
-              {item.checkSwitch() ? item.name2 : item.name1}
-            </button>
-          ))}
+                    setShowContextMenu(false);
+                  }}
+                  className="px-6 py-3 text-lg font-semibold text-white bg-blue-500 rounded-xl hover:bg-blue-600"
+                >
+                  {item.checkSwitch?.() ? item.name2 : item.name1}
+                </button>
+              )
+          )}
         </div>
       </div>
     </div>
