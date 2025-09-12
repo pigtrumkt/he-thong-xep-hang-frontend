@@ -9,6 +9,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
 import { AnimatePresence, motion } from "framer-motion";
+import PopupContextMenuDevice, {
+  ContextMenuItem,
+} from "@/components/popup/PopupContextMenuDevice";
 
 type AdsData = {
   type?: number; // 0:none, 1:images, 2:video
@@ -112,7 +115,6 @@ export default function CounterStatusScreen() {
   const [screenNotice, setScreenNotice] = useState<string | null>(null);
 
   const [history, setHistory] = useState<any[]>([]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoConnect, setAutoConnect] = useState(false);
 
   const [adsData, setAdsData] = useState<AdsData>();
@@ -121,8 +123,46 @@ export default function CounterStatusScreen() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+  const [passwordMode, setPasswordMode] = useState(0); // 1: toggle fullscreen - 2: chọn lại quầy
 
   const [serviceIndex, setServiceIndex] = useState(0);
+
+  const { globalFunctions } = useGlobalParams();
+  const [listContextMenu, setListContextMenu] = useState<ContextMenuItem[]>([]);
+
+  useEffect(() => {
+    if (!globalFunctions) return;
+    if (!globalFunctions.hideMenu) return;
+    if (!globalFunctions.showMenuByPassword) return;
+
+    const listContextMenu: ContextMenuItem[] = [
+      {
+        name1: "Chọn quầy khác",
+        action1: backAuth,
+        hidden: !isReady,
+      },
+      {
+        name1: "Phóng to màn hình",
+        action1: toggleFullscreen,
+        name2: "Thu nhỏ màn hình",
+        action2: toggleFullscreen,
+        checkSwitch: () => {
+          return !!document.fullscreenElement;
+        },
+      },
+      {
+        name1: "Ẩn menu",
+        action1: globalFunctions.hideMenu,
+        name2: "Hiện menu",
+        action2: globalFunctions.showMenuByPassword,
+        checkSwitch: () => {
+          return localStorage.getItem("isHideMenu") === "true";
+        },
+      },
+    ];
+
+    setListContextMenu(listContextMenu);
+  }, [globalFunctions.hideMenu, globalFunctions.showMenuByPassword, isReady]);
 
   const showAdsRef = useRef<(delay?: number) => void>(() => {});
   showAdsRef.current = (delay = 0) => {
@@ -333,12 +373,18 @@ export default function CounterStatusScreen() {
     const target = parentRef.current;
     if (!target) return;
     if (!document.fullscreenElement) {
-      setIsFullscreen(true);
       target.requestFullscreen?.();
     } else {
       setPasswordInput("");
       setShowPasswordModal(true);
+      setPasswordMode(1);
     }
+  };
+
+  const backAuth = () => {
+    setPasswordInput("");
+    setShowPasswordModal(true);
+    setPasswordMode(2);
   };
 
   const handleBack = () => {
@@ -398,182 +444,191 @@ export default function CounterStatusScreen() {
     handleConfirmSelected();
   }, [autoConnect]);
 
-  return isReady ? (
-    <div
-      ref={parentRef}
-      className="relative flex flex-col w-full h-full uppercase"
-    >
-      {/* FULLSCREEN BUTTON */}
-      <button
-        onClick={toggleFullscreen}
-        title="Toàn màn hình"
-        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-      >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-        </svg>
-      </button>
-      {/* BACK BUTTON */}
-      {!isFullscreen && (
-        <button
-          onClick={handleBack}
-          title="Quay lại"
-          className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-16 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10 6l-6 6 6 6"
-            />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
-          </svg>
-        </button>
-      )}
-      {!isShowAds ? (
-        <>
-          {/* HEADER */}
-          <header className="px-5 pt-2 pb-6 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
-            <h1 className="font-bold text-[7rem] leading-[8rem]">
-              {counterNameSelectedRef.current}
-            </h1>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={serviceIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-[3.5rem] leading-[5rem]"
-              >
-                {serviceNames[serviceIndex] || ""}
-              </motion.div>
-            </AnimatePresence>
-          </header>
-
-          {/* MAIN */}
-          <main className="flex flex-1 overflow-hidden">
-            {/* SỐ CHÍNH */}
-            <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
-              <div className="text-6xl font-semibold tracking-wide text-blue-800">
-                {statusTicket === 2 && currentNumber && "Mời công dân có số"}
-              </div>
-              <div className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop">
-                {statusTicket === 2 && currentNumber}
-              </div>
-            </section>
-
-            {/* SỐ ĐÃ GỌI */}
-            <aside className="flex flex-col w-1/4 p-6 overflow-hidden bg-blue-100">
-              <h2 className="flex items-center justify-center gap-2 mb-2 text-5xl font-semibold leading-normal text-center text-blue-800">
-                Số đã gọi
-              </h2>
-              <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
-                {[...history].map((item, idx) => (
-                  <div
-                    key={item.id}
-                    className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
-                      idx === 0 ? "animate-zoom-in" : ""
-                    }`}
+  return (
+    <div ref={parentRef} className="w-full h-full">
+      {isReady ? (
+        <div className="relative flex flex-col w-full h-full uppercase">
+          {!isShowAds ? (
+            <>
+              {/* HEADER */}
+              <header className="px-5 pt-2 pb-6 tracking-wide text-center text-white shadow-md bg-gradient-to-tr from-blue-700 to-blue-500">
+                <h1 className="font-bold text-[7rem] leading-[8rem]">
+                  {counterNameSelectedRef.current}
+                </h1>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={serviceIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-[3.5rem] leading-[5rem]"
                   >
-                    <div className="text-3xl text-blue-600">
-                      {item.counter_name}
-                    </div>
-                    <div className="font-bold text-blue-800 text-8xl leading-[5.5rem]">
-                      {item.queue_number}
-                    </div>
-                    <div
-                      className={`flex gap-x-1.5 text-3xl mt-2 ${
-                        item.status === 3 ? "text-green-600" : "text-red-500"
-                      }`}
-                    >
-                      <span>{item.status === 3 ? "✔️" : "❌"}</span>
-                      <span>
-                        {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
-                      </span>
-                    </div>
+                    {serviceNames[serviceIndex] || ""}
+                  </motion.div>
+                </AnimatePresence>
+              </header>
+
+              {/* MAIN */}
+              <main className="flex flex-1 overflow-hidden">
+                {/* SỐ CHÍNH */}
+                <section className="w-3/4 bg-white flex flex-col items-center justify-center relative mt-[-5rem]">
+                  <div className="text-6xl font-semibold tracking-wide text-blue-800">
+                    {statusTicket === 2 &&
+                      currentNumber &&
+                      "Mời công dân có số"}
                   </div>
-                ))}
-                {/* chèn dòng trống nếu thiếu */}
-                {Array.from({ length: Math.max(0, 4 - history.length) }).map(
-                  (_, i) => (
-                    <div key={i} className="flex-1 invisible" />
-                  )
-                )}
-              </div>
-            </aside>
-          </main>
-          {/* FOOTER */}
-          <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
-            <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
-              {screenNotice}
-            </div>
-          </footer>
+                  <div className="font-extrabold text-red-500 drop-shadow-lg leading-none text-[20rem] zoom-loop">
+                    {statusTicket === 2 && currentNumber}
+                  </div>
+                </section>
 
-          {/* STYLES */}
-          <style jsx global>{`
-            @keyframes scrollText {
-              0% {
-                transform: translateX(100%);
-              }
-              100% {
-                transform: translateX(-100%);
-              }
-            }
+                {/* SỐ ĐÃ GỌI */}
+                <aside className="flex flex-col w-1/4 p-6 overflow-hidden bg-blue-100">
+                  <h2 className="flex items-center justify-center gap-2 mb-2 text-5xl font-semibold leading-normal text-center text-blue-800">
+                    Số đã gọi
+                  </h2>
+                  <div className="flex flex-col flex-1 space-y-2 overflow-hidden">
+                    {[...history].map((item, idx) => (
+                      <div
+                        key={item.id}
+                        className={`bg-white rounded-xl shadow p-2 text-center border border-blue-400 flex-1 flex flex-col justify-center items-center h-12 ${
+                          idx === 0 ? "animate-zoom-in" : ""
+                        }`}
+                      >
+                        <div className="text-3xl text-blue-600">
+                          {item.counter_name}
+                        </div>
+                        <div className="font-bold text-blue-800 text-8xl leading-[5.5rem]">
+                          {item.queue_number}
+                        </div>
+                        <div
+                          className={`flex gap-x-1.5 text-3xl mt-2 ${
+                            item.status === 3
+                              ? "text-green-600"
+                              : "text-red-500"
+                          }`}
+                        >
+                          <span>{item.status === 3 ? "✔️" : "❌"}</span>
+                          <span>
+                            {item.status === 3 ? "Đã phục vụ" : "Không có mặt"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    {/* chèn dòng trống nếu thiếu */}
+                    {Array.from({
+                      length: Math.max(0, 4 - history.length),
+                    }).map((_, i) => (
+                      <div key={i} className="flex-1 invisible" />
+                    ))}
+                  </div>
+                </aside>
+              </main>
+              {/* FOOTER */}
+              <footer className="relative overflow-hidden bg-gradient-to-br from-blue-700 to-blue-500 h-14">
+                <div className="absolute min-w-full text-4xl font-semibold leading-normal text-white whitespace-nowrap animate-scrollText">
+                  {screenNotice}
+                </div>
+              </footer>
 
-            @keyframes zoomLoop {
-              0%,
-              100% {
-                transform: scale(1);
-              }
-              50% {
-                transform: scale(1.01);
-              }
-            }
+              {/* STYLES */}
+              <style jsx global>{`
+                @keyframes scrollText {
+                  0% {
+                    transform: translateX(100%);
+                  }
+                  100% {
+                    transform: translateX(-100%);
+                  }
+                }
 
-            @keyframes zoomIn {
-              0% {
-                transform: scale(0.8);
-                opacity: 0;
-              }
-              100% {
-                transform: scale(1);
-                opacity: 1;
-              }
-            }
+                @keyframes zoomLoop {
+                  0%,
+                  100% {
+                    transform: scale(1);
+                  }
+                  50% {
+                    transform: scale(1.01);
+                  }
+                }
 
-            .zoom-loop {
-              animation: zoomLoop 1.8s ease-in-out infinite;
-            }
+                @keyframes zoomIn {
+                  0% {
+                    transform: scale(0.8);
+                    opacity: 0;
+                  }
+                  100% {
+                    transform: scale(1);
+                    opacity: 1;
+                  }
+                }
 
-            .animate-zoom-in {
-              animation: zoomIn 0.3s ease-out;
-            }
+                .zoom-loop {
+                  animation: zoomLoop 1.8s ease-in-out infinite;
+                }
 
-            .animate-scrollText {
-              animation: scrollText 15s linear infinite;
-            }
-          `}</style>
-        </>
+                .animate-zoom-in {
+                  animation: zoomIn 0.3s ease-out;
+                }
+
+                .animate-scrollText {
+                  animation: scrollText 15s linear infinite;
+                }
+              `}</style>
+            </>
+          ) : (
+            <>
+              <section className="w-full h-full bg-black">
+                <AdsDisplay ads={adsData} />
+              </section>
+            </>
+          )}
+        </div>
       ) : (
-        <>
-          <section className="w-full h-full bg-black">
-            <AdsDisplay ads={adsData} />
-          </section>
-        </>
+        <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">
+          <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
+            <h2 className="text-2xl font-bold text-blue-800">
+              Màn hình tại quầy
+            </h2>
+
+            {/* Form chọn */}
+            <div className="space-y-4 text-left">
+              <div>
+                <label className="block mb-1 font-semibold text-blue-700">
+                  Chọn quầy:
+                </label>
+                <select
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                  onChange={(e) => setCounterIdSelected(Number(e.target.value))}
+                  value={counterIdSelected || ""}
+                >
+                  <option value="" disabled>
+                    -- Chọn quầy --
+                  </option>
+                  {counters.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Nút xác nhận */}
+            <button
+              className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
+                counterIdSelected
+                  ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+              disabled={!counterIdSelected}
+              onClick={handleConfirmSelected}
+            >
+              Xác nhận
+            </button>
+          </div>
+        </div>
       )}
 
       <PopupManager ref={popupRef} />
@@ -607,8 +662,11 @@ export default function CounterStatusScreen() {
                     password: passwordInput,
                   });
                   if (res.status === 200) {
-                    setIsFullscreen(false);
-                    document.exitFullscreen?.();
+                    if (passwordMode === 1) {
+                      document.exitFullscreen?.();
+                    } else if (passwordMode === 2) {
+                      handleBack();
+                    }
                   } else {
                     popupRef.current?.showMessage({
                       description: "Sai mật khẩu",
@@ -624,48 +682,7 @@ export default function CounterStatusScreen() {
           </div>
         </div>
       )}
-    </div>
-  ) : (
-    <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">
-      <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
-        <h2 className="text-2xl font-bold text-blue-800">Màn hình tại quầy</h2>
-
-        {/* Form chọn */}
-        <div className="space-y-4 text-left">
-          <div>
-            <label className="block mb-1 font-semibold text-blue-700">
-              Chọn quầy:
-            </label>
-            <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setCounterIdSelected(Number(e.target.value))}
-              value={counterIdSelected || ""}
-            >
-              <option value="" disabled>
-                -- Chọn quầy --
-              </option>
-              {counters.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Nút xác nhận */}
-        <button
-          className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
-            counterIdSelected
-              ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-          disabled={!counterIdSelected}
-          onClick={handleConfirmSelected}
-        >
-          Xác nhận
-        </button>
-      </div>
+      <PopupContextMenuDevice listContextMenu={listContextMenu} />
     </div>
   );
 }

@@ -8,6 +8,9 @@ import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import PopupManager, { PopupManagerRef } from "@/components/popup/PopupManager";
+import PopupContextMenuDevice, {
+  ContextMenuItem,
+} from "@/components/popup/PopupContextMenuDevice";
 
 type AdsData = {
   type?: number; // 0:none, 1:images, 2:video
@@ -117,6 +120,38 @@ export default function GeneralStatusScreen() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+
+  const { globalFunctions } = useGlobalParams();
+  const [listContextMenu, setListContextMenu] = useState<ContextMenuItem[]>([]);
+
+  useEffect(() => {
+    if (!globalFunctions) return;
+    if (!globalFunctions.hideMenu) return;
+    if (!globalFunctions.showMenuByPassword) return;
+
+    const listContextMenu: ContextMenuItem[] = [
+      {
+        name1: "Phóng to màn hình",
+        action1: toggleFullscreen,
+        name2: "Thu nhỏ màn hình",
+        action2: toggleFullscreen,
+        checkSwitch: () => {
+          return !!document.fullscreenElement;
+        },
+      },
+      {
+        name1: "Ẩn menu",
+        action1: globalFunctions.hideMenu,
+        name2: "Hiện menu",
+        action2: globalFunctions.showMenuByPassword,
+        checkSwitch: () => {
+          return localStorage.getItem("isHideMenu") === "true";
+        },
+      },
+    ];
+
+    setListContextMenu(listContextMenu);
+  }, [globalFunctions.hideMenu, globalFunctions.showMenuByPassword]);
 
   const showAdsRef = useRef<(delay?: number) => void>(() => {});
   showAdsRef.current = (delay = 0) => {
@@ -320,23 +355,6 @@ export default function GeneralStatusScreen() {
       ref={parentRef}
       className="relative flex flex-col w-full h-full uppercase "
     >
-      {/* FULLSCREEN BUTTON */}
-      <button
-        onClick={toggleFullscreen}
-        title="Toàn màn hình"
-        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 right-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-      >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-        </svg>
-      </button>
-
       {!isShowAds ? (
         <>
           {/* HEADER */}
@@ -523,6 +541,8 @@ export default function GeneralStatusScreen() {
           </div>
         </div>
       )}
+
+      <PopupContextMenuDevice listContextMenu={listContextMenu} />
     </div>
   );
 }

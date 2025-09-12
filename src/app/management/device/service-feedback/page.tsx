@@ -10,6 +10,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import { AnimatePresence, motion } from "framer-motion";
+import PopupContextMenuDevice, {
+  ContextMenuItem,
+} from "@/components/popup/PopupContextMenuDevice";
 
 type AdsData = {
   type?: number; // 0:none, 1:images, 2:video
@@ -122,14 +125,51 @@ export default function RatingScreen() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+  const [passwordMode, setPasswordMode] = useState(0); // 1: toggle fullscreen - 2: chọn lại quầy
   const [autoConnect, setAutoConnect] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const popupRef = useRef<PopupManagerRef>(null);
 
   const [adsData, setAdsData] = useState<AdsData>();
   const [isShowAds, setShowAds] = useState<boolean>(false);
 
   const [serviceIndex, setServiceIndex] = useState(0);
+
+  const { globalFunctions } = useGlobalParams();
+  const [listContextMenu, setListContextMenu] = useState<ContextMenuItem[]>([]);
+
+  useEffect(() => {
+    if (!globalFunctions) return;
+    if (!globalFunctions.hideMenu) return;
+    if (!globalFunctions.showMenuByPassword) return;
+
+    const listContextMenu: ContextMenuItem[] = [
+      {
+        name1: "Chọn quầy khác",
+        action1: backAuth,
+        hidden: !isReady,
+      },
+      {
+        name1: "Phóng to màn hình",
+        action1: toggleFullscreen,
+        name2: "Thu nhỏ màn hình",
+        action2: toggleFullscreen,
+        checkSwitch: () => {
+          return !!document.fullscreenElement;
+        },
+      },
+      {
+        name1: "Ẩn menu",
+        action1: globalFunctions.hideMenu,
+        name2: "Hiện menu",
+        action2: globalFunctions.showMenuByPassword,
+        checkSwitch: () => {
+          return localStorage.getItem("isHideMenu") === "true";
+        },
+      },
+    ];
+
+    setListContextMenu(listContextMenu);
+  }, [globalFunctions.hideMenu, globalFunctions.showMenuByPassword, isReady]);
 
   const delayAdsRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -358,12 +398,18 @@ export default function RatingScreen() {
     const target = parentRef.current;
     if (!target) return;
     if (!document.fullscreenElement) {
-      setIsFullscreen(true);
       target.requestFullscreen?.();
     } else {
       setPasswordInput("");
       setShowPasswordModal(true);
+      setPasswordMode(1);
     }
+  };
+
+  const backAuth = () => {
+    setPasswordInput("");
+    setShowPasswordModal(true);
+    setPasswordMode(2);
   };
 
   const handleBack = () => {
@@ -423,212 +469,214 @@ export default function RatingScreen() {
     handleConfirmSelected();
   }, [autoConnect]);
 
-  return isReady ? (
-    <div
-      ref={parentRef}
-      className="relative w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-white"
-    >
-      {/* FULLSCREEN BUTTON */}
-      <button
-        onClick={toggleFullscreen}
-        title="Toàn màn hình"
-        className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-10 top-1 right-1 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-      >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" />
-        </svg>
-      </button>
-
-      {!isShowAds ? (
-        <div className="[container-type:size] h-full w-full flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)]">
-          <div className="[container-type:size] flex aspect-[20/13] [width:min(95cqw,calc(95cqh*20/13))] [height:min(95cqh,calc(95cqw*13/20))] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden text-[0.8cqw]">
-            {/* LEFT */}
-            <div className="relative flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center text-[0.8cqw]">
-              {/* BACK BUTTON */}
-              {!isFullscreen && (
-                <button
-                  onClick={handleBack}
-                  title="Quay lại"
-                  className="absolute z-50 p-2 text-gray-600 transition-all border border-gray-200 rounded-lg shadow-sm opacity-20 top-4 left-4 bg-white/80 hover:bg-gray-100 active:scale-90 backdrop-blur-sm"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M10 6l-6 6 6 6"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 12h16"
-                    />
-                  </svg>
-                </button>
-              )}
-              <div className="mb-[3em] text-center">
-                <div
-                  className={` font-semibold mb-2 uppercase ${
-                    serviceNames && serviceNames.length !== 0
-                      ? "text-[5em]"
-                      : "text-[12em]"
-                  }`}
-                >
-                  {counterNameSelected}
-                </div>
-                {serviceNames && serviceNames.length !== 0 && (
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={serviceIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-[3em] opacity-90 line-clamp-2 min-h-[3em]"
-                    >
-                      {serviceNames[serviceIndex] || ""}
-                    </motion.div>
-                  </AnimatePresence>
-                )}
-              </div>
-
-              {serviceNames && serviceNames.length !== 0 && (
-                <div className="flex flex-col items-center justify-center">
-                  <div className="w-[16em] h-[16em] rounded-full border-[0.6em] border-[rgba(255,255,255,0.3)] overflow-hidden mb-[1em]">
-                    <img
-                      src={`${API_BASE}/accounts/avatar/${
-                        staffAvatarUrl
-                          ? `${staffAvatarUrl}`
-                          : staffGender === 0
-                          ? "avatar_default_female.png"
-                          : "avatar_default_male.png"
+  return (
+    <div ref={parentRef} className="w-full h-full overflow-hidden">
+      {isReady ? (
+        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-white">
+          {!isShowAds ? (
+            <div className="[container-type:size] h-full w-full flex items-center justify-center p-5 bg-[linear-gradient(135deg,#f5f7fa_0%,#c3cfe2_100%)]">
+              <div className="[container-type:size] flex aspect-[20/13] [width:min(95cqw,calc(95cqh*20/13))] [height:min(95cqh,calc(95cqw*13/20))] shadow-[0_1em_2em_rgba(0,0,0,0.15)] rounded-[1.5em] bg-white overflow-hidden text-[0.8cqw]">
+                {/* LEFT */}
+                <div className="relative flex-1 bg-[linear-gradient(to_bottom,#4a6bdf,#2a4ac0)] text-white p-[2em] flex flex-col items-center justify-center text-[0.8cqw]">
+                  <div className="mb-[3em] text-center">
+                    <div
+                      className={` font-semibold mb-2 uppercase ${
+                        serviceNames && serviceNames.length !== 0
+                          ? "text-[5em]"
+                          : "text-[12em]"
                       }`}
-                      alt="Ảnh đại diện"
-                      className="object-cover w-full h-full bg-white"
-                      onClick={() => setShowAvatarPreview(true)}
-                    />
+                    >
+                      {counterNameSelected}
+                    </div>
+                    {serviceNames && serviceNames.length !== 0 && (
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={serviceIndex}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-[3em] opacity-90 line-clamp-2 min-h-[3em]"
+                        >
+                          {serviceNames[serviceIndex] || ""}
+                        </motion.div>
+                      </AnimatePresence>
+                    )}
                   </div>
-                  <div className="text-[3.2em] font-medium mb-1">
-                    {staffName}
-                  </div>
-                  <div className="text-[2.6em] opacity-90">{StaffPosition}</div>
+
+                  {serviceNames && serviceNames.length !== 0 && (
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-[16em] h-[16em] rounded-full border-[0.6em] border-[rgba(255,255,255,0.3)] overflow-hidden mb-[1em]">
+                        <img
+                          src={`${API_BASE}/accounts/avatar/${
+                            staffAvatarUrl
+                              ? `${staffAvatarUrl}`
+                              : staffGender === 0
+                              ? "avatar_default_female.png"
+                              : "avatar_default_male.png"
+                          }`}
+                          alt="Ảnh đại diện"
+                          className="object-cover w-full h-full bg-white"
+                          onClick={() => setShowAvatarPreview(true)}
+                        />
+                      </div>
+                      <div className="text-[3.2em] font-medium mb-1">
+                        {staffName}
+                      </div>
+                      <div className="text-[2.6em] opacity-90">
+                        {StaffPosition}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* RIGHT */}
-            {serviceNames && serviceNames.length !== 0 && (
-              <div className="flex-[1.5] p-[4em] flex flex-col text-[0.82cqw]">
-                <div className="text-center">
-                  <h1 className="text-[4em] text-[#333] font-medium mt-[0.2em]">
-                    MỜI CÔNG DÂN SỐ
-                  </h1>
-                  <div className="text-[15em] font-extrabold text-[#2a4ac0] leading-[1.2em]">
-                    {currentNumber || "?"}
-                  </div>
+                {/* RIGHT */}
+                {serviceNames && serviceNames.length !== 0 && (
+                  <div className="flex-[1.5] p-[4em] flex flex-col text-[0.82cqw]">
+                    <div className="text-center">
+                      <h1 className="text-[4em] text-[#333] font-medium mt-[0.2em]">
+                        MỜI CÔNG DÂN SỐ
+                      </h1>
+                      <div className="text-[15em] font-extrabold text-[#2a4ac0] leading-[1.2em]">
+                        {currentNumber || "?"}
+                      </div>
 
-                  {/* Stars */}
-                  <div className="mb-[2em] mt-[3em]">
-                    <div className="flex justify-center gap-[2em]">
-                      {[1, 2, 3, 4, 5].map((value) => {
-                        const active = value <= selectedStars;
-                        return (
-                          <button
-                            key={value}
-                            aria-label={`rate-${value}`}
-                            className={`text-[6em] transition-transform ${
-                              active
-                                ? "text-[#ffc107] scale-110"
-                                : "text-[#ddd]"
-                            }`}
-                            onClick={() => setSelectedStars(value)}
-                            disabled={submitted}
-                          >
-                            <FontAwesomeIcon icon={faStar} />
-                          </button>
-                        );
-                      })}
+                      {/* Stars */}
+                      <div className="mb-[2em] mt-[3em]">
+                        <div className="flex justify-center gap-[2em]">
+                          {[1, 2, 3, 4, 5].map((value) => {
+                            const active = value <= selectedStars;
+                            return (
+                              <button
+                                key={value}
+                                aria-label={`rate-${value}`}
+                                className={`text-[6em] transition-transform ${
+                                  active
+                                    ? "text-[#ffc107] scale-110"
+                                    : "text-[#ddd]"
+                                }`}
+                                onClick={() => setSelectedStars(value)}
+                                disabled={submitted}
+                              >
+                                <FontAwesomeIcon icon={faStar} />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Comment */}
+                      <div className="mb-[2em]">
+                        <textarea
+                          placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
+                          value={feedback}
+                          onChange={(e) => setFeedback(e.target.value)}
+                          className="w-full h-[7.5em] p-[0.8em] border-2 border-[#ddd] rounded-[0.6em] resize-none text-[2.2em] focus:outline-none focus:border-[#4a6bdf] transition-colors"
+                          disabled={submitted}
+                        />
+                      </div>
+
+                      {/* Submit */}
+                      <button
+                        onClick={handleSubmit}
+                        disabled={
+                          !currentNumber || submitted || selectedStars === 0
+                        }
+                        className="bg-[#4a6bdf] text-white border-0 px-[1.6em] py-[0.6em] text-[2.5em] rounded-full font-semibold transition-all active:translate-y-0 disabled:opacity-20 disabled:bg-gray-700"
+                      >
+                        GỬI ĐÁNH GIÁ
+                      </button>
+                      <p
+                        className={`text-blue-700 text-[2.8em] font-semibold text-center mt-[0.5em] ${
+                          submitted ? "" : "invisible"
+                        }`}
+                      >
+                        🎉 Cảm ơn bạn đã phản hồi!
+                      </p>
                     </div>
                   </div>
-
-                  {/* Comment */}
-                  <div className="mb-[2em]">
-                    <textarea
-                      placeholder="Bạn có góp ý gì thêm không? (Không bắt buộc)"
-                      value={feedback}
-                      onChange={(e) => setFeedback(e.target.value)}
-                      className="w-full h-[7.5em] p-[0.8em] border-2 border-[#ddd] rounded-[0.6em] resize-none text-[2.2em] focus:outline-none focus:border-[#4a6bdf] transition-colors"
-                      disabled={submitted}
-                    />
-                  </div>
-
-                  {/* Submit */}
-                  <button
-                    onClick={handleSubmit}
-                    disabled={
-                      !currentNumber || submitted || selectedStars === 0
-                    }
-                    className="bg-[#4a6bdf] text-white border-0 px-[1.6em] py-[0.6em] text-[2.5em] rounded-full font-semibold transition-all active:translate-y-0 disabled:opacity-20 disabled:bg-gray-700"
-                  >
-                    GỬI ĐÁNH GIÁ
-                  </button>
-                  <p
-                    className={`text-blue-700 text-[2.8em] font-semibold text-center mt-[0.5em] ${
-                      submitted ? "" : "invisible"
-                    }`}
-                  >
-                    🎉 Cảm ơn bạn đã phản hồi!
-                  </p>
-                </div>
+                )}
               </div>
-            )}
-          </div>
-          {showAvatarPreview && (
-            <div
-              onClick={() => setShowAvatarPreview(false)}
-              className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
-            >
-              <img
-                src={`${API_BASE}/accounts/avatar/${
-                  staffAvatarUrl
-                    ? `${staffAvatarUrl}`
-                    : staffGender === 0
-                    ? "avatar_default_female.png"
-                    : "avatar_default_male.png"
-                }`}
-                alt="Avatar full"
-                className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
-              />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAvatarPreview(false);
-                }}
-                className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
-              >
-                ×
-              </button>
+              {showAvatarPreview && (
+                <div
+                  onClick={() => setShowAvatarPreview(false)}
+                  className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center"
+                >
+                  <img
+                    src={`${API_BASE}/accounts/avatar/${
+                      staffAvatarUrl
+                        ? `${staffAvatarUrl}`
+                        : staffGender === 0
+                        ? "avatar_default_female.png"
+                        : "avatar_default_male.png"
+                    }`}
+                    alt="Avatar full"
+                    className="max-w-full max-h-[90vh] rounded-xl shadow-2xl bg-white"
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAvatarPreview(false);
+                    }}
+                    className="absolute text-3xl font-bold text-white top-4 right-6 hover:text-red-400"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
             </div>
+          ) : (
+            <>
+              <section className="w-full h-full bg-black">
+                <AdsDisplay ads={adsData} />
+              </section>
+            </>
           )}
         </div>
       ) : (
-        <>
-          <section className="w-full h-full bg-black">
-            <AdsDisplay ads={adsData} />
-          </section>
-        </>
+        <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">
+          <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
+            <h2 className="text-2xl font-bold text-blue-800">
+              Màn hình tại quầy
+            </h2>
+
+            {/* Form chọn */}
+            <div className="space-y-4 text-left">
+              <div>
+                <label className="block mb-1 font-semibold text-blue-700">
+                  Chọn quầy:
+                </label>
+                <select
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                  onChange={(e) => setCounterIdSelected(Number(e.target.value))}
+                  value={counterIdSelected || ""}
+                >
+                  <option value="" disabled>
+                    -- Chọn quầy --
+                  </option>
+                  {counters.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Nút xác nhận */}
+            <button
+              className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
+                counterIdSelected
+                  ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+              disabled={!counterIdSelected}
+              onClick={handleConfirmSelected}
+            >
+              Xác nhận
+            </button>
+          </div>
+        </div>
       )}
       <PopupManager ref={popupRef} />
       {showPasswordModal && (
@@ -661,8 +709,11 @@ export default function RatingScreen() {
                     password: passwordInput,
                   });
                   if (res.status === 200) {
-                    setIsFullscreen(false);
-                    document.exitFullscreen?.();
+                    if (passwordMode === 1) {
+                      document.exitFullscreen?.();
+                    } else if (passwordMode === 2) {
+                      handleBack();
+                    }
                   } else {
                     popupRef.current?.showMessage({
                       description: "Sai mật khẩu",
@@ -678,48 +729,7 @@ export default function RatingScreen() {
           </div>
         </div>
       )}
-    </div>
-  ) : (
-    <div className="w-full h-full px-4 py-8 bg-gradient-to-br from-blue-100 to-white">
-      <div className="w-full max-w-xl p-8 mx-auto space-y-6 text-center bg-white border border-blue-200 shadow-xl rounded-3xl">
-        <h2 className="text-2xl font-bold text-blue-800">Màn hình tại quầy</h2>
-
-        {/* Form chọn */}
-        <div className="space-y-4 text-left">
-          <div>
-            <label className="block mb-1 font-semibold text-blue-700">
-              Chọn quầy:
-            </label>
-            <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-              onChange={(e) => setCounterIdSelected(Number(e.target.value))}
-              value={counterIdSelected || ""}
-            >
-              <option value="" disabled>
-                -- Chọn quầy --
-              </option>
-              {counters.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Nút xác nhận */}
-        <button
-          className={`mt-4 w-full py-3 font-bold text-white rounded-xl transition-all ${
-            counterIdSelected
-              ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-          disabled={!counterIdSelected}
-          onClick={handleConfirmSelected}
-        >
-          Xác nhận
-        </button>
-      </div>
+      <PopupContextMenuDevice listContextMenu={listContextMenu} />
     </div>
   );
 }
