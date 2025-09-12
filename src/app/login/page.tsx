@@ -10,11 +10,15 @@ import {
   faLock,
   faSignInAlt,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
 import { handleApiError } from "@/lib/handleApiError";
 import { usePopup } from "@/components/popup/PopupContext";
+
+const huongDanSuDungArray = JSON.parse(
+  process.env.NEXT_PUBLIC_HUONG_DAN_SU_DUNG || "[]"
+);
 
 export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -23,6 +27,29 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const { alertMessageRed, popupMessage } = usePopup();
+  const [showHelp, setShowHelp] = useState(false);
+  const helpRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
+      if (helpRef.current && !helpRef.current.contains(e.target as Node)) {
+        setShowHelp(false);
+      }
+    }
+
+    if (showHelp) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [showHelp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,6 +217,40 @@ export default function LoginPage() {
             </form>
           </div>
         </div>
+      </div>
+      {/* Nút trợ giúp nổi góc phải dưới */}
+      <div className="fixed bottom-6 right-6 z-50" ref={helpRef}>
+        <button
+          type="button"
+          onClick={() => setShowHelp(!showHelp)}
+          className="w-12 h-12 flex items-center justify-center rounded-full shadow-xl bg-blue-600 hover:bg-blue-700 text-white text-2xl transition"
+        >
+          ?
+        </button>
+
+        {showHelp && (
+          <div className="absolute bottom-14 right-0 w-56 bg-white shadow-xl rounded-xl border border-slate-200 p-4 space-y-3 animate-fadeIn">
+            <ul className="space-y-2 text-sm text-blue-600 font-medium">
+              <ul className="space-y-2 text-sm text-blue-600 font-medium">
+                {huongDanSuDungArray.map(
+                  (item: { title: string; link: string }, index: number) => (
+                    <li key={index}>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                        onClick={() => setShowHelp(false)}
+                      >
+                        {item.title}
+                      </a>
+                    </li>
+                  )
+                )}
+              </ul>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
